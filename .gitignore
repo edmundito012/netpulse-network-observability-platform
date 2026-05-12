@@ -1,0 +1,19 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# IntelliJ
+.idea/
+
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Logs
+*.log
+
+# Build
+dist/
