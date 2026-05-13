@@ -82,3 +82,33 @@ def admin_only(
         "message": "Admin access granted",
         "user": current_user.email
     }
+
+@router.get("/operator-only")
+def operator_only(
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR
+        )
+    )
+):
+    return {
+        "message": "Operator access granted",
+        "user": current_user.email,
+        "role": current_user.role
+    }
+@router.get("/viewer-or-above")
+def viewer_or_above(
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER
+        )
+    )
+):
+    return {
+        "message": "Viewer access granted",
+        "user": current_user.email,
+        "role": current_user.role
+    }
