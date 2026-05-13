@@ -10,6 +10,7 @@ from app.schemas.device import DeviceCreate, DeviceRead, DeviceUpdate
 from app.services.device_service import DeviceService
 from app.schemas.device_metric import DeviceMetricRead
 from app.repositories.device_metric_repository import DeviceMetricRepository
+from app.services.snmp_service import SNMPService
 
 
 router = APIRouter(
@@ -88,6 +89,40 @@ def get_device_metrics(
         device_id=device_id,
         limit=limit
     )
+
+@router.get("/{device_id}/snmp/sysdescr")
+async def get_device_sysdescr(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER
+        )
+    )
+):
+    try:
+        device = DeviceService.get_device(
+            db=db,
+            device_id=device_id
+        )
+
+        sysdescr = await SNMPService.get_sysdescr(
+            ip_address=device.ip_address
+        )
+
+        return {
+            "device_id": device.id,
+            "ip_address": device.ip_address,
+            "sysdescr": sysdescr
+        }
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 @router.get("/{device_id}", response_model=DeviceRead)
 def get_device(
