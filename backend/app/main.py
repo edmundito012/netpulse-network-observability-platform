@@ -3,8 +3,10 @@ from fastapi import FastAPI
 from app.db.session import engine
 from app.models.base import Base
 from app.models import user
+from app.models import device
 
 from app.api.auth import router as auth_router
+from app.api.devices import router as devices_router
 
 app = FastAPI(
     title="NetPulse API",
@@ -12,6 +14,7 @@ app = FastAPI(
     version="0.1.0"
 )
 app.include_router(auth_router)
+app.include_router(devices_router)
 
 @app.on_event("startup")
 def on_startup():
