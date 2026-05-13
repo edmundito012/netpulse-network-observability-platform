@@ -23,6 +23,11 @@ from app.repositories.device_metric_repository import (
 from app.repositories.device_repository import (
     DeviceRepository,
 )
+from app.repositories.device_repository import DeviceRepository
+from app.repositories.device_metric_repository import DeviceMetricRepository
+from app.repositories.device_snmp_system_snapshot_repository import (
+    DeviceSNMPSystemSnapshotRepository,
+)
 
 router = APIRouter(
     prefix="/devices",
@@ -131,6 +136,47 @@ async def get_device_snmp_system(
             "ip_address": device.ip_address,
             **system_info,
         }
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"SNMP error: {str(e)}",
+        )
+@router.post("/{device_id}/snmp/system/snapshot")
+async def create_device_snmp_system_snapshot(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+        )
+    ),
+):
+    device = DeviceRepository.get_by_id(db, device_id)
+
+    if not device:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device not found",
+        )
+
+    try:
+        system_info = await SNMPService.get_system_info(
+            ip_address=device.ip_address,
+        )
+
+        snapshot = DeviceSNMPSystemSnapshotRepository.create(
+            db=db,
+            device_id=device.id,
+            sysdescr=system_info.get("sysdescr"),
+            sysuptime=system_info.get("sysuptime"),
+            syscontact=system_info.get("syscontact"),
+            sysname=system_info.get("sysname"),
+            syslocation=system_info.get("syslocation"),
+        )
+
+        return snapshot
 
     except ValueError as e:
         raise HTTPException(
