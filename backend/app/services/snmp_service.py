@@ -16,7 +16,7 @@ class SNMPService:
         ip_address: str,
         oid: str,
         community: str = "public",
-        port: int = 161,
+        port: int = 1161,
         timeout: int = 2,
         retries: int = 1,
     ):
@@ -49,9 +49,11 @@ class SNMPService:
     async def get_sysdescr(
         ip_address: str,
         community: str = "public",
+        port: int = 1161,
     ):
         return await SNMPService.get_value(
             ip_address=ip_address,
             oid="1.3.6.1.2.1.1.1.0",
             community=community,
+            port=port,
         )
