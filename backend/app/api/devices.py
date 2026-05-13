@@ -142,6 +142,34 @@ async def get_device_snmp_system(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"SNMP error: {str(e)}",
         )
+
+@router.get("/{device_id}/snmp/system/snapshots")
+def get_device_snmp_system_snapshots(
+    device_id: int,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+        )
+    ),
+):
+    device = DeviceRepository.get_by_id(db, device_id)
+
+    if not device:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device not found",
+        )
+
+    return DeviceSNMPSystemSnapshotRepository.get_by_device_id(
+        db=db,
+        device_id=device.id,
+        limit=limit,
+    )
+
 @router.post("/{device_id}/snmp/system/snapshot")
 async def create_device_snmp_system_snapshot(
     device_id: int,

@@ -31,3 +31,17 @@ class DeviceSNMPSystemSnapshotRepository:
         db.refresh(snapshot)
 
         return snapshot
+
+    @staticmethod
+    def get_by_device_id(
+        db: Session,
+        device_id: int,
+        limit: int = 50,
+    ):
+        return (
+            db.query(DeviceSNMPSystemSnapshot)
+            .filter(DeviceSNMPSystemSnapshot.device_id == device_id)
+            .order_by(DeviceSNMPSystemSnapshot.collected_at.desc())
+            .limit(limit)
+            .all()
+        )
