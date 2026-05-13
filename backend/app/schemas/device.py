@@ -30,6 +30,7 @@ class DeviceRead(DeviceBase):
     id: int
     status: DeviceStatus
     created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True

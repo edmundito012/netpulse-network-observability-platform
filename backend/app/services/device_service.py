@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 
 from app.repositories.device_repository import DeviceRepository
 from app.schemas.device import DeviceCreate, DeviceUpdate
+from app.services.monitoring_service import MonitoringService
 
 
 class DeviceService:
@@ -64,3 +65,19 @@ class DeviceService:
         )
 
         return None
+
+    @staticmethod
+    def ping_device(db: Session, device_id: int):
+        device = DeviceRepository.get_by_id(db, device_id)
+
+        if not device:
+            raise ValueError("Device not found")
+
+        status = MonitoringService.ping_device(device.ip_address)
+
+        device.status = status
+
+        db.commit()
+        db.refresh(device)
+
+        return device

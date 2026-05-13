@@ -43,6 +43,25 @@ def create_device(
             detail=str(e)
         )
 
+@router.post("/{device_id}/ping", response_model=DeviceRead)
+def ping_device(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OPERATOR)
+    )
+):
+    try:
+        return DeviceService.ping_device(
+            db=db,
+            device_id=device_id
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )
 
 @router.get("/{device_id}", response_model=DeviceRead)
 def get_device(
