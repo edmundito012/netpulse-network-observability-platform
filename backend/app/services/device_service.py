@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.repositories.device_repository import DeviceRepository
 from app.schemas.device import DeviceCreate, DeviceUpdate
 from app.services.monitoring_service import MonitoringService
+from app.repositories.device_metric_repository import DeviceMetricRepository
 
 
 class DeviceService:
@@ -73,11 +74,19 @@ class DeviceService:
         if not device:
             raise ValueError("Device not found")
 
-        status = MonitoringService.ping_device(device.ip_address)
+        status, response_time_ms = MonitoringService.ping_device(
+            device.ip_address
+        )
 
         device.status = status
 
-        db.commit()
+        metric = DeviceMetricRepository.create(
+            db=db,
+            device_id=device.id,
+            status=status,
+            response_time_ms=response_time_ms
+        )
+
         db.refresh(device)
 
         return device

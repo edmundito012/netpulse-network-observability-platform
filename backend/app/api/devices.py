@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session
+from fastapi import Depends
 
 from app.api.deps import require_roles
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.schemas.device import DeviceCreate, DeviceRead, DeviceUpdate
 from app.services.device_service import DeviceService
+from app.schemas.device_metric import DeviceMetricRead
+from app.repositories.device_metric_repository import DeviceMetricRepository
 
 
 router = APIRouter(
@@ -62,6 +66,28 @@ def ping_device(
             status_code=404,
             detail=str(e)
         )
+
+@router.get(
+    "/{device_id}/metrics",
+    response_model=list[DeviceMetricRead]
+)
+def get_device_metrics(
+    device_id: int,
+    limit: int = 50,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER
+        )
+    )
+):
+    return DeviceMetricRepository.get_by_device_id(
+        db=db,
+        device_id=device_id,
+        limit=limit
+    )
 
 @router.get("/{device_id}", response_model=DeviceRead)
 def get_device(
