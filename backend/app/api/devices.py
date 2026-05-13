@@ -1,17 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy.orm import Session
-from fastapi import Depends
 
 from app.api.deps import require_roles
 from app.db.session import get_db
+
 from app.models.user import User, UserRole
-from app.schemas.device import DeviceCreate, DeviceRead, DeviceUpdate
-from app.services.device_service import DeviceService
+
+from app.schemas.device import (
+    DeviceCreate,
+    DeviceRead,
+    DeviceUpdate,
+)
+
 from app.schemas.device_metric import DeviceMetricRead
-from app.repositories.device_metric_repository import DeviceMetricRepository
+
+from app.services.device_service import DeviceService
 from app.services.snmp_service import SNMPService
 
+from app.repositories.device_metric_repository import (
+    DeviceMetricRepository,
+)
+from app.repositories.device_repository import (
+    DeviceRepository,
+)
 
 router = APIRouter(
     prefix="/devices",
@@ -89,6 +100,43 @@ def get_device_metrics(
         device_id=device_id,
         limit=limit
     )
+
+@router.get("/{device_id}/snmp/system")
+async def get_device_snmp_system(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+        )
+    ),
+):
+    device = DeviceRepository.get_by_id(db, device_id)
+
+    if not device:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device not found",
+        )
+
+    try:
+        system_info = await SNMPService.get_system_info(
+            ip_address=device.ip_address,
+        )
+
+        return {
+            "device_id": device.id,
+            "ip_address": device.ip_address,
+            **system_info,
+        }
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"SNMP error: {str(e)}",
+        )
 
 @router.get("/{device_id}/snmp/sysdescr")
 async def get_device_sysdescr(

@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.db.session import get_db
-from app.models.user import User
-from app.repositories.user_repository import UserRepository
 from app.models.user import User, UserRole
+from app.repositories.user_repository import UserRepository
+
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login"
@@ -18,20 +18,18 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-
     credentials_exception = HTTPException(
         status_code=401,
-        detail="Could not validate credentials"
+        detail="Could not validate credentials",
     )
 
     try:
-
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            algorithms=[settings.ALGORITHM],
         )
 
         email: str = payload.get("sub")
@@ -42,23 +40,22 @@ def get_current_user(
     except JWTError:
         raise credentials_exception
 
-    user = UserRepository.get_by_email(
-        db,
-        email
-    )
+    user = UserRepository.get_by_email(db, email)
 
     if user is None:
         raise credentials_exception
 
     return user
+
+
 def require_roles(*allowed_roles: UserRole):
     def role_checker(
-        current_user: User = Depends(get_current_user)
+        current_user: User = Depends(get_current_user),
     ):
         if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=403,
-                detail="Not enough permissions"
+                detail="Not enough permissions",
             )
 
         return current_user

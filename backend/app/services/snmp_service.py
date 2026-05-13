@@ -57,3 +57,29 @@ class SNMPService:
             community=community,
             port=port,
         )
+
+    @staticmethod
+    async def get_system_info(
+        ip_address: str,
+        community: str = "public",
+        port: int = 1161,
+    ):
+        oids = {
+            "sysdescr": "1.3.6.1.2.1.1.1.0",
+            "sysuptime": "1.3.6.1.2.1.1.3.0",
+            "syscontact": "1.3.6.1.2.1.1.4.0",
+            "sysname": "1.3.6.1.2.1.1.5.0",
+            "syslocation": "1.3.6.1.2.1.1.6.0",
+        }
+
+        result = {}
+
+        for key, oid in oids.items():
+            result[key] = await SNMPService.get_value(
+                ip_address=ip_address,
+                oid=oid,
+                community=community,
+                port=port,
+            )
+
+        return result
