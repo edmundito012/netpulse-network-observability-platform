@@ -11,6 +11,10 @@ from app.repositories.device_snmp_system_snapshot_repository import (
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
 
+from app.models.alert import AlertSeverity
+from app.models.device import DeviceStatus
+from app.repositories.alert_repository import AlertRepository
+
 
 scheduler = BackgroundScheduler()
 
@@ -23,7 +27,31 @@ def monitor_devices():
 
         for device in devices:
             status, response_time_ms = MonitoringService.ping_device(device.ip_address)
+
             device.status = status
+
+            open_alert = AlertRepository.get_open_alert_for_device(
+                db=db,
+                device_id=device.id,
+            )
+
+            if status == DeviceStatus.OFFLINE and not open_alert:
+                AlertRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    severity=AlertSeverity.CRITICAL,
+                    message=f"Device {device.name} is offline",
+                )
+
+                print(f"Alert created for device {device.id}")
+
+            if status == DeviceStatus.ONLINE and open_alert:
+                AlertRepository.resolve(
+                    db=db,
+                    alert=open_alert,
+                )
+
+                print(f"Alert resolved for device {device.id}")
 
         db.commit()
 
