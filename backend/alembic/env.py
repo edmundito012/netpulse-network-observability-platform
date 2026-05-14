@@ -12,6 +12,7 @@ from app.models import device
 from app.models import device_metric
 from app.models import device_snmp_system_snapshot
 from app.models import alert
+from app.models import device_event
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

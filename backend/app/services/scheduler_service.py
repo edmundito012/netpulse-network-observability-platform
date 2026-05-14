@@ -4,16 +4,17 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
+from app.models.alert import AlertSeverity
+from app.models.device import DeviceStatus
+from app.models.device_event import DeviceEventType
+from app.repositories.alert_repository import AlertRepository
+from app.repositories.device_event_repository import DeviceEventRepository
 from app.repositories.device_repository import DeviceRepository
 from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
-
-from app.models.alert import AlertSeverity
-from app.models.device import DeviceStatus
-from app.repositories.alert_repository import AlertRepository
 
 
 scheduler = BackgroundScheduler()
@@ -26,7 +27,11 @@ def monitor_devices():
         devices = DeviceRepository.get_all(db)
 
         for device in devices:
-            status, response_time_ms = MonitoringService.ping_device(device.ip_address)
+            previous_status = device.status
+
+            status, response_time_ms = MonitoringService.ping_device(
+                device.ip_address,
+            )
 
             device.status = status
 
@@ -35,18 +40,51 @@ def monitor_devices():
                 device_id=device.id,
             )
 
+            if status == DeviceStatus.OFFLINE and previous_status != DeviceStatus.OFFLINE:
+                DeviceEventRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    event_type=DeviceEventType.DEVICE_OFFLINE,
+                    message=f"Device {device.name} changed status to OFFLINE",
+                )
+
+            if status == DeviceStatus.ONLINE and previous_status != DeviceStatus.ONLINE:
+                DeviceEventRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    event_type=DeviceEventType.DEVICE_ONLINE,
+                    message=f"Device {device.name} changed status to ONLINE",
+                )
+
             if status == DeviceStatus.OFFLINE and not active_alert:
-                AlertRepository.create(
+                alert = AlertRepository.create(
                     db=db,
                     device_id=device.id,
                     severity=AlertSeverity.CRITICAL,
                     message=f"Device {device.name} is offline",
                 )
 
+                DeviceEventRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    event_type=DeviceEventType.ALERT_CREATED,
+                    message=f"Critical alert created: {alert.message}",
+                )
+
                 print(f"Alert created for device {device.id}")
 
             if status == DeviceStatus.ONLINE and active_alert:
-                AlertRepository.resolve(db, active_alert)
+                resolved_alert = AlertRepository.resolve(
+                    db=db,
+                    alert=active_alert,
+                )
+
+                DeviceEventRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    event_type=DeviceEventType.ALERT_RESOLVED,
+                    message=f"Alert resolved: {resolved_alert.message}",
+                )
 
                 print(f"Alert resolved for device {device.id}")
 
@@ -55,6 +93,7 @@ def monitor_devices():
         print("Device monitoring cycle completed")
 
     except Exception as e:
+        db.rollback()
         print(f"Monitoring error: {e}")
 
     finally:
@@ -83,6 +122,13 @@ async def collect_snmp_system_snapshots_async():
                     syslocation=system_info.get("syslocation"),
                 )
 
+                DeviceEventRepository.create(
+                    db=db,
+                    device_id=device.id,
+                    event_type=DeviceEventType.SNMP_SNAPSHOT_COLLECTED,
+                    message=f"SNMP system snapshot collected for device {device.name}",
+                )
+
                 print(f"SNMP snapshot collected for device {device.id}")
 
             except Exception as e:
@@ -91,6 +137,7 @@ async def collect_snmp_system_snapshots_async():
         print("SNMP snapshot cycle completed")
 
     except Exception as e:
+        db.rollback()
         print(f"SNMP scheduler error: {e}")
 
     finally:

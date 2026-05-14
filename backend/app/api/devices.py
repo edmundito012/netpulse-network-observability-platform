@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from fastapi import Query
+from app.repositories.device_event_repository import DeviceEventRepository
+from app.schemas.device_event import DeviceEventRead
+
 from app.api.deps import require_roles
 from app.db.session import get_db
 
@@ -265,6 +269,24 @@ def get_device(
             detail=str(e)
         )
 
+@router.get("/{device_id}/events", response_model=list[DeviceEventRead])
+def get_device_events(
+    device_id: int,
+    limit: int = Query(default=100, ge=1, le=500),
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+        )
+    ),
+):
+    return DeviceEventRepository.get_by_device(
+        db=db,
+        device_id=device_id,
+        limit=limit,
+    )
 
 @router.put("/{device_id}", response_model=DeviceRead)
 def update_device(
