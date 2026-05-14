@@ -15,8 +15,8 @@ class AlertSeverity(str, Enum):
 
 class AlertStatus(str, Enum):
     OPEN = "OPEN"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
     RESOLVED = "RESOLVED"
-
 
 class Alert(Base):
     __tablename__ = "alerts"

@@ -88,3 +88,24 @@ def resolve_alert(
         return alert
 
     return AlertRepository.resolve(db, alert)
+
+@router.post("/{alert_id}/acknowledge", response_model=AlertRead)
+def acknowledge_alert(
+    alert_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+        )
+    ),
+):
+    alert = AlertRepository.get_by_id(db, alert_id)
+
+    if not alert:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Alert not found",
+        )
+
+    return AlertRepository.acknowledge(db, alert)

@@ -32,7 +32,7 @@ class AlertRepository:
         )
 
     @staticmethod
-    def get_open_alert_for_device(
+    def get_active_alert_for_device(
         db: Session,
         device_id: int,
     ) -> Alert | None:
@@ -40,7 +40,12 @@ class AlertRepository:
             db.query(Alert)
             .filter(
                 Alert.device_id == device_id,
-                Alert.status == AlertStatus.OPEN,
+                Alert.status.in_(
+                    [
+                        AlertStatus.OPEN,
+                        AlertStatus.ACKNOWLEDGED,
+                    ]
+                ),
             )
             .first()
         )
@@ -75,6 +80,21 @@ class AlertRepository:
 
         alert.status = AlertStatus.RESOLVED
         alert.resolved_at = datetime.now(timezone.utc)
+
+        db.commit()
+        db.refresh(alert)
+
+        return alert
+
+    @staticmethod
+    def acknowledge(
+        db: Session,
+        alert: Alert,
+    ) -> Alert:
+        if alert.status == AlertStatus.ACKNOWLEDGED:
+            return alert
+
+        alert.status = AlertStatus.ACKNOWLEDGED
 
         db.commit()
         db.refresh(alert)

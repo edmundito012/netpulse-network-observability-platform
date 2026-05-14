@@ -30,12 +30,12 @@ def monitor_devices():
 
             device.status = status
 
-            open_alert = AlertRepository.get_open_alert_for_device(
+            active_alert = AlertRepository.get_active_alert_for_device(
                 db=db,
                 device_id=device.id,
             )
 
-            if status == DeviceStatus.OFFLINE and not open_alert:
+            if status == DeviceStatus.OFFLINE and not active_alert:
                 AlertRepository.create(
                     db=db,
                     device_id=device.id,
@@ -45,11 +45,8 @@ def monitor_devices():
 
                 print(f"Alert created for device {device.id}")
 
-            if status == DeviceStatus.ONLINE and open_alert:
-                AlertRepository.resolve(
-                    db=db,
-                    alert=open_alert,
-                )
+            if status == DeviceStatus.ONLINE and active_alert:
+                AlertRepository.resolve(db, active_alert)
 
                 print(f"Alert resolved for device {device.id}")
 
