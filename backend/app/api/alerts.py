@@ -6,7 +6,8 @@ from app.models.user import UserRole
 from app.repositories.alert_repository import AlertRepository
 from app.schemas.alert import AlertRead
 from app.api.deps import require_roles
-
+from app.repositories.device_event_repository import DeviceEventRepository
+from app.models.device_event import DeviceEventType
 
 router = APIRouter(
     prefix="/alerts",
@@ -87,7 +88,16 @@ def resolve_alert(
     if alert.status.value == "RESOLVED":
         return alert
 
-    return AlertRepository.resolve(db, alert)
+    resolved_alert = AlertRepository.resolve(db, alert)
+
+    DeviceEventRepository.create(
+        db=db,
+        device_id=alert.device_id,
+        event_type=DeviceEventType.ALERT_RESOLVED,
+        message=f"Alert resolved manually: {alert.message}",
+    )
+
+    return resolved_alert
 
 @router.post("/{alert_id}/acknowledge", response_model=AlertRead)
 def acknowledge_alert(
@@ -108,4 +118,13 @@ def acknowledge_alert(
             detail="Alert not found",
         )
 
-    return AlertRepository.acknowledge(db, alert)
+    acknowledged_alert = AlertRepository.acknowledge(db, alert)
+
+    DeviceEventRepository.create(
+        db=db,
+        device_id=alert.device_id,
+        event_type=DeviceEventType.ALERT_ACKNOWLEDGED,
+        message=f"Alert acknowledged: {alert.message}",
+    )
+
+    return acknowledged_alert
