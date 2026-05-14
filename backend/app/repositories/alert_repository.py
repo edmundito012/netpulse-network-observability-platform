@@ -1,15 +1,41 @@
-from sqlalchemy.orm import Session
-
-from app.models.alert import Alert, AlertStatus
 from datetime import datetime, timezone
 
+from sqlalchemy.orm import Session
+
+from app.models.alert import Alert, AlertSeverity, AlertStatus
+
+
 class AlertRepository:
+    @staticmethod
+    def get_all(db: Session) -> list[Alert]:
+        return (
+            db.query(Alert)
+            .order_by(Alert.created_at.desc())
+            .all()
+        )
+
+    @staticmethod
+    def get_by_id(db: Session, alert_id: int) -> Alert | None:
+        return (
+            db.query(Alert)
+            .filter(Alert.id == alert_id)
+            .first()
+        )
+
+    @staticmethod
+    def get_open_alerts(db: Session) -> list[Alert]:
+        return (
+            db.query(Alert)
+            .filter(Alert.status == AlertStatus.OPEN)
+            .order_by(Alert.created_at.desc())
+            .all()
+        )
 
     @staticmethod
     def get_open_alert_for_device(
         db: Session,
         device_id: int,
-    ):
+    ) -> Alert | None:
         return (
             db.query(Alert)
             .filter(
@@ -23,14 +49,14 @@ class AlertRepository:
     def create(
         db: Session,
         device_id: int,
-        severity,
+        severity: AlertSeverity,
         message: str,
-    ):
+    ) -> Alert:
         alert = Alert(
             device_id=device_id,
             severity=severity,
-            message=message,
             status=AlertStatus.OPEN,
+            message=message,
         )
 
         db.add(alert)
@@ -43,7 +69,10 @@ class AlertRepository:
     def resolve(
         db: Session,
         alert: Alert,
-    ):
+    ) -> Alert:
+        if alert.status == AlertStatus.RESOLVED:
+            return alert
+
         alert.status = AlertStatus.RESOLVED
         alert.resolved_at = datetime.now(timezone.utc)
 

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.auth import router as auth_router
 from app.api.devices import router as devices_router
 from app.services.scheduler_service import start_scheduler
+from app.api.alerts import router as alerts_router
 
 
 app = FastAPI(
@@ -13,7 +14,7 @@ app = FastAPI(
 
 app.include_router(auth_router)
 app.include_router(devices_router)
-
+app.include_router(alerts_router)
 
 @app.on_event("startup")
 def on_startup():
