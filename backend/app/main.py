@@ -26,7 +26,7 @@ app.include_router(devices_router)
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-    # start_scheduler()
+    start_scheduler()
 
 
 @app.get("/")
