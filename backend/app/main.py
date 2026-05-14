@@ -1,13 +1,5 @@
 from fastapi import FastAPI
 
-from app.db.session import engine
-from app.models.base import Base
-
-from app.models import user
-from app.models import device
-from app.models import device_metric
-from app.models import device_snmp_system_snapshot
-
 from app.api.auth import router as auth_router
 from app.api.devices import router as devices_router
 from app.services.scheduler_service import start_scheduler
@@ -25,7 +17,6 @@ app.include_router(devices_router)
 
 @app.on_event("startup")
 def on_startup():
-    Base.metadata.create_all(bind=engine)
     start_scheduler()
 
 
