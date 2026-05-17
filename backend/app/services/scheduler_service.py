@@ -1,9 +1,15 @@
 import asyncio
+from datetime import UTC, datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
-from app.api.websocket import dashboard_manager
+from app.api.websocket import dashboard_manager, device_state_manager
+from app.core.device_state_cache import (
+    get_all_device_states,
+    update_device_state,
+)
+from app.core.logging import logger
 from app.db.session import SessionLocal
 from app.models.alert import AlertSeverity
 from app.models.device import DeviceStatus
@@ -18,19 +24,7 @@ from app.services.dashboard_service import DashboardService
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
 
-from datetime import datetime, UTC
 
-from app.core.device_state_cache import (
-    update_device_state,
-)
-
-from app.core.device_state_cache import (
-    get_all_device_states,
-)
-from app.api.websocket import (
-    dashboard_manager,
-    device_state_manager,
-)
 scheduler = BackgroundScheduler()
 
 
@@ -61,7 +55,7 @@ async def monitor_devices_async():
 
         for result in ping_results:
             if isinstance(result, Exception):
-                print(f"Ping task error: {result}")
+                logger.error("Ping task error: %s", result)
                 continue
 
             results_by_device_id[result["device_id"]] = result
@@ -105,6 +99,11 @@ async def monitor_devices_async():
                     message=f"Device {device.name} changed status to OFFLINE",
                 )
 
+                logger.warning(
+                    "Device %s changed status to OFFLINE",
+                    device.id,
+                )
+
             if (
                 status == DeviceStatus.ONLINE
                 and previous_status != DeviceStatus.ONLINE
@@ -114,6 +113,11 @@ async def monitor_devices_async():
                     device_id=device.id,
                     event_type=DeviceEventType.DEVICE_ONLINE,
                     message=f"Device {device.name} changed status to ONLINE",
+                )
+
+                logger.info(
+                    "Device %s changed status to ONLINE",
+                    device.id,
                 )
 
             if status == DeviceStatus.OFFLINE and not active_alert:
@@ -131,7 +135,10 @@ async def monitor_devices_async():
                     message=f"Critical alert created: {alert.message}",
                 )
 
-                print(f"Alert created for device {device.id}")
+                logger.warning(
+                    "Critical alert created for device %s",
+                    device.id,
+                )
 
             if status == DeviceStatus.ONLINE and active_alert:
                 resolved_alert = AlertRepository.resolve(
@@ -146,7 +153,10 @@ async def monitor_devices_async():
                     message=f"Alert resolved: {resolved_alert.message}",
                 )
 
-                print(f"Alert resolved for device {device.id}")
+                logger.info(
+                    "Alert resolved for device %s",
+                    device.id,
+                )
 
         db.commit()
 
@@ -154,11 +164,11 @@ async def monitor_devices_async():
             get_all_device_states()
         )
 
-        print("Async device monitoring cycle completed")
+        logger.info("Async device monitoring cycle completed")
 
     except Exception as e:
         db.rollback()
-        print(f"Async monitoring error: {e}")
+        logger.error("Async monitoring error: %s", e)
 
     finally:
         db.close()
@@ -203,7 +213,7 @@ async def collect_snmp_system_snapshots_async():
 
         for result in snmp_results:
             if isinstance(result, Exception):
-                print(f"SNMP task error: {result}")
+                logger.error("SNMP task error: %s", result)
                 continue
 
             device = devices_by_id.get(result["device_id"])
@@ -212,9 +222,10 @@ async def collect_snmp_system_snapshots_async():
                 continue
 
             if not result["success"]:
-                print(
-                    f"SNMP snapshot error for device "
-                    f"{device.id}: {result['error']}"
+                logger.warning(
+                    "SNMP snapshot error for device %s: %s",
+                    device.id,
+                    result["error"],
                 )
                 continue
 
@@ -240,15 +251,18 @@ async def collect_snmp_system_snapshots_async():
                 ),
             )
 
-            print(f"SNMP snapshot collected for device {device.id}")
+            logger.info(
+                "SNMP snapshot collected for device %s",
+                device.id,
+            )
 
         db.commit()
 
-        print("Async SNMP snapshot cycle completed")
+        logger.info("Async SNMP snapshot cycle completed")
 
     except Exception as e:
         db.rollback()
-        print(f"SNMP scheduler error: {e}")
+        logger.error("SNMP scheduler error: %s", e)
 
     finally:
         db.close()
@@ -264,12 +278,10 @@ async def broadcast_dashboard_overview():
     try:
         overview = DashboardService.refresh_dashboard_cache(db=db)
 
-        await dashboard_manager.broadcast(
-            overview
-        )
+        await dashboard_manager.broadcast(overview)
 
     except Exception as e:
-        print(f"Dashboard broadcast error: {e}")
+        logger.error("Dashboard broadcast error: %s", e)
 
     finally:
         db.close()
@@ -279,9 +291,23 @@ def broadcast_dashboard_overview_job():
     asyncio.run(broadcast_dashboard_overview())
 
 
+def warm_up_caches():
+    db: Session = SessionLocal()
+
+    try:
+        DashboardService.refresh_dashboard_cache(db=db)
+        logger.info("Dashboard cache warmed up")
+
+    except Exception as e:
+        logger.error("Cache warm-up error: %s", e)
+
+    finally:
+        db.close()
+
+
 def start_scheduler():
     if scheduler.running:
-        print("Monitoring scheduler already running")
+        logger.info("Monitoring scheduler already running")
         return
 
     scheduler.add_job(
@@ -318,23 +344,10 @@ def start_scheduler():
 
     scheduler.start()
 
-    print("Monitoring scheduler started")
+    logger.info("Monitoring scheduler started")
 
 
 def stop_scheduler():
     if scheduler.running:
         scheduler.shutdown(wait=False)
-        print("Monitoring scheduler stopped")
-
-def warm_up_caches():
-    db: Session = SessionLocal()
-
-    try:
-        DashboardService.refresh_dashboard_cache(db=db)
-        print("Dashboard cache warmed up")
-
-    except Exception as e:
-        print(f"Cache warm-up error: {e}")
-
-    finally:
-        db.close()
+        logger.info("Monitoring scheduler stopped")
