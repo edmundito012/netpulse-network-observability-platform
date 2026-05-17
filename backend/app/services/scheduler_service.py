@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
 from app.api.websocket import dashboard_manager, device_state_manager
+from app.core.config import settings
 from app.core.device_state_cache import (
     get_all_device_states,
     update_device_state,
@@ -313,7 +314,7 @@ def start_scheduler():
     scheduler.add_job(
         monitor_devices,
         "interval",
-        seconds=30,
+        seconds=settings.MONITOR_INTERVAL_SECONDS,
         id="monitor_devices",
         replace_existing=True,
         max_instances=1,
@@ -323,7 +324,7 @@ def start_scheduler():
     scheduler.add_job(
         collect_snmp_system_snapshots,
         "interval",
-        seconds=60,
+        seconds=settings.SNMP_INTERVAL_SECONDS,
         id="collect_snmp_system_snapshots",
         replace_existing=True,
         max_instances=1,
@@ -333,7 +334,7 @@ def start_scheduler():
     scheduler.add_job(
         broadcast_dashboard_overview_job,
         "interval",
-        seconds=5,
+        seconds=settings.DASHBOARD_BROADCAST_INTERVAL_SECONDS,
         id="broadcast_dashboard_overview",
         replace_existing=True,
         max_instances=1,
@@ -344,7 +345,12 @@ def start_scheduler():
 
     scheduler.start()
 
-    logger.info("Monitoring scheduler started")
+    logger.info(
+        "Monitoring scheduler started with intervals: monitor=%ss snmp=%ss dashboard=%ss",
+        settings.MONITOR_INTERVAL_SECONDS,
+        settings.SNMP_INTERVAL_SECONDS,
+        settings.DASHBOARD_BROADCAST_INTERVAL_SECONDS,
+    )
 
 
 def stop_scheduler():

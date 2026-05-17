@@ -8,6 +8,7 @@ from pysnmp.hlapi.v3arch.asyncio import (
     get_cmd,
 )
 
+from app.core.config import settings
 from app.core.logging import logger
 
 
@@ -18,10 +19,14 @@ class SNMPService:
         ip_address: str,
         oid: str,
         community: str = "public",
-        port: int = 1161,
-        timeout: int = 2,
-        retries: int = 1,
+        port: int | None = None,
+        timeout: int | None = None,
+        retries: int | None = None,
     ):
+        port = port or settings.SNMP_PORT
+        timeout = timeout or settings.SNMP_TIMEOUT_SECONDS
+        retries = retries or settings.SNMP_RETRIES
+
         try:
             error_indication, error_status, error_index, var_binds = await get_cmd(
                 SnmpEngine(),
@@ -37,9 +42,10 @@ class SNMPService:
 
             if error_indication:
                 logger.warning(
-                    "SNMP error for IP %s OID %s: %s",
+                    "SNMP error for IP %s OID %s on port %s: %s",
                     ip_address,
                     oid,
+                    port,
                     error_indication,
                 )
                 raise ValueError(str(error_indication))
@@ -48,9 +54,10 @@ class SNMPService:
                 error_message = f"{error_status.prettyPrint()} at {error_index}"
 
                 logger.warning(
-                    "SNMP status error for IP %s OID %s: %s",
+                    "SNMP status error for IP %s OID %s on port %s: %s",
                     ip_address,
                     oid,
+                    port,
                     error_message,
                 )
 
@@ -60,26 +67,32 @@ class SNMPService:
                 value = str(var_bind[1])
 
                 logger.info(
-                    "SNMP value received for IP %s OID %s",
+                    "SNMP value received for IP %s OID %s on port %s",
                     ip_address,
                     oid,
+                    port,
                 )
 
                 return value
 
             logger.warning(
-                "SNMP returned no value for IP %s OID %s",
+                "SNMP returned no value for IP %s OID %s on port %s",
                 ip_address,
                 oid,
+                port,
             )
 
             return None
 
         except Exception as e:
             logger.warning(
-                "SNMP request failed for IP %s OID %s: %s",
+                "SNMP request failed for IP %s OID %s on port %s "
+                "timeout=%ss retries=%s: %s",
                 ip_address,
                 oid,
+                port,
+                timeout,
+                retries,
                 e,
             )
 
@@ -89,7 +102,7 @@ class SNMPService:
     async def get_sysdescr(
         ip_address: str,
         community: str = "public",
-        port: int = 1161,
+        port: int | None = None,
     ):
         return await SNMPService.get_value(
             ip_address=ip_address,
@@ -102,7 +115,7 @@ class SNMPService:
     async def get_system_info(
         ip_address: str,
         community: str = "public",
-        port: int = 1161,
+        port: int | None = None,
     ):
         logger.info(
             "Collecting SNMP system info for IP %s",

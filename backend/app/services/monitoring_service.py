@@ -2,6 +2,7 @@ import asyncio
 
 from ping3 import ping
 
+from app.core.config import settings
 from app.core.logging import logger
 from app.models.device import DeviceStatus
 
@@ -13,13 +14,14 @@ class MonitoringService:
         try:
             response_time = ping(
                 str(ip_address),
-                timeout=2,
+                timeout=settings.PING_TIMEOUT_SECONDS,
             )
 
             if response_time is None:
                 logger.warning(
-                    "Ping failed for device IP %s",
+                    "Ping failed for device IP %s after %ss timeout",
                     ip_address,
+                    settings.PING_TIMEOUT_SECONDS,
                 )
 
                 return DeviceStatus.OFFLINE, None
