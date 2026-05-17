@@ -96,24 +96,26 @@ def ping_device(
 
 @router.get(
     "/{device_id}/metrics",
-    response_model=list[DeviceMetricRead]
+    response_model=PaginatedResponse[DeviceMetricRead],
 )
 def get_device_metrics(
     device_id: int,
-    limit: int = 50,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_roles(
             UserRole.ADMIN,
             UserRole.OPERATOR,
-            UserRole.VIEWER
+            UserRole.VIEWER,
         )
-    )
+    ),
 ):
-    return DeviceMetricRepository.get_by_device_id(
+    return DeviceMetricRepository.get_paginated_by_device_id(
         db=db,
         device_id=device_id,
-        limit=limit
+        page=page,
+        page_size=page_size,
     )
 
 @router.get("/{device_id}/snmp/system")
