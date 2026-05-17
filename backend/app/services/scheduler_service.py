@@ -149,6 +149,10 @@ def collect_snmp_system_snapshots():
 
 
 def start_scheduler():
+    if scheduler.running:
+        print("Monitoring scheduler already running")
+        return
+
     scheduler.add_job(
         monitor_devices,
         "interval",
@@ -168,3 +172,9 @@ def start_scheduler():
     scheduler.start()
 
     print("Monitoring scheduler started")
+
+
+def stop_scheduler():
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        print("Monitoring scheduler stopped")
