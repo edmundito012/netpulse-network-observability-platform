@@ -20,18 +20,49 @@ from app.services.snmp_service import SNMPService
 scheduler = BackgroundScheduler()
 
 
-def monitor_devices():
+async def ping_device_task(device):
+    status, response_time_ms = await MonitoringService.ping_device_async(
+        device.ip_address,
+    )
+
+    return {
+        "device_id": device.id,
+        "status": status,
+        "response_time_ms": response_time_ms,
+    }
+
+
+async def monitor_devices_async():
     db: Session = SessionLocal()
 
     try:
         devices = DeviceRepository.get_all(db)
 
-        for device in devices:
-            previous_status = device.status
+        ping_results = await asyncio.gather(
+            *[
+                ping_device_task(device)
+                for device in devices
+            ],
+            return_exceptions=True,
+        )
 
-            status, response_time_ms = MonitoringService.ping_device(
-                device.ip_address,
-            )
+        results_by_device_id = {}
+
+        for result in ping_results:
+            if isinstance(result, Exception):
+                print(f"Ping task error: {result}")
+                continue
+
+            results_by_device_id[result["device_id"]] = result
+
+        for device in devices:
+            result = results_by_device_id.get(device.id)
+
+            if not result:
+                continue
+
+            previous_status = device.status
+            status = result["status"]
 
             device.status = status
 
@@ -40,7 +71,10 @@ def monitor_devices():
                 device_id=device.id,
             )
 
-            if status == DeviceStatus.OFFLINE and previous_status != DeviceStatus.OFFLINE:
+            if (
+                status == DeviceStatus.OFFLINE
+                and previous_status != DeviceStatus.OFFLINE
+            ):
                 DeviceEventRepository.create(
                     db=db,
                     device_id=device.id,
@@ -48,7 +82,10 @@ def monitor_devices():
                     message=f"Device {device.name} changed status to OFFLINE",
                 )
 
-            if status == DeviceStatus.ONLINE and previous_status != DeviceStatus.ONLINE:
+            if (
+                status == DeviceStatus.ONLINE
+                and previous_status != DeviceStatus.ONLINE
+            ):
                 DeviceEventRepository.create(
                     db=db,
                     device_id=device.id,
@@ -90,14 +127,38 @@ def monitor_devices():
 
         db.commit()
 
-        print("Device monitoring cycle completed")
+        print("Async device monitoring cycle completed")
 
     except Exception as e:
         db.rollback()
-        print(f"Monitoring error: {e}")
+        print(f"Async monitoring error: {e}")
 
     finally:
         db.close()
+
+
+def monitor_devices():
+    asyncio.run(monitor_devices_async())
+
+
+async def collect_snmp_for_device(device):
+    try:
+        system_info = await SNMPService.get_system_info(
+            ip_address=device.ip_address,
+        )
+
+        return {
+            "device_id": device.id,
+            "success": True,
+            "system_info": system_info,
+        }
+
+    except Exception as e:
+        return {
+            "device_id": device.id,
+            "success": False,
+            "error": str(e),
+        }
 
 
 async def collect_snmp_system_snapshots_async():
@@ -106,35 +167,61 @@ async def collect_snmp_system_snapshots_async():
     try:
         devices = DeviceRepository.get_all(db)
 
-        for device in devices:
-            try:
-                system_info = await SNMPService.get_system_info(
-                    ip_address=device.ip_address,
+        snmp_results = await asyncio.gather(
+            *[
+                collect_snmp_for_device(device)
+                for device in devices
+            ],
+            return_exceptions=True,
+        )
+
+        devices_by_id = {
+            device.id: device
+            for device in devices
+        }
+
+        for result in snmp_results:
+            if isinstance(result, Exception):
+                print(f"SNMP task error: {result}")
+                continue
+
+            device = devices_by_id.get(result["device_id"])
+
+            if not device:
+                continue
+
+            if not result["success"]:
+                print(
+                    f"SNMP snapshot error for device "
+                    f"{device.id}: {result['error']}"
                 )
+                continue
 
-                DeviceSNMPSystemSnapshotRepository.create(
-                    db=db,
-                    device_id=device.id,
-                    sysdescr=system_info.get("sysdescr"),
-                    sysuptime=system_info.get("sysuptime"),
-                    syscontact=system_info.get("syscontact"),
-                    sysname=system_info.get("sysname"),
-                    syslocation=system_info.get("syslocation"),
-                )
+            system_info = result["system_info"]
 
-                DeviceEventRepository.create(
-                    db=db,
-                    device_id=device.id,
-                    event_type=DeviceEventType.SNMP_SNAPSHOT_COLLECTED,
-                    message=f"SNMP system snapshot collected for device {device.name}",
-                )
+            DeviceSNMPSystemSnapshotRepository.create(
+                db=db,
+                device_id=device.id,
+                sysdescr=system_info.get("sysdescr"),
+                sysuptime=system_info.get("sysuptime"),
+                syscontact=system_info.get("syscontact"),
+                sysname=system_info.get("sysname"),
+                syslocation=system_info.get("syslocation"),
+            )
 
-                print(f"SNMP snapshot collected for device {device.id}")
+            DeviceEventRepository.create(
+                db=db,
+                device_id=device.id,
+                event_type=DeviceEventType.SNMP_SNAPSHOT_COLLECTED,
+                message=(
+                    "SNMP system snapshot collected for device "
+                    f"{device.name}"
+                ),
+            )
 
-            except Exception as e:
-                print(f"SNMP snapshot error for device {device.id}: {e}")
+            print(f"SNMP snapshot collected for device {device.id}")
 
-        print("SNMP snapshot cycle completed")
+        print("Async SNMP snapshot cycle completed")
 
     except Exception as e:
         db.rollback()
