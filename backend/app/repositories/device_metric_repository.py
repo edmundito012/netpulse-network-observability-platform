@@ -38,3 +38,15 @@ class DeviceMetricRepository:
             .limit(limit)
             .all()
         )
+
+    @staticmethod
+    def get_latest_by_device(
+        db: Session,
+        device_id: int,
+    ):
+        return (
+            db.query(DeviceMetric)
+            .filter(DeviceMetric.device_id == device_id)
+            .order_by(DeviceMetric.checked_at.desc())
+            .first()
+        )

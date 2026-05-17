@@ -45,3 +45,15 @@ class DeviceSNMPSystemSnapshotRepository:
             .limit(limit)
             .all()
         )
+
+    @staticmethod
+    def get_latest_by_device(
+        db: Session,
+        device_id: int,
+    ):
+        return (
+            db.query(DeviceSNMPSystemSnapshot)
+            .filter(DeviceSNMPSystemSnapshot.device_id == device_id)
+            .order_by(DeviceSNMPSystemSnapshot.collected_at.desc())
+            .first()
+        )

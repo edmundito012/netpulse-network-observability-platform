@@ -33,6 +33,9 @@ from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
 
+from app.schemas.device_summary import DeviceSummaryRead
+from app.services.device_summary_service import DeviceSummaryService
+
 router = APIRouter(
     prefix="/devices",
     tags=["Devices"]
@@ -250,24 +253,31 @@ async def get_device_sysdescr(
             detail=str(e)
         )
 
-@router.get("/{device_id}", response_model=DeviceRead)
-def get_device(
+@router.get("/{device_id}/summary", response_model=DeviceSummaryRead)
+def get_device_summary(
     device_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
-    )
+        require_roles(
+            UserRole.ADMIN,
+            UserRole.OPERATOR,
+            UserRole.VIEWER,
+        )
+    ),
 ):
-    try:
-        return DeviceService.get_device(
-            db=db,
-            device_id=device_id
-        )
-    except ValueError as e:
+    summary = DeviceSummaryService.get_summary(
+        db=db,
+        device_id=device_id,
+    )
+
+    if not summary:
         raise HTTPException(
-            status_code=404,
-            detail=str(e)
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device not found",
         )
+
+    return summary
+
 
 @router.get("/{device_id}/events", response_model=list[DeviceEventRead])
 def get_device_events(
@@ -287,6 +297,26 @@ def get_device_events(
         device_id=device_id,
         limit=limit,
     )
+
+
+@router.get("/{device_id}", response_model=DeviceRead)
+def get_device(
+    device_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
+    )
+):
+    try:
+        return DeviceService.get_device(
+            db=db,
+            device_id=device_id
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=404,
+            detail=str(e)
+        )
 
 @router.put("/{device_id}", response_model=DeviceRead)
 def update_device(
