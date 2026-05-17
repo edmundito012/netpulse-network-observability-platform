@@ -223,8 +223,8 @@ async def collect_snmp_system_snapshots_async():
                 continue
 
             if not result["success"]:
-                logger.warning(
-                    "SNMP snapshot error for device %s: %s",
+                logger.info(
+                    "SNMP unavailable for device %s: %s",
                     device.id,
                     result["error"],
                 )

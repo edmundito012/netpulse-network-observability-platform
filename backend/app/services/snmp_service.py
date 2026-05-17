@@ -85,7 +85,7 @@ class SNMPService:
             return None
 
         except Exception as e:
-            logger.warning(
+            logger.debug(
                 "SNMP request failed for IP %s OID %s on port %s "
                 "timeout=%ss retries=%s: %s",
                 ip_address,
