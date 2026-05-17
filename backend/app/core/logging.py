@@ -12,3 +12,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("netpulse")
+
+# Reduce APScheduler verbosity
+logging.getLogger("apscheduler").setLevel(
+    logging.WARNING
+)
