@@ -3,6 +3,7 @@ import asyncio
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
+from app.api.websocket import dashboard_manager
 from app.db.session import SessionLocal
 from app.models.alert import AlertSeverity
 from app.models.device import DeviceStatus
@@ -13,12 +14,9 @@ from app.repositories.device_repository import DeviceRepository
 from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
+from app.services.dashboard_service import DashboardService
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
-from fastapi.encoders import jsonable_encoder
-
-from app.api.websocket import dashboard_manager
-from app.services.dashboard_service import DashboardService
 
 scheduler = BackgroundScheduler()
 
@@ -42,10 +40,7 @@ async def monitor_devices_async():
         devices = DeviceRepository.get_all(db)
 
         ping_results = await asyncio.gather(
-            *[
-                ping_device_task(device)
-                for device in devices
-            ],
+            *[ping_device_task(device) for device in devices],
             return_exceptions=True,
         )
 
@@ -171,17 +166,11 @@ async def collect_snmp_system_snapshots_async():
         devices = DeviceRepository.get_all(db)
 
         snmp_results = await asyncio.gather(
-            *[
-                collect_snmp_for_device(device)
-                for device in devices
-            ],
+            *[collect_snmp_for_device(device) for device in devices],
             return_exceptions=True,
         )
 
-        devices_by_id = {
-            device.id: device
-            for device in devices
-        }
+        devices_by_id = {device.id: device for device in devices}
 
         for result in snmp_results:
             if isinstance(result, Exception):
@@ -224,6 +213,8 @@ async def collect_snmp_system_snapshots_async():
 
             print(f"SNMP snapshot collected for device {device.id}")
 
+        db.commit()
+
         print("Async SNMP snapshot cycle completed")
 
     except Exception as e:
@@ -234,18 +225,18 @@ async def collect_snmp_system_snapshots_async():
         db.close()
 
 
-
 def collect_snmp_system_snapshots():
     asyncio.run(collect_snmp_system_snapshots_async())
+
 
 async def broadcast_dashboard_overview():
     db: Session = SessionLocal()
 
     try:
-        overview = DashboardService.get_overview(db=db)
+        overview = DashboardService.refresh_dashboard_cache(db=db)
 
         await dashboard_manager.broadcast(
-            jsonable_encoder(overview)
+            overview
         )
 
     except Exception as e:
@@ -270,6 +261,8 @@ def start_scheduler():
         seconds=30,
         id="monitor_devices",
         replace_existing=True,
+        max_instances=1,
+        coalesce=True,
     )
 
     scheduler.add_job(
@@ -278,6 +271,8 @@ def start_scheduler():
         seconds=60,
         id="collect_snmp_system_snapshots",
         replace_existing=True,
+        max_instances=1,
+        coalesce=True,
     )
 
     scheduler.add_job(
@@ -286,6 +281,8 @@ def start_scheduler():
         seconds=5,
         id="broadcast_dashboard_overview",
         replace_existing=True,
+        max_instances=1,
+        coalesce=True,
     )
 
     scheduler.start()

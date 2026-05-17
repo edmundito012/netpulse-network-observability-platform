@@ -1,14 +1,16 @@
 from sqlalchemy.orm import Session
+from fastapi.encoders import jsonable_encoder
 
 from app.models.alert import Alert, AlertSeverity, AlertStatus
 from app.models.device import Device, DeviceStatus
 from app.repositories.device_event_repository import DeviceEventRepository
+from app.core.dashboard_cache import update_dashboard_state
 
 
 class DashboardService:
 
     @staticmethod
-    def get_overview(db: Session):
+    def get_dashboard_overview(db: Session):
         total_devices = db.query(Device).count()
 
         online_devices = (
@@ -83,3 +85,13 @@ class DashboardService:
             "info_alerts": info_alerts,
             "latest_events": latest_events,
         }
+
+    @staticmethod
+    def refresh_dashboard_cache(db: Session):
+        overview = DashboardService.get_dashboard_overview(db)
+
+        encoded_overview = jsonable_encoder(overview)
+
+        update_dashboard_state(encoded_overview)
+
+        return encoded_overview
