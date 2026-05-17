@@ -15,7 +15,10 @@ from app.repositories.device_snmp_system_snapshot_repository import (
 )
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
+from fastapi.encoders import jsonable_encoder
 
+from app.api.websocket import dashboard_manager
+from app.services.dashboard_service import DashboardService
 
 scheduler = BackgroundScheduler()
 
@@ -231,8 +234,29 @@ async def collect_snmp_system_snapshots_async():
         db.close()
 
 
+
 def collect_snmp_system_snapshots():
     asyncio.run(collect_snmp_system_snapshots_async())
+
+async def broadcast_dashboard_overview():
+    db: Session = SessionLocal()
+
+    try:
+        overview = DashboardService.get_overview(db=db)
+
+        await dashboard_manager.broadcast(
+            jsonable_encoder(overview)
+        )
+
+    except Exception as e:
+        print(f"Dashboard broadcast error: {e}")
+
+    finally:
+        db.close()
+
+
+def broadcast_dashboard_overview_job():
+    asyncio.run(broadcast_dashboard_overview())
 
 
 def start_scheduler():
@@ -253,6 +277,14 @@ def start_scheduler():
         "interval",
         seconds=60,
         id="collect_snmp_system_snapshots",
+        replace_existing=True,
+    )
+
+    scheduler.add_job(
+        broadcast_dashboard_overview_job,
+        "interval",
+        seconds=5,
+        id="broadcast_dashboard_overview",
         replace_existing=True,
     )
 
