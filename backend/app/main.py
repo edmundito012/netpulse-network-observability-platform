@@ -5,6 +5,7 @@ from app.api.devices import router as devices_router
 from app.services.scheduler_service import start_scheduler
 from app.api.alerts import router as alerts_router
 from app.api.events import router as events_router
+from app.api.dashboard import router as dashboard_router
 
 app = FastAPI(
     title="NetPulse API",
@@ -16,6 +17,7 @@ app.include_router(auth_router)
 app.include_router(devices_router)
 app.include_router(alerts_router)
 app.include_router(events_router)
+app.include_router(dashboard_router)
 
 @app.on_event("startup")
 def on_startup():
