@@ -16,6 +16,7 @@ from app.core.dashboard_cache import get_dashboard_state
 from app.core.device_state_cache import get_all_device_states
 from app.db.session import SessionLocal
 from app.services.scheduler_service import scheduler
+from app.middleware.request_logging import RequestLoggingMiddleware
 
 app = FastAPI(
     title="NetPulse API",
@@ -30,6 +31,7 @@ app.include_router(events_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)
 app.include_router(device_state_router)
+app.add_middleware(RequestLoggingMiddleware)
 
 @app.on_event("startup")
 def on_startup():
