@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import require_roles
 from app.db.session import get_db
+from app.models.alert import AlertSeverity, AlertStatus
+from app.models.device_event import DeviceEventType
 from app.models.user import UserRole
 from app.repositories.alert_repository import AlertRepository
-from app.schemas.alert import AlertRead
-from app.api.deps import require_roles
 from app.repositories.device_event_repository import DeviceEventRepository
-from app.models.device_event import DeviceEventType
+from app.schemas.alert import AlertRead
+
 
 router = APIRouter(
     prefix="/alerts",
@@ -17,6 +19,10 @@ router = APIRouter(
 
 @router.get("/", response_model=list[AlertRead])
 def get_alerts(
+    device_id: int | None = Query(default=None),
+    severity: AlertSeverity | None = Query(default=None),
+    status: AlertStatus | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=500),
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -26,7 +32,13 @@ def get_alerts(
         )
     ),
 ):
-    return AlertRepository.get_all(db)
+    return AlertRepository.get_all(
+        db=db,
+        device_id=device_id,
+        severity=severity,
+        status=status,
+        limit=limit,
+    )
 
 
 @router.get("/open", response_model=list[AlertRead])
@@ -85,7 +97,7 @@ def resolve_alert(
             detail="Alert not found",
         )
 
-    if alert.status.value == "RESOLVED":
+    if alert.status == AlertStatus.RESOLVED:
         return alert
 
     resolved_alert = AlertRepository.resolve(db, alert)
@@ -98,6 +110,7 @@ def resolve_alert(
     )
 
     return resolved_alert
+
 
 @router.post("/{alert_id}/acknowledge", response_model=AlertRead)
 def acknowledge_alert(
@@ -117,6 +130,9 @@ def acknowledge_alert(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Alert not found",
         )
+
+    if alert.status == AlertStatus.ACKNOWLEDGED:
+        return alert
 
     acknowledged_alert = AlertRepository.acknowledge(db, alert)
 

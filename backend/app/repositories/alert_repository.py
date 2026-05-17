@@ -6,16 +6,46 @@ from app.models.alert import Alert, AlertSeverity, AlertStatus
 
 
 class AlertRepository:
+
     @staticmethod
-    def get_all(db: Session) -> list[Alert]:
+    def get_all(
+        db: Session,
+        device_id: int | None = None,
+        severity: AlertSeverity | None = None,
+        status: AlertStatus | None = None,
+        limit: int = 100,
+    ) -> list[Alert]:
+
+        query = db.query(Alert)
+
+        if device_id is not None:
+            query = query.filter(
+                Alert.device_id == device_id
+            )
+
+        if severity is not None:
+            query = query.filter(
+                Alert.severity == severity
+            )
+
+        if status is not None:
+            query = query.filter(
+                Alert.status == status
+            )
+
         return (
-            db.query(Alert)
+            query
             .order_by(Alert.created_at.desc())
+            .limit(limit)
             .all()
         )
 
     @staticmethod
-    def get_by_id(db: Session, alert_id: int) -> Alert | None:
+    def get_by_id(
+        db: Session,
+        alert_id: int,
+    ) -> Alert | None:
+
         return (
             db.query(Alert)
             .filter(Alert.id == alert_id)
@@ -23,7 +53,10 @@ class AlertRepository:
         )
 
     @staticmethod
-    def get_open_alerts(db: Session) -> list[Alert]:
+    def get_open_alerts(
+        db: Session,
+    ) -> list[Alert]:
+
         return (
             db.query(Alert)
             .filter(Alert.status == AlertStatus.OPEN)
@@ -36,6 +69,7 @@ class AlertRepository:
         db: Session,
         device_id: int,
     ) -> Alert | None:
+
         return (
             db.query(Alert)
             .filter(
@@ -57,6 +91,7 @@ class AlertRepository:
         severity: AlertSeverity,
         message: str,
     ) -> Alert:
+
         alert = Alert(
             device_id=device_id,
             severity=severity,
@@ -75,6 +110,7 @@ class AlertRepository:
         db: Session,
         alert: Alert,
     ) -> Alert:
+
         if alert.status == AlertStatus.RESOLVED:
             return alert
 
@@ -91,6 +127,7 @@ class AlertRepository:
         db: Session,
         alert: Alert,
     ) -> Alert:
+
         if alert.status == AlertStatus.ACKNOWLEDGED:
             return alert
 
