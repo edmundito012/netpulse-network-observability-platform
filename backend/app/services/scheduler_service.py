@@ -18,6 +18,11 @@ from app.services.dashboard_service import DashboardService
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
 
+from datetime import datetime, UTC
+
+from app.core.device_state_cache import (
+    update_device_state,
+)
 scheduler = BackgroundScheduler()
 
 
@@ -63,6 +68,18 @@ async def monitor_devices_async():
             status = result["status"]
 
             device.status = status
+
+            update_device_state(
+                device.id,
+                {
+                    "device_id": device.id,
+                    "device_name": device.name,
+                    "ip_address": device.ip_address,
+                    "status": status,
+                    "response_time_ms": result["response_time_ms"],
+                    "last_checked_at": datetime.now(UTC).isoformat(),
+                },
+            )
 
             active_alert = AlertRepository.get_active_alert_for_device(
                 db=db,

@@ -8,6 +8,7 @@ from app.api.events import router as events_router
 from app.api.dashboard import router as dashboard_router
 from app.api.websocket import router as websocket_router
 from app.services.scheduler_service import start_scheduler, stop_scheduler
+from app.api.device_state import router as device_state_router
 
 app = FastAPI(
     title="NetPulse API",
@@ -21,6 +22,7 @@ app.include_router(alerts_router)
 app.include_router(events_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)
+app.include_router(device_state_router)
 
 @app.on_event("startup")
 def on_startup():
