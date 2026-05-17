@@ -2,6 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.core.dashboard_cache import get_dashboard_state
 from app.core.device_state_cache import get_all_device_states
+from app.core.logging import logger
 
 
 router = APIRouter(tags=["WebSocket"])
@@ -20,9 +21,10 @@ class WebSocketConnectionManager:
         await websocket.accept()
         self.active_connections.append(websocket)
 
-        print(
-            f"{self.name} websocket connected. "
-            f"Active connections: {len(self.active_connections)}"
+        logger.info(
+            "%s websocket connected. Active connections: %s",
+            self.name,
+            len(self.active_connections),
         )
 
     def disconnect(
@@ -32,10 +34,39 @@ class WebSocketConnectionManager:
         if websocket in self.active_connections:
             self.active_connections.remove(websocket)
 
-        print(
-            f"{self.name} websocket disconnected. "
-            f"Active connections: {len(self.active_connections)}"
+        logger.info(
+            "%s websocket disconnected. Active connections: %s",
+            self.name,
+            len(self.active_connections),
         )
+
+    async def send_initial_state(
+        self,
+        websocket: WebSocket,
+        state: dict,
+    ):
+        if not state:
+            logger.info(
+                "%s websocket connected with empty initial state",
+                self.name,
+            )
+            return
+
+        try:
+            await websocket.send_json(state)
+
+            logger.info(
+                "%s initial state sent",
+                self.name,
+            )
+
+        except Exception as e:
+            logger.error(
+                "%s initial state send error: %s",
+                self.name,
+                e,
+            )
+            self.disconnect(websocket)
 
     async def broadcast(
         self,
@@ -46,11 +77,23 @@ class WebSocketConnectionManager:
         for connection in self.active_connections:
             try:
                 await connection.send_json(message)
-            except Exception:
+            except Exception as e:
+                logger.warning(
+                    "%s websocket broadcast failed: %s",
+                    self.name,
+                    e,
+                )
                 disconnected_connections.append(connection)
 
         for connection in disconnected_connections:
             self.disconnect(connection)
+
+        if self.active_connections:
+            logger.info(
+                "%s broadcast sent to %s active connections",
+                self.name,
+                len(self.active_connections),
+            )
 
 
 dashboard_manager = WebSocketConnectionManager(name="Dashboard")
@@ -61,10 +104,10 @@ device_state_manager = WebSocketConnectionManager(name="Device state")
 async def dashboard_websocket(websocket: WebSocket):
     await dashboard_manager.connect(websocket)
 
-    cached_state = get_dashboard_state()
-
-    if cached_state:
-        await websocket.send_json(cached_state)
+    await dashboard_manager.send_initial_state(
+        websocket=websocket,
+        state=get_dashboard_state(),
+    )
 
     try:
         while True:
@@ -78,10 +121,10 @@ async def dashboard_websocket(websocket: WebSocket):
 async def device_state_websocket(websocket: WebSocket):
     await device_state_manager.connect(websocket)
 
-    cached_device_states = get_all_device_states()
-
-    if cached_device_states:
-        await websocket.send_json(cached_device_states)
+    await device_state_manager.send_initial_state(
+        websocket=websocket,
+        state=get_all_device_states(),
+    )
 
     try:
         while True:
