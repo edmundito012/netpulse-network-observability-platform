@@ -1,16 +1,16 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from app.core.dashboard_cache import get_dashboard_state
-from app.core.device_state_cache import (
-    get_all_device_states,
-)
+from app.core.device_state_cache import get_all_device_states
+
 
 router = APIRouter(tags=["WebSocket"])
 
 
-class DashboardConnectionManager:
+class WebSocketConnectionManager:
 
-    def __init__(self):
+    def __init__(self, name: str):
+        self.name = name
         self.active_connections: list[WebSocket] = []
 
     async def connect(
@@ -21,7 +21,7 @@ class DashboardConnectionManager:
         self.active_connections.append(websocket)
 
         print(
-            "Dashboard websocket connected. "
+            f"{self.name} websocket connected. "
             f"Active connections: {len(self.active_connections)}"
         )
 
@@ -33,7 +33,7 @@ class DashboardConnectionManager:
             self.active_connections.remove(websocket)
 
         print(
-            "Dashboard websocket disconnected. "
+            f"{self.name} websocket disconnected. "
             f"Active connections: {len(self.active_connections)}"
         )
 
@@ -53,8 +53,9 @@ class DashboardConnectionManager:
             self.disconnect(connection)
 
 
-dashboard_manager = DashboardConnectionManager()
-device_state_manager = DashboardConnectionManager()
+dashboard_manager = WebSocketConnectionManager(name="Dashboard")
+device_state_manager = WebSocketConnectionManager(name="Device state")
+
 
 @router.websocket("/ws/dashboard")
 async def dashboard_websocket(websocket: WebSocket):
@@ -71,6 +72,7 @@ async def dashboard_websocket(websocket: WebSocket):
 
     except WebSocketDisconnect:
         dashboard_manager.disconnect(websocket)
+
 
 @router.websocket("/ws/devices/live")
 async def device_state_websocket(websocket: WebSocket):
