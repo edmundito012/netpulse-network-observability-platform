@@ -36,6 +36,9 @@ from app.repositories.device_snmp_system_snapshot_repository import (
 from app.schemas.device_summary import DeviceSummaryRead
 from app.services.device_summary_service import DeviceSummaryService
 
+from app.schemas.device_event import DeviceEventRead
+from app.schemas.pagination import PaginatedResponse
+
 router = APIRouter(
     prefix="/devices",
     tags=["Devices"]
@@ -279,10 +282,12 @@ def get_device_summary(
     return summary
 
 
-@router.get("/{device_id}/events", response_model=list[DeviceEventRead])
+@router.get("/{device_id}/events",response_model=PaginatedResponse[DeviceEventRead],
+)
 def get_device_events(
     device_id: int,
-    limit: int = Query(default=100, ge=1, le=500),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -292,12 +297,12 @@ def get_device_events(
         )
     ),
 ):
-    return DeviceEventRepository.get_by_device(
+    return DeviceEventRepository.get_paginated(
         db=db,
         device_id=device_id,
-        limit=limit,
+        page=page,
+        page_size=page_size,
     )
-
 
 @router.get("/{device_id}", response_model=DeviceRead)
 def get_device(
