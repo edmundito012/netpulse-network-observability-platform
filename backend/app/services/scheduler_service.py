@@ -314,6 +314,8 @@ def start_scheduler():
         coalesce=True,
     )
 
+    warm_up_caches()
+
     scheduler.start()
 
     print("Monitoring scheduler started")
@@ -323,3 +325,16 @@ def stop_scheduler():
     if scheduler.running:
         scheduler.shutdown(wait=False)
         print("Monitoring scheduler stopped")
+
+def warm_up_caches():
+    db: Session = SessionLocal()
+
+    try:
+        DashboardService.refresh_dashboard_cache(db=db)
+        print("Dashboard cache warmed up")
+
+    except Exception as e:
+        print(f"Cache warm-up error: {e}")
+
+    finally:
+        db.close()

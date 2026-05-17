@@ -10,6 +10,13 @@ from app.api.websocket import router as websocket_router
 from app.services.scheduler_service import start_scheduler, stop_scheduler
 from app.api.device_state import router as device_state_router
 
+from sqlalchemy import text
+
+from app.core.dashboard_cache import get_dashboard_state
+from app.core.device_state_cache import get_all_device_states
+from app.db.session import SessionLocal
+from app.services.scheduler_service import scheduler
+
 app = FastAPI(
     title="NetPulse API",
     description="Network Observability Platform API",
@@ -43,4 +50,24 @@ def root():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    db_status = "ok"
+
+    db = SessionLocal()
+
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "error"
+    finally:
+        db.close()
+
+    dashboard_cache = get_dashboard_state()
+    device_state_cache = get_all_device_states()
+
+    return {
+        "status": "ok" if db_status == "ok" else "degraded",
+        "database": db_status,
+        "scheduler_running": scheduler.running,
+        "dashboard_cache_loaded": bool(dashboard_cache),
+        "device_state_cache_count": len(device_state_cache),
+    }
