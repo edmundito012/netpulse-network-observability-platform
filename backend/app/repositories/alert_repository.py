@@ -41,6 +41,50 @@ class AlertRepository:
         )
 
     @staticmethod
+    def get_paginated(
+        db: Session,
+        device_id: int | None = None,
+        severity: AlertSeverity | None = None,
+        status: AlertStatus | None = None,
+        page: int = 1,
+        page_size: int = 20,
+    ):
+        query = db.query(Alert)
+
+        if device_id is not None:
+            query = query.filter(Alert.device_id == device_id)
+
+        if severity is not None:
+            query = query.filter(Alert.severity == severity)
+
+        if status is not None:
+            query = query.filter(Alert.status == status)
+
+        total_count = query.count()
+
+        items = (
+            query
+            .order_by(Alert.created_at.desc())
+            .offset((page - 1) * page_size)
+            .limit(page_size)
+            .all()
+        )
+
+        total_pages = (
+            (total_count + page_size - 1) // page_size
+            if total_count > 0
+            else 0
+        )
+
+        return {
+            "items": items,
+            "total_count": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+        }
+
+    @staticmethod
     def get_by_id(
         db: Session,
         alert_id: int,

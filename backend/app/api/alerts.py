@@ -9,6 +9,7 @@ from app.models.user import UserRole
 from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.schemas.alert import AlertRead
+from app.schemas.pagination import PaginatedResponse
 
 
 router = APIRouter(
@@ -17,12 +18,13 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[AlertRead])
+@router.get("/", response_model=PaginatedResponse[AlertRead])
 def get_alerts(
     device_id: int | None = Query(default=None),
     severity: AlertSeverity | None = Query(default=None),
     status: AlertStatus | None = Query(default=None),
-    limit: int = Query(default=100, ge=1, le=500),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -32,12 +34,13 @@ def get_alerts(
         )
     ),
 ):
-    return AlertRepository.get_all(
+    return AlertRepository.get_paginated(
         db=db,
         device_id=device_id,
         severity=severity,
         status=status,
-        limit=limit,
+        page=page,
+        page_size=page_size,
     )
 
 
