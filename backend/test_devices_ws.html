@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NetPulse Device State WebSocket</title>
+</head>
+<body>
+<h1>NetPulse Device State WebSocket</h1>
+
+<pre id="output"></pre>
+
+<script>
+    const output = document.getElementById("output");
+
+    const ws = new WebSocket(
+        "ws://127.0.0.1:8000/ws/devices/live"
+    );
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        output.textContent = JSON.stringify(
+            data,
+            null,
+            2
+        );
+    };
+
+    ws.onopen = () => {
+        console.log("Connected");
+    };
+
+    ws.onclose = () => {
+        console.log("Disconnected");
+    };
+</script>
+</body>
+</html>

@@ -23,6 +23,14 @@ from datetime import datetime, UTC
 from app.core.device_state_cache import (
     update_device_state,
 )
+
+from app.core.device_state_cache import (
+    get_all_device_states,
+)
+from app.api.websocket import (
+    dashboard_manager,
+    device_state_manager,
+)
 scheduler = BackgroundScheduler()
 
 
@@ -141,6 +149,10 @@ async def monitor_devices_async():
                 print(f"Alert resolved for device {device.id}")
 
         db.commit()
+
+        await device_state_manager.broadcast(
+            get_all_device_states()
+        )
 
         print("Async device monitoring cycle completed")
 
