@@ -39,6 +39,11 @@ from app.services.device_summary_service import DeviceSummaryService
 from app.schemas.device_event import DeviceEventRead
 from app.schemas.pagination import PaginatedResponse
 
+from app.schemas.pagination import PaginatedResponse
+from app.schemas.device_snmp_system_snapshot import (
+    DeviceSNMPSystemSnapshotRead,
+)
+
 router = APIRouter(
     prefix="/devices",
     tags=["Devices"]
@@ -155,10 +160,14 @@ async def get_device_snmp_system(
             detail=f"SNMP error: {str(e)}",
         )
 
-@router.get("/{device_id}/snmp/system/snapshots")
+@router.get(
+    "/{device_id}/snmp/system/snapshots",
+    response_model=PaginatedResponse[DeviceSNMPSystemSnapshotRead],
+)
 def get_device_snmp_system_snapshots(
     device_id: int,
-    limit: int = 50,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_roles(
@@ -176,12 +185,12 @@ def get_device_snmp_system_snapshots(
             detail="Device not found",
         )
 
-    return DeviceSNMPSystemSnapshotRepository.get_by_device_id(
+    return DeviceSNMPSystemSnapshotRepository.get_paginated_by_device_id(
         db=db,
         device_id=device.id,
-        limit=limit,
+        page=page,
+        page_size=page_size,
     )
-
 @router.post("/{device_id}/snmp/system/snapshot")
 async def create_device_snmp_system_snapshot(
     device_id: int,
