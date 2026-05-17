@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NetPulse WebSocket Test</title>
+</head>
+<body>
+
+<h1>NetPulse Dashboard WebSocket</h1>
+
+<pre id="output"></pre>
+
+<script>
+    const output = document.getElementById("output");
+
+    const socket = new WebSocket(
+        "ws://127.0.0.1:8000/ws/dashboard"
+    );
+
+    socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        output.textContent =
+            JSON.stringify(data, null, 2);
+    };
+
+    socket.onopen = function() {
+        console.log("WebSocket connected");
+    };
+
+    socket.onclose = function() {
+        console.log("WebSocket disconnected");
+    };
+</script>
+
+</body>
+</html>
