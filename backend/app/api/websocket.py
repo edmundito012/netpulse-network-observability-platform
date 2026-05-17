@@ -1,5 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
+from app.core.dashboard_cache import get_dashboard_state
+
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -55,6 +57,11 @@ dashboard_manager = DashboardConnectionManager()
 @router.websocket("/ws/dashboard")
 async def dashboard_websocket(websocket: WebSocket):
     await dashboard_manager.connect(websocket)
+
+    cached_state = get_dashboard_state()
+
+    if cached_state:
+        await websocket.send_json(cached_state)
 
     try:
         while True:
