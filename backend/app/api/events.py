@@ -7,6 +7,7 @@ from app.models.device_event import DeviceEventType
 from app.models.user import UserRole
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.schemas.device_event import DeviceEventRead
+from app.schemas.pagination import PaginatedResponse
 
 
 router = APIRouter(
@@ -15,11 +16,12 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=list[DeviceEventRead])
+@router.get("/", response_model=PaginatedResponse[DeviceEventRead])
 def get_events(
     device_id: int | None = Query(default=None),
     event_type: DeviceEventType | None = Query(default=None),
-    limit: int = Query(default=100, ge=1, le=500),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user=Depends(
         require_roles(
@@ -29,9 +31,10 @@ def get_events(
         )
     ),
 ):
-    return DeviceEventRepository.get_all(
+    return DeviceEventRepository.get_paginated(
         db=db,
         device_id=device_id,
         event_type=event_type,
-        limit=limit,
+        page=page,
+        page_size=page_size,
     )
