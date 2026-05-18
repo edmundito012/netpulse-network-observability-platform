@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.models.device import DeviceStatus
 
@@ -12,5 +12,6 @@ class DeviceMetricRead(BaseModel):
     response_time_ms: float | None
     checked_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )

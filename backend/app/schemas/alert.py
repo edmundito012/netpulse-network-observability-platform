@@ -1,5 +1,6 @@
 from datetime import datetime
-from pydantic import BaseModel
+
+from pydantic import BaseModel, ConfigDict
 
 from app.models.alert import AlertSeverity, AlertStatus
 
@@ -13,5 +14,6 @@ class AlertRead(BaseModel):
     created_at: datetime
     resolved_at: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+    )
