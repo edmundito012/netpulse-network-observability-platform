@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>NetPulse Device State WebSocket</title>
 </head>
 <body>
@@ -12,26 +14,43 @@
     const output = document.getElementById("output");
 
     const ws = new WebSocket(
-        "ws://127.0.0.1:8000/ws/devices/live"
+        "ws://localhost:8000/ws/devices/live"
     );
 
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-
-        output.textContent = JSON.stringify(
-            data,
-            null,
-            2
-        );
+    ws.onopen = () => {
+        console.log("WebSocket connected");
     };
 
-    ws.onopen = () => {
-        console.log("Connected");
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+
+            output.textContent = JSON.stringify(
+                data,
+                null,
+                2
+            );
+
+            console.log(data);
+
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     ws.onclose = () => {
-        console.log("Disconnected");
+        console.log("WebSocket disconnected");
     };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+    setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send("ping");
+        }
+    }, 10000);
 </script>
 </body>
 </html>
