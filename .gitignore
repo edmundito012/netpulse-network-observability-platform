@@ -10,7 +10,7 @@ __pycache__/
 node_modules/
 
 # Environment
-.env
+backend/alembic/env.py
 
 # Logs
 *.log
