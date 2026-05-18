@@ -20,6 +20,8 @@ from app.services.scheduler_service import (
     start_scheduler,
     stop_scheduler,
 )
+from prometheus_client import generate_latest
+from fastapi.responses import Response
 
 
 @asynccontextmanager
@@ -89,3 +91,10 @@ def health():
         "dashboard_cache_loaded": bool(dashboard_cache),
         "device_state_cache_count": len(device_state_cache),
     }
+
+@app.get("/metrics")
+def metrics():
+    return Response(
+        generate_latest(),
+        media_type="text/plain",
+    )
