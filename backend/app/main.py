@@ -1,28 +1,50 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-
-from app.api.auth import router as auth_router
-from app.api.devices import router as devices_router
-from app.services.scheduler_service import start_scheduler
-from app.api.alerts import router as alerts_router
-from app.api.events import router as events_router
-from app.api.dashboard import router as dashboard_router
-from app.api.websocket import router as websocket_router
-from app.services.scheduler_service import start_scheduler, stop_scheduler
-from app.api.device_state import router as device_state_router
-
 from sqlalchemy import text
 
+from app.api.alerts import router as alerts_router
+from app.api.auth import router as auth_router
+from app.api.dashboard import router as dashboard_router
+from app.api.device_state import router as device_state_router
+from app.api.devices import router as devices_router
+from app.api.events import router as events_router
+from app.api.websocket import router as websocket_router
 from app.core.dashboard_cache import get_dashboard_state
 from app.core.device_state_cache import get_all_device_states
+from app.core.logging import logger
 from app.db.session import SessionLocal
-from app.services.scheduler_service import scheduler
 from app.middleware.request_logging import RequestLoggingMiddleware
+from app.services.scheduler_service import (
+    scheduler,
+    start_scheduler,
+    stop_scheduler,
+)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Starting NetPulse application")
+
+    start_scheduler()
+
+    yield
+
+    logger.info("Stopping NetPulse application")
+
+    stop_scheduler()
+
 
 app = FastAPI(
     title="NetPulse API",
     description="Network Observability Platform API",
     version="0.1.0",
+    lifespan=lifespan,
 )
+
+
+app.add_middleware(RequestLoggingMiddleware)
+
 
 app.include_router(auth_router)
 app.include_router(devices_router)
@@ -31,15 +53,7 @@ app.include_router(events_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)
 app.include_router(device_state_router)
-app.add_middleware(RequestLoggingMiddleware)
 
-@app.on_event("startup")
-def on_startup():
-    start_scheduler()
-
-@app.on_event("shutdown")
-def on_shutdown():
-    stop_scheduler()
 
 @app.get("/")
 def root():
@@ -58,8 +72,10 @@ def health():
 
     try:
         db.execute(text("SELECT 1"))
+
     except Exception:
         db_status = "error"
+
     finally:
         db.close()
 
