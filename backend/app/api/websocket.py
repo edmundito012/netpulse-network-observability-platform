@@ -6,6 +6,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.core.dashboard_cache import get_dashboard_state
 from app.core.device_state_cache import get_all_device_states
 from app.core.logging import logger
+from app.core.metrics import active_websocket_connections
 
 
 router = APIRouter(tags=["WebSocket"])
@@ -18,6 +19,11 @@ class WebSocketConnectionManager:
         self.active_connections: list[WebSocket] = []
         self.connection_last_seen: dict[WebSocket, datetime] = {}
 
+    def update_connection_metric(self):
+        active_websocket_connections.labels(
+            channel=self.name,
+        ).set(len(self.active_connections))
+
     async def connect(
         self,
         websocket: WebSocket,
@@ -25,8 +31,9 @@ class WebSocketConnectionManager:
         await websocket.accept()
 
         self.active_connections.append(websocket)
-
         self.connection_last_seen[websocket] = datetime.now(UTC)
+
+        self.update_connection_metric()
 
         logger.info(
             "%s websocket connected. Active connections: %s",
@@ -43,6 +50,8 @@ class WebSocketConnectionManager:
 
         if websocket in self.connection_last_seen:
             del self.connection_last_seen[websocket]
+
+        self.update_connection_metric()
 
         logger.info(
             "%s websocket disconnected. Active connections: %s",

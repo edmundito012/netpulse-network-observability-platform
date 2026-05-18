@@ -11,6 +11,7 @@ from app.core.device_state_cache import (
     update_device_state,
 )
 from app.core.logging import logger
+from app.core.metrics import device_status_total
 from app.db.session import SessionLocal
 from app.models.alert import AlertSeverity
 from app.models.device import DeviceStatus
@@ -27,6 +28,36 @@ from app.services.snmp_service import SNMPService
 
 
 scheduler = BackgroundScheduler()
+
+
+def update_device_status_metrics():
+    states = get_all_device_states()
+
+    online_count = 0
+    offline_count = 0
+    unknown_count = 0
+
+    for state in states.values():
+        status = state.get("status")
+
+        if status == DeviceStatus.ONLINE:
+            online_count += 1
+        elif status == DeviceStatus.OFFLINE:
+            offline_count += 1
+        else:
+            unknown_count += 1
+
+    device_status_total.labels(
+        status="ONLINE",
+    ).set(online_count)
+
+    device_status_total.labels(
+        status="OFFLINE",
+    ).set(offline_count)
+
+    device_status_total.labels(
+        status="UNKNOWN",
+    ).set(unknown_count)
 
 
 async def ping_device_task(device):
@@ -160,6 +191,8 @@ async def monitor_devices_async():
                 )
 
         db.commit()
+
+        update_device_status_metrics()
 
         await device_state_manager.broadcast(
             get_all_device_states()
