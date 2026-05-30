@@ -1,6 +1,6 @@
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Integer, String
+from sqlalchemy import DateTime, Enum as SqlEnum, ForeignKey, Index, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -20,6 +20,11 @@ class DeviceEventType(str, Enum):
 
 class DeviceEvent(Base):
     __tablename__ = "device_events"
+
+    __table_args__ = (
+        Index("ix_device_events_device_id_created_at", "device_id", "created_at"),
+        Index("ix_device_events_event_type", "event_type"),
+    )
 
     id: Mapped[int] = mapped_column(
         Integer,

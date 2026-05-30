@@ -1,7 +1,7 @@
 from enum import Enum
 
 from sqlalchemy import Column, DateTime, Enum as SQLEnum
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import ForeignKey, Index, Integer, String
 from sqlalchemy.sql import func
 
 from app.models.base import Base
@@ -18,8 +18,14 @@ class AlertStatus(str, Enum):
     ACKNOWLEDGED = "ACKNOWLEDGED"
     RESOLVED = "RESOLVED"
 
+
 class Alert(Base):
     __tablename__ = "alerts"
+
+    __table_args__ = (
+        Index("ix_alerts_status", "status"),
+        Index("ix_alerts_device_id_status", "device_id", "status"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
 

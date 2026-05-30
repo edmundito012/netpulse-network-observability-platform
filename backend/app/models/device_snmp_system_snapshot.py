@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.sql import func
 
 from app.models.base import Base
@@ -6,6 +6,14 @@ from app.models.base import Base
 
 class DeviceSNMPSystemSnapshot(Base):
     __tablename__ = "device_snmp_system_snapshots"
+
+    __table_args__ = (
+        Index(
+            "ix_snmp_snapshots_device_id_collected_at",
+            "device_id",
+            "collected_at",
+        ),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
 
