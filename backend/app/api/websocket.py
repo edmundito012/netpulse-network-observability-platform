@@ -1,12 +1,15 @@
 import asyncio
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from sqlalchemy.orm import Session
 
 from app.core.dashboard_cache import get_dashboard_state
 from app.core.device_state_cache import get_all_device_states
 from app.core.logging import logger
 from app.core.metrics import active_websocket_connections
+from app.core.websocket_auth import authenticate_websocket
+from app.db.session import get_db
 
 
 router = APIRouter(tags=["WebSocket"])
@@ -147,7 +150,27 @@ device_state_manager = WebSocketConnectionManager(name="Device state")
 
 
 @router.websocket("/ws/dashboard")
-async def dashboard_websocket(websocket: WebSocket):
+async def dashboard_websocket(
+    websocket: WebSocket,
+    db: Session = Depends(get_db),
+):
+    user = await authenticate_websocket(
+        websocket,
+        db,
+    )
+
+    if not user:
+        await websocket.close(
+            code=1008,
+            reason="Authentication required",
+        )
+        return
+
+    logger.info(
+        "Authenticated websocket user: %s",
+        user.email,
+    )
+
     await dashboard_manager.connect(websocket)
 
     await dashboard_manager.send_initial_state(
@@ -173,7 +196,27 @@ async def dashboard_websocket(websocket: WebSocket):
 
 
 @router.websocket("/ws/devices/live")
-async def device_state_websocket(websocket: WebSocket):
+async def device_state_websocket(
+    websocket: WebSocket,
+    db: Session = Depends(get_db),
+):
+    user = await authenticate_websocket(
+        websocket,
+        db,
+    )
+
+    if not user:
+        await websocket.close(
+            code=1008,
+            reason="Authentication required",
+        )
+        return
+
+    logger.info(
+        "Authenticated websocket user: %s",
+        user.email,
+    )
+
     await device_state_manager.connect(websocket)
 
     await device_state_manager.send_initial_state(
