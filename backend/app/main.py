@@ -20,6 +20,7 @@ from app.services.scheduler_service import (
     start_scheduler,
     stop_scheduler,
 )
+from app.api.users import router as users_router
 from prometheus_client import generate_latest
 from fastapi.responses import Response
 
@@ -49,6 +50,7 @@ app.add_middleware(RequestLoggingMiddleware)
 
 
 app.include_router(auth_router)
+app.include_router(users_router)
 app.include_router(devices_router)
 app.include_router(alerts_router)
 app.include_router(events_router)
