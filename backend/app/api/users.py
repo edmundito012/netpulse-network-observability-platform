@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate, UserRead, UserUpdate
+from app.services.audit_log_service import AuditLogService
 
 
 router = APIRouter(
@@ -60,11 +61,26 @@ def create_user(
 
     hashed_password = hash_password(user_data.password)
 
-    return UserRepository.create(
+    created_user = UserRepository.create(
         db=db,
         user_data=user_data,
         hashed_password=hashed_password,
     )
+
+    AuditLogService.log(
+        db=db,
+        user_id=current_user.id,
+        action="CREATE_USER",
+        resource_type="USER",
+        resource_id=created_user.id,
+        details={
+            "email": created_user.email,
+            "username": created_user.username,
+            "role": created_user.role.value,
+        },
+    )
+
+    return created_user
 
 
 @router.put("/{user_id}", response_model=UserRead)
@@ -105,12 +121,28 @@ def update_user(
     if user_data.password:
         hashed_password = hash_password(user_data.password)
 
-    return UserRepository.update(
+    updated_user = UserRepository.update(
         db=db,
         user=user,
         user_data=user_data,
         hashed_password=hashed_password,
     )
+
+    AuditLogService.log(
+        db=db,
+        user_id=current_user.id,
+        action="UPDATE_USER",
+        resource_type="USER",
+        resource_id=updated_user.id,
+        details={
+            "email": updated_user.email,
+            "username": updated_user.username,
+            "role": updated_user.role.value,
+            "is_active": updated_user.is_active,
+        },
+    )
+
+    return updated_user
 
 
 @router.delete("/{user_id}")
@@ -133,6 +165,21 @@ def delete_user(
             detail="You cannot delete your own user",
         )
 
+    deleted_user_email = user.email
+    deleted_username = user.username
+
     UserRepository.delete(db, user)
+
+    AuditLogService.log(
+        db=db,
+        user_id=current_user.id,
+        action="DELETE_USER",
+        resource_type="USER",
+        resource_id=user_id,
+        details={
+            "email": deleted_user_email,
+            "username": deleted_username,
+        },
+    )
 
     return {"message": "User deleted successfully"}

@@ -43,6 +43,7 @@ from app.schemas.pagination import PaginatedResponse
 from app.schemas.device_snmp_system_snapshot import (
     DeviceSNMPSystemSnapshotRead,
 )
+from app.services.audit_log_service import AuditLogService
 
 router = APIRouter(
     prefix="/devices",
@@ -69,10 +70,25 @@ def create_device(
     )
 ):
     try:
-        return DeviceService.create_device(
+        created_device = DeviceService.create_device(
             db=db,
-            device_data=device_data
+            device_data=device_data,
         )
+
+        AuditLogService.log(
+            db=db,
+            user_id=current_user.id,
+            action="CREATE_DEVICE",
+            resource_type="DEVICE",
+            resource_id=created_device.id,
+            details={
+                "name": created_device.name,
+                "ip_address": created_device.ip_address,
+            },
+        )
+
+        return created_device
+
     except ValueError as e:
         raise HTTPException(
             status_code=400,
@@ -344,11 +360,26 @@ def update_device(
     )
 ):
     try:
-        return DeviceService.update_device(
+        updated_device = DeviceService.update_device(
             db=db,
             device_id=device_id,
-            device_data=device_data
+            device_data=device_data,
         )
+
+        AuditLogService.log(
+            db=db,
+            user_id=current_user.id,
+            action="UPDATE_DEVICE",
+            resource_type="DEVICE",
+            resource_id=updated_device.id,
+            details={
+                "name": updated_device.name,
+                "ip_address": updated_device.ip_address,
+            },
+        )
+
+        return updated_device
+
     except ValueError as e:
         raise HTTPException(
             status_code=404,
@@ -365,9 +396,26 @@ def delete_device(
     )
 ):
     try:
+        device = DeviceService.get_device(
+            db=db,
+            device_id=device_id,
+        )
+
         DeviceService.delete_device(
             db=db,
             device_id=device_id
+        )
+
+        AuditLogService.log(
+            db=db,
+            user_id=current_user.id,
+            action="DELETE_DEVICE",
+            resource_type="DEVICE",
+            resource_id=device_id,
+            details={
+                "name": device.name,
+                "ip_address": device.ip_address,
+            },
         )
 
         return {"message": "Device deleted successfully"}

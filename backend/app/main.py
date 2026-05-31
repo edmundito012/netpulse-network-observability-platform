@@ -23,7 +23,7 @@ from app.services.scheduler_service import (
 from app.api.users import router as users_router
 from prometheus_client import generate_latest
 from fastapi.responses import Response
-
+from app.api.audit_logs import router as audit_logs_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,8 +51,10 @@ app.add_middleware(RequestLoggingMiddleware)
 
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(audit_logs_router)
 app.include_router(devices_router)
 app.include_router(alerts_router)
+app.include_router(audit_logs_router)
 app.include_router(events_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)

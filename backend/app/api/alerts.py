@@ -11,7 +11,7 @@ from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.schemas.alert import AlertRead
 from app.schemas.pagination import PaginatedResponse
-
+from app.services.audit_log_service import AuditLogService
 
 router = APIRouter(
     prefix="/alerts",
@@ -158,6 +158,18 @@ def resolve_alert(
         message=f"Alert resolved manually: {alert.message}",
     )
 
+    AuditLogService.log(
+        db=db,
+        user_id=current_user.id,
+        action="RESOLVE_ALERT",
+        resource_type="ALERT",
+        resource_id=alert.id,
+        details={
+            "device_id": alert.device_id,
+            "message": alert.message,
+        },
+    )
+
     logger.info(
         "Alert %s resolved manually by %s for device %s",
         alert_id,
@@ -215,6 +227,18 @@ def acknowledge_alert(
         device_id=alert.device_id,
         event_type=DeviceEventType.ALERT_ACKNOWLEDGED,
         message=f"Alert acknowledged: {alert.message}",
+    )
+
+    AuditLogService.log(
+        db=db,
+        user_id=current_user.id,
+        action="ACKNOWLEDGE_ALERT",
+        resource_type="ALERT",
+        resource_id=alert.id,
+        details={
+            "device_id": alert.device_id,
+            "message": alert.message,
+        },
     )
 
     logger.info(
