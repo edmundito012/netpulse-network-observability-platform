@@ -14,8 +14,8 @@ client = TestClient(app)
 def create_test_admin():
     db = SessionLocal()
 
-    email = f"admin_{uuid4().hex}@test.com"
-    username = f"admin_{uuid4().hex}"
+    email = f"audit_admin_{uuid4().hex}@test.com"
+    username = f"audit_admin_{uuid4().hex}"
 
     user = User(
         email=email,
@@ -49,11 +49,17 @@ def get_admin_token():
     return response.json()["access_token"]
 
 
-def test_list_users():
+def test_audit_logs_requires_auth():
+    response = client.get("/audit-logs/")
+
+    assert response.status_code in [401, 403]
+
+
+def test_list_audit_logs():
     token = get_admin_token()
 
     response = client.get(
-        "/users/",
+        "/audit-logs/",
         headers={
             "Authorization": f"Bearer {token}",
         },
@@ -63,65 +69,19 @@ def test_list_users():
     assert isinstance(response.json(), list)
 
 
-def test_create_user():
+def test_create_user_generates_audit_log():
     token = get_admin_token()
 
     unique_id = uuid4().hex
 
-    response = client.post(
-        "/users/",
-        json={
-            "email": f"pytest_user_{unique_id}@test.com",
-            "username": f"pytest_user_{unique_id}",
-            "password": "pytest123",
-            "role": "VIEWER",
-        },
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
-    )
-
-    assert response.status_code == 201
-
-
-def test_get_user():
-    token = get_admin_token()
-
-    users_response = client.get(
-        "/users/",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
-    )
-
-    assert users_response.status_code == 200
-
-    users = users_response.json()
-
-    assert len(users) > 0
-
-    user_id = users[0]["id"]
-
-    response = client.get(
-        f"/users/{user_id}",
-        headers={
-            "Authorization": f"Bearer {token}",
-        },
-    )
-
-    assert response.status_code == 200
-
-
-def test_update_user():
-    token = get_admin_token()
-
-    unique_id = uuid4().hex
+    username = f"audit_pytest_user_{unique_id}"
+    email = f"audit_pytest_{unique_id}@test.com"
 
     create_response = client.post(
         "/users/",
         json={
-            "email": f"update_user_{unique_id}@test.com",
-            "username": f"update_user_{unique_id}",
+            "email": email,
+            "username": username,
             "password": "pytest123",
             "role": "VIEWER",
         },
@@ -132,23 +92,43 @@ def test_update_user():
 
     assert create_response.status_code == 201
 
-    user_id = create_response.json()["id"]
-
-    response = client.put(
-        f"/users/{user_id}",
-        json={
-            "username": f"updated_user_{unique_id}",
+    logs_response = client.get(
+        "/audit-logs/",
+        headers={
+            "Authorization": f"Bearer {token}",
         },
+    )
+
+    assert logs_response.status_code == 200
+
+    logs = logs_response.json()
+
+    assert isinstance(logs, list)
+    assert len(logs) > 0
+
+    matching_logs = [
+        log for log in logs
+        if log["action"] == "CREATE_USER"
+        and log["resource_type"] == "USER"
+        and log["details"]["email"] == email
+    ]
+
+    assert len(matching_logs) >= 1
+
+
+def test_audit_logs_limit_parameter():
+    token = get_admin_token()
+
+    response = client.get(
+        "/audit-logs/?limit=10",
         headers={
             "Authorization": f"Bearer {token}",
         },
     )
 
     assert response.status_code == 200
-    assert response.json()["username"] == f"updated_user_{unique_id}"
 
+    logs = response.json()
 
-def test_users_requires_auth():
-    response = client.get("/users/")
-
-    assert response.status_code in [401, 403]
+    assert isinstance(logs, list)
+    assert len(logs) <= 10
