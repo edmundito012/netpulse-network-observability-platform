@@ -61,7 +61,7 @@ def update_device_status_metrics():
 
 
 async def ping_device_task(device):
-    status, response_time_ms = await MonitoringService.ping_device_async(
+    status, response_time_ms, packet_loss_percent = await MonitoringService.ping_device_async(
         device.ip_address,
     )
 
@@ -69,6 +69,7 @@ async def ping_device_task(device):
         "device_id": device.id,
         "status": status,
         "response_time_ms": response_time_ms,
+        "packet_loss_percent": packet_loss_percent,
     }
 
 
@@ -111,6 +112,7 @@ async def monitor_devices_async():
                     "ip_address": device.ip_address,
                     "status": status,
                     "response_time_ms": result["response_time_ms"],
+                    "packet_loss_percent": result["packet_loss_percent"],
                     "last_checked_at": datetime.now(UTC).isoformat(),
                 },
             )

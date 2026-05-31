@@ -74,17 +74,18 @@ class DeviceService:
         if not device:
             raise ValueError("Device not found")
 
-        status, response_time_ms = MonitoringService.ping_device(
+        status, response_time_ms, packet_loss_percent = MonitoringService.ping_device(
             device.ip_address
         )
 
         device.status = status
 
-        metric = DeviceMetricRepository.create(
+        DeviceMetricRepository.create(
             db=db,
             device_id=device.id,
             status=status,
-            response_time_ms=response_time_ms
+            response_time_ms=response_time_ms,
+            packet_loss_percent=packet_loss_percent,
         )
 
         db.refresh(device)

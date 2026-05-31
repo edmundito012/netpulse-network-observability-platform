@@ -35,6 +35,11 @@ class DeviceMetric(Base):
         nullable=True,
     )
 
+    packet_loss_percent: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
     checked_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=datetime.utcnow,
