@@ -17,4 +17,6 @@ class DashboardOverviewRead(BaseModel):
     warning_alerts: int
     info_alerts: int
 
+    network_health_score: int
+
     latest_events: list[DeviceEventRead]

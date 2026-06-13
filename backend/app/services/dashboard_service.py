@@ -5,7 +5,7 @@ from app.models.alert import Alert, AlertSeverity, AlertStatus
 from app.models.device import Device, DeviceStatus
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.core.dashboard_cache import update_dashboard_state
-
+from app.services.health_score_service import HealthScoreService
 
 class DashboardService:
 
@@ -72,11 +72,31 @@ class DashboardService:
             limit=10,
         )
 
+        devices = db.query(Device).all()
+
+        health_scores = []
+
+        for device in devices:
+            result = HealthScoreService.calculate(
+                db=db,
+                device=device,
+            )
+
+            health_scores.append(result["score"])
+
+        network_health_score = 100
+
+        if health_scores:
+            network_health_score = int(
+                sum(health_scores) / len(health_scores)
+            )
+
         return {
             "total_devices": total_devices,
             "online_devices": online_devices,
             "offline_devices": offline_devices,
             "unknown_devices": unknown_devices,
+            "network_health_score": network_health_score,
             "open_alerts": open_alerts,
             "acknowledged_alerts": acknowledged_alerts,
             "resolved_alerts": resolved_alerts,
