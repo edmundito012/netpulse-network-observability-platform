@@ -44,6 +44,8 @@ from app.schemas.device_snmp_system_snapshot import (
     DeviceSNMPSystemSnapshotRead,
 )
 from app.services.audit_log_service import AuditLogService
+from app.schemas.health_score import HealthScoreRead
+from app.services.health_score_service import HealthScoreService
 
 router = APIRouter(
     prefix="/devices",
@@ -60,6 +62,23 @@ def list_devices(
 ):
     return DeviceService.get_devices(db)
 
+@router.get(
+    "/{device_id}/health-score",
+    response_model=HealthScoreRead,
+)
+def get_device_health_score(
+    device_id: int,
+    db: Session = Depends(get_db),
+):
+    device = DeviceService.get_device(
+        db=db,
+        device_id=device_id,
+    )
+
+    return HealthScoreService.calculate(
+        db=db,
+        device=device,
+    )
 
 @router.post("/", response_model=DeviceRead)
 def create_device(
