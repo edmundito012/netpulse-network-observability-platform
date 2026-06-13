@@ -13,7 +13,7 @@ class MonitoringService:
     def ping_device(
         ip_address: str,
         attempts: int = 5,
-    ) -> tuple[DeviceStatus, float | None, float]:
+    ) -> tuple[DeviceStatus, float | None, float, float]:
         successful_pings: list[float] = []
 
         try:
@@ -41,23 +41,45 @@ class MonitoringService:
                     DeviceStatus.OFFLINE,
                     None,
                     packet_loss_percent,
+                    0.0,
                 )
 
             average_response_time_ms = (
                 sum(successful_pings) / len(successful_pings)
             ) * 1000
 
+            jitter_ms = 0.0
+
+            if len(successful_pings) >= 2:
+
+                differences = []
+
+                for i in range(1, len(successful_pings)):
+                    differences.append(
+                        abs(
+                            successful_pings[i]
+                            - successful_pings[i - 1]
+                        )
+                    )
+
+                jitter_ms = (
+                    sum(differences)
+                    / len(differences)
+                ) * 1000
+
             logger.info(
-                "Ping successful for device IP %s: %.2f ms avg, %.2f%% packet loss",
+                "Ping successful for device IP %s: %.2f ms avg, %.2f%% packet loss, %.2f ms jitter",
                 ip_address,
                 average_response_time_ms,
                 packet_loss_percent,
+                jitter_ms,
             )
 
             return (
                 DeviceStatus.ONLINE,
                 average_response_time_ms,
                 packet_loss_percent,
+                jitter_ms,
             )
 
         except Exception as e:
@@ -71,12 +93,13 @@ class MonitoringService:
                 DeviceStatus.OFFLINE,
                 None,
                 100.0,
+                0.0,
             )
 
     @staticmethod
     async def ping_device_async(
         ip_address: str,
-    ) -> tuple[DeviceStatus, float | None, float]:
+    ) -> tuple[DeviceStatus, float | None, float, float]:
         return await asyncio.to_thread(
             MonitoringService.ping_device,
             ip_address,

@@ -13,12 +13,14 @@ class DeviceMetricRepository:
         status: DeviceStatus,
         response_time_ms: float | None,
         packet_loss_percent: float | None,
+        jitter_ms: float | None,
     ):
         metric = DeviceMetric(
             device_id=device_id,
             status=status,
             response_time_ms=response_time_ms,
             packet_loss_percent=packet_loss_percent,
+            jitter_ms=jitter_ms,
         )
 
         db.add(metric)

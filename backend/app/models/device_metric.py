@@ -40,6 +40,11 @@ class DeviceMetric(Base):
         nullable=True,
     )
 
+    jitter_ms: Mapped[float | None] = mapped_column(
+        Float,
+        nullable=True,
+    )
+
     checked_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(UTC),

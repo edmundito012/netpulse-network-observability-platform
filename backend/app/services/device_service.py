@@ -84,6 +84,7 @@ class DeviceService:
             status,
             response_time_ms,
             packet_loss_percent,
+            jitter_ms,
         ) = MonitoringService.ping_device(
             device.ip_address,
         )
@@ -96,6 +97,7 @@ class DeviceService:
             status=status,
             response_time_ms=response_time_ms,
             packet_loss_percent=packet_loss_percent,
+            jitter_ms=jitter_ms,
         )
 
         AlertService.create_packet_loss_alert_if_needed(
