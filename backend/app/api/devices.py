@@ -48,6 +48,16 @@ from app.schemas.health_score import HealthScoreRead
 from app.services.health_score_service import HealthScoreService
 from app.schemas.failure_risk import FailureRiskRead
 from app.services.failure_risk_service import FailureRiskService
+from typing import List
+
+from app.schemas.top_risk_device import (
+    TopRiskDeviceRead,
+)
+
+from app.services.risk_service import (
+    RiskService,
+)
+
 
 router = APIRouter(
     prefix="/devices",
@@ -99,6 +109,20 @@ def get_device_failure_risk(
         db=db,
         device=device,
     )
+
+@router.get(
+    "/risk/top",
+    response_model=List[TopRiskDeviceRead],
+)
+def get_top_risk_devices(
+    limit: int = 10,
+    db: Session = Depends(get_db),
+):
+    return RiskService.get_top_risk_devices(
+        db=db,
+        limit=limit,
+    )
+
 
 @router.post("/", response_model=DeviceRead)
 def create_device(
