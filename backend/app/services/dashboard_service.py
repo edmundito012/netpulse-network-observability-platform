@@ -6,6 +6,7 @@ from app.models.device import Device, DeviceStatus
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.core.dashboard_cache import update_dashboard_state
 from app.services.health_score_service import HealthScoreService
+from app.services.failure_risk_service import FailureRiskService
 
 class DashboardService:
 
@@ -90,6 +91,31 @@ class DashboardService:
             network_health_score = int(
                 sum(health_scores) / len(health_scores)
             )
+        devices_at_risk = 0
+        highest_risk_device = None
+        highest_risk = -1
+
+        for device in devices:
+
+            risk_data = FailureRiskService.calculate(
+                db=db,
+                device=device,
+            )
+
+            risk = risk_data["failure_risk"]
+
+            if risk >= 50:
+                devices_at_risk += 1
+
+            if risk > highest_risk:
+                highest_risk = risk
+
+                highest_risk_device = {
+                    "device_id": device.id,
+                    "device_name": device.name,
+                    "health_score": risk_data["health_score"],
+                    "failure_risk": risk,
+                }
 
         return {
             "total_devices": total_devices,
@@ -103,6 +129,8 @@ class DashboardService:
             "critical_alerts": critical_alerts,
             "warning_alerts": warning_alerts,
             "info_alerts": info_alerts,
+            "devices_at_risk": devices_at_risk,
+            "highest_risk_device": highest_risk_device,
             "latest_events": latest_events,
         }
 
