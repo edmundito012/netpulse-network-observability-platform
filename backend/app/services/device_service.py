@@ -8,6 +8,9 @@ from app.services.monitoring_service import MonitoringService
 from app.services.latency_alert_service import (
     LatencyAlertService,
 )
+from app.services.flapping_alert_service import (
+    FlappingAlertService,
+)
 
 class DeviceService:
 
@@ -107,6 +110,7 @@ class DeviceService:
             device_id=device.id,
             device_name=device.name,
         )
+
 
         db.refresh(device)
 

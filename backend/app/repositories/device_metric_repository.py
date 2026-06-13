@@ -102,3 +102,17 @@ class DeviceMetricRepository:
             .limit(limit)
             .all()
         )
+
+    @staticmethod
+    def get_latest_status_metrics(
+        db: Session,
+        device_id: int,
+        limit: int = 6,
+    ):
+        return (
+            db.query(DeviceMetric)
+            .filter(DeviceMetric.device_id == device_id)
+            .order_by(DeviceMetric.checked_at.desc())
+            .limit(limit)
+            .all()
+        )

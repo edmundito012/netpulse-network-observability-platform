@@ -29,6 +29,9 @@ from app.services.alert_service import AlertService
 from app.services.latency_alert_service import (
     LatencyAlertService,
 )
+from app.services.flapping_alert_service import (
+    FlappingAlertService,
+)
 
 scheduler = BackgroundScheduler()
 
@@ -165,6 +168,12 @@ async def monitor_devices_async():
             )
 
             LatencyAlertService.create_latency_trend_alert_if_needed(
+                db=db,
+                device_id=device.id,
+                device_name=device.name,
+            )
+
+            FlappingAlertService.create_flapping_alert_if_needed(
                 db=db,
                 device_id=device.id,
                 device_name=device.name,
