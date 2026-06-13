@@ -7,7 +7,7 @@ from app.repositories.device_metric_repository import (
 from app.services.health_score_service import (
     HealthScoreService,
 )
-
+from app.services.recommendation_service import RecommendationService
 
 class FailureRiskService:
 
@@ -58,16 +58,28 @@ class FailureRiskService:
         risk = min(risk, 100)
 
         if risk < 20:
-            recommendation = "Healthy device"
+            recommendation = RecommendationService.generate(
+                db=db,
+                device=device,
+            )
 
         elif risk < 50:
-            recommendation = "Monitor latency and packet loss"
+            recommendation = RecommendationService.generate(
+                db=db,
+                device=device,
+            )
 
         elif risk < 80:
-            recommendation = "Investigate device stability"
+            recommendation = RecommendationService.generate(
+                db=db,
+                device=device,
+            )
 
         else:
-            recommendation = "Immediate investigation recommended"
+            recommendation = RecommendationService.generate(
+                db=db,
+                device=device,
+            )
 
         return {
             "device_id": device.id,
