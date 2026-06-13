@@ -25,7 +25,7 @@ from app.repositories.device_snmp_system_snapshot_repository import (
 from app.services.dashboard_service import DashboardService
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
-
+from app.services.alert_service import AlertService
 
 scheduler = BackgroundScheduler()
 
@@ -153,6 +153,13 @@ async def monitor_devices_async():
                     "Device %s changed status to ONLINE",
                     device.id,
                 )
+
+            AlertService.create_packet_loss_alert_if_needed(
+                db=db,
+                device_id=device.id,
+                device_name=device.name,
+                packet_loss_percent=result["packet_loss_percent"],
+            )
 
             if status == DeviceStatus.OFFLINE and not active_alert:
                 alert = AlertRepository.create(
