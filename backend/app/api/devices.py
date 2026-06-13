@@ -46,6 +46,8 @@ from app.schemas.device_snmp_system_snapshot import (
 from app.services.audit_log_service import AuditLogService
 from app.schemas.health_score import HealthScoreRead
 from app.services.health_score_service import HealthScoreService
+from app.schemas.failure_risk import FailureRiskRead
+from app.services.failure_risk_service import FailureRiskService
 
 router = APIRouter(
     prefix="/devices",
@@ -76,6 +78,24 @@ def get_device_health_score(
     )
 
     return HealthScoreService.calculate(
+        db=db,
+        device=device,
+    )
+
+@router.get(
+    "/{device_id}/failure-risk",
+    response_model=FailureRiskRead,
+)
+def get_device_failure_risk(
+    device_id: int,
+    db: Session = Depends(get_db),
+):
+    device = DeviceService.get_device(
+        db=db,
+        device_id=device_id,
+    )
+
+    return FailureRiskService.calculate(
         db=db,
         device=device,
     )
