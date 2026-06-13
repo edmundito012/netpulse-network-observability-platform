@@ -87,3 +87,18 @@ class DeviceMetricRepository:
             .order_by(DeviceMetric.checked_at.desc())
             .first()
         )
+
+    @staticmethod
+    def get_latest_metrics(
+        db: Session,
+        device_id: int,
+        limit: int = 5,
+    ):
+        return (
+            db.query(DeviceMetric)
+            .filter(DeviceMetric.device_id == device_id)
+            .filter(DeviceMetric.response_time_ms.isnot(None))
+            .order_by(DeviceMetric.checked_at.desc())
+            .limit(limit)
+            .all()
+        )

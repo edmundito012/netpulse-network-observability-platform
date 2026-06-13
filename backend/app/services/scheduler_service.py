@@ -26,6 +26,9 @@ from app.services.dashboard_service import DashboardService
 from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
 from app.services.alert_service import AlertService
+from app.services.latency_alert_service import (
+    LatencyAlertService,
+)
 
 scheduler = BackgroundScheduler()
 
@@ -159,6 +162,12 @@ async def monitor_devices_async():
                 device_id=device.id,
                 device_name=device.name,
                 packet_loss_percent=result["packet_loss_percent"],
+            )
+
+            LatencyAlertService.create_latency_trend_alert_if_needed(
+                db=db,
+                device_id=device.id,
+                device_name=device.name,
             )
 
             if status == DeviceStatus.OFFLINE and not active_alert:

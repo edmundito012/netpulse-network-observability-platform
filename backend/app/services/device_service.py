@@ -5,7 +5,9 @@ from app.repositories.device_repository import DeviceRepository
 from app.schemas.device import DeviceCreate, DeviceUpdate
 from app.services.alert_service import AlertService
 from app.services.monitoring_service import MonitoringService
-
+from app.services.latency_alert_service import (
+    LatencyAlertService,
+)
 
 class DeviceService:
 
@@ -98,6 +100,12 @@ class DeviceService:
             device_id=device.id,
             device_name=device.name,
             packet_loss_percent=packet_loss_percent,
+        )
+
+        LatencyAlertService.create_latency_trend_alert_if_needed(
+            db=db,
+            device_id=device.id,
+            device_name=device.name,
         )
 
         db.refresh(device)
