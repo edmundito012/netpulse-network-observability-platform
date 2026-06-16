@@ -24,6 +24,7 @@ from app.api.users import router as users_router
 from prometheus_client import generate_latest
 from fastapi.responses import Response
 from app.api.audit_logs import router as audit_logs_router
+from app.api.network_impact import router as network_impact_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,7 +60,7 @@ app.include_router(events_router)
 app.include_router(dashboard_router)
 app.include_router(websocket_router)
 app.include_router(device_state_router)
-
+app.include_router(network_impact_router)
 
 @app.get("/")
 def root():

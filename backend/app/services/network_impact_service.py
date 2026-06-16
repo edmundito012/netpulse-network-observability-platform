@@ -1,5 +1,7 @@
 from dataclasses import dataclass
+from sqlalchemy.orm import Session
 
+from app.models.device_metric import DeviceMetric
 
 @dataclass
 class NetworkImpactResult:
@@ -10,6 +12,30 @@ class NetworkImpactResult:
 
 
 class NetworkImpactService:
+
+    @staticmethod
+    def get_network_impact(db: Session):
+
+        latest_metric = (
+            db.query(DeviceMetric)
+            .order_by(DeviceMetric.checked_at.desc())
+            .first()
+        )
+
+        if not latest_metric:
+            return NetworkImpactResult(
+                impact_score=0,
+                status="UNKNOWN",
+                affected_services=[],
+                message="No network metrics available.",
+            )
+
+        return NetworkImpactService.calculate_impact(
+            latency_ms=latest_metric.response_time_ms,
+            packet_loss_percent=latest_metric.packet_loss_percent,
+            jitter_ms=latest_metric.jitter_ms,
+            failure_risk=0,
+        )
 
     @staticmethod
     def calculate_status(score: int) -> str:
