@@ -1,16 +1,15 @@
 from sqlalchemy.orm import Session
 
+from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_metric_repository import DeviceMetricRepository
 from app.repositories.device_repository import DeviceRepository
 from app.schemas.device import DeviceCreate, DeviceUpdate
 from app.services.alert_service import AlertService
+from app.services.flapping_alert_service import FlappingAlertService
+from app.services.jitter_alert_service import JitterAlertService
+from app.services.latency_alert_service import LatencyAlertService
 from app.services.monitoring_service import MonitoringService
-from app.services.latency_alert_service import (
-    LatencyAlertService,
-)
-from app.services.flapping_alert_service import (
-    FlappingAlertService,
-)
+
 
 class DeviceService:
 
@@ -100,6 +99,21 @@ class DeviceService:
             jitter_ms=jitter_ms,
         )
 
+        jitter_alert = JitterAlertService.evaluate(
+            device_name=device.name,
+            jitter_ms=jitter_ms,
+        )
+
+        if jitter_alert:
+            severity, message = jitter_alert
+
+            AlertRepository.create(
+                db=db,
+                device_id=device.id,
+                severity=severity,
+                message=message,
+            )
+
         AlertService.create_packet_loss_alert_if_needed(
             db=db,
             device_id=device.id,
@@ -113,6 +127,11 @@ class DeviceService:
             device_name=device.name,
         )
 
+        FlappingAlertService.create_flapping_alert_if_needed(
+            db=db,
+            device_id=device.id,
+            device_name=device.name,
+        )
 
         db.refresh(device)
 
