@@ -1,33 +1,19 @@
-from app.services.device_risk_service import (
-    DeviceRiskService,
-)
+from app.services.device_risk_service import DeviceRiskService
 
 
-def test_high_device_risk():
+def test_classify_high_device_risk():
+    risk_level = DeviceRiskService.classify_risk_level(90)
 
-    result = (
-        DeviceRiskService
-        .calculate_device_risk(
-            device_id=1,
-            device_name="Router",
-            health_score=30,
-            failure_risk=90,
-        )
-    )
-
-    assert result.risk_level == "HIGH"
+    assert risk_level == "HIGH"
 
 
-def test_low_device_risk():
+def test_classify_medium_device_risk():
+    risk_level = DeviceRiskService.classify_risk_level(60)
 
-    result = (
-        DeviceRiskService
-        .calculate_device_risk(
-            device_id=1,
-            device_name="Router",
-            health_score=95,
-            failure_risk=5,
-        )
-    )
+    assert risk_level == "MEDIUM"
 
-    assert result.risk_level == "LOW"
+
+def test_classify_low_device_risk():
+    risk_level = DeviceRiskService.classify_risk_level(20)
+
+    assert risk_level == "LOW"

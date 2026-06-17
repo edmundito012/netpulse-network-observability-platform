@@ -1,5 +1,12 @@
 from dataclasses import dataclass
 
+from sqlalchemy.orm import Session
+
+from app.models.device import Device
+from app.services.failure_risk_service import (
+    FailureRiskService,
+)
+
 
 @dataclass
 class DeviceRiskResult:
@@ -27,24 +34,24 @@ class DeviceRiskService:
 
     @staticmethod
     def calculate_device_risk(
-        device_id: int,
-        device_name: str,
-        health_score: int,
-        failure_risk: int,
+        db: Session,
+        device,
     ) -> DeviceRiskResult:
 
-        health_risk = (
-            100 - health_score
+        risk_data = (
+            FailureRiskService.calculate(
+                db=db,
+                device=device,
+            )
         )
 
-        risk_score = int(
-            failure_risk * 0.70
-            + health_risk * 0.30
-        )
+        risk_score = risk_data[
+            "failure_risk"
+        ]
 
         return DeviceRiskResult(
-            device_id=device_id,
-            device_name=device_name,
+            device_id=device.id,
+            device_name=device.name,
             risk_score=risk_score,
             risk_level=(
                 DeviceRiskService
@@ -53,3 +60,32 @@ class DeviceRiskService:
                 )
             ),
         )
+
+    @staticmethod
+    def get_risk_ranking(
+        db: Session,
+    ) -> list[DeviceRiskResult]:
+
+        devices = (
+            db.query(Device)
+            .all()
+        )
+
+        ranking = []
+
+        for device in devices:
+
+            ranking.append(
+                DeviceRiskService
+                .calculate_device_risk(
+                    db=db,
+                    device=device,
+                )
+            )
+
+        ranking.sort(
+            key=lambda x: x.risk_score,
+            reverse=True,
+        )
+
+        return ranking
