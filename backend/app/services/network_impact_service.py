@@ -1,7 +1,16 @@
 from dataclasses import dataclass
+
 from sqlalchemy.orm import Session
 
 from app.models.device_metric import DeviceMetric
+
+
+@dataclass
+class NetworkSummary:
+    average_latency_ms: float
+    average_packet_loss_percent: float
+    average_jitter_ms: float
+
 
 @dataclass
 class NetworkImpactResult:
@@ -14,15 +23,51 @@ class NetworkImpactResult:
 class NetworkImpactService:
 
     @staticmethod
-    def get_network_impact(db: Session):
-
-        latest_metric = (
+    def get_network_summary(db: Session) -> NetworkSummary:
+        metrics = (
             db.query(DeviceMetric)
             .order_by(DeviceMetric.checked_at.desc())
-            .first()
+            .limit(100)
+            .all()
         )
 
-        if not latest_metric:
+        if not metrics:
+            return NetworkSummary(
+                average_latency_ms=0,
+                average_packet_loss_percent=0,
+                average_jitter_ms=0,
+            )
+
+        avg_latency = sum(
+            metric.response_time_ms or 0
+            for metric in metrics
+        ) / len(metrics)
+
+        avg_packet_loss = sum(
+            metric.packet_loss_percent or 0
+            for metric in metrics
+        ) / len(metrics)
+
+        avg_jitter = sum(
+            metric.jitter_ms or 0
+            for metric in metrics
+        ) / len(metrics)
+
+        return NetworkSummary(
+            average_latency_ms=round(avg_latency, 2),
+            average_packet_loss_percent=round(avg_packet_loss, 2),
+            average_jitter_ms=round(avg_jitter, 2),
+        )
+
+    @staticmethod
+    def get_network_impact(db: Session) -> NetworkImpactResult:
+        summary = NetworkImpactService.get_network_summary(db)
+
+        if (
+            summary.average_latency_ms == 0
+            and summary.average_packet_loss_percent == 0
+            and summary.average_jitter_ms == 0
+        ):
             return NetworkImpactResult(
                 impact_score=0,
                 status="UNKNOWN",
@@ -31,9 +76,9 @@ class NetworkImpactService:
             )
 
         return NetworkImpactService.calculate_impact(
-            latency_ms=latest_metric.response_time_ms,
-            packet_loss_percent=latest_metric.packet_loss_percent,
-            jitter_ms=latest_metric.jitter_ms,
+            latency_ms=summary.average_latency_ms,
+            packet_loss_percent=summary.average_packet_loss_percent,
+            jitter_ms=summary.average_jitter_ms,
             failure_risk=0,
         )
 
@@ -57,7 +102,6 @@ class NetworkImpactService:
         jitter_ms: float,
         failure_risk: int,
     ) -> NetworkImpactResult:
-
         latency_score = min(100, latency_ms / 2)
         packet_loss_score = min(100, packet_loss_percent * 4)
         jitter_score = min(100, jitter_ms * 2)
@@ -72,7 +116,7 @@ class NetworkImpactService:
             ),
         )
 
-        affected_services = []
+        affected_services: list[str] = []
 
         if jitter_ms >= 40:
             affected_services.extend(
@@ -117,19 +161,17 @@ class NetworkImpactService:
         status: str,
         affected_services: list[str],
     ) -> str:
+        if status == "UNKNOWN":
+            return "No network metrics available."
 
         if status == "HEALTHY":
             return "Network operating normally."
 
         if status == "WARNING":
-            return (
-                "Minor network degradation detected."
-            )
+            return "Minor network degradation detected."
 
         if status == "DEGRADED":
-            return (
-                "Users may experience lag spikes and unstable calls."
-            )
+            return "Users may experience lag spikes and unstable calls."
 
         return (
             "Critical network degradation detected. "

@@ -2,12 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.network_impact import (
-    NetworkImpactResponse,
-)
-from app.services.network_impact_service import (
-    NetworkImpactService,
-)
+from app.schemas.network_impact import NetworkImpactResponse
+from app.services.network_impact_service import NetworkImpactService
 
 router = APIRouter(
     prefix="/network",
@@ -22,7 +18,7 @@ router = APIRouter(
 def get_network_impact(
     db: Session = Depends(get_db),
 ):
-
+    summary = NetworkImpactService.get_network_summary(db)
     result = NetworkImpactService.get_network_impact(db)
 
     return NetworkImpactResponse(
@@ -30,4 +26,7 @@ def get_network_impact(
         status=result.status,
         affected_services=result.affected_services,
         message=result.message,
+        average_latency_ms=summary.average_latency_ms,
+        average_packet_loss_percent=summary.average_packet_loss_percent,
+        average_jitter_ms=summary.average_jitter_ms,
     )
