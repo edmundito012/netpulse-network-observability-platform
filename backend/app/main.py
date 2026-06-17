@@ -32,6 +32,9 @@ from app.api.gaming_impact import (
     router as gaming_impact_router,
 )
 from app.api.network_risk import router as network_risk_router
+from app.api.device_risk import (
+    router as device_risk_router,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -73,6 +76,9 @@ app.include_router(
 )
 app.include_router(gaming_impact_router)
 app.include_router(network_risk_router)
+app.include_router(
+    device_risk_router
+)
 
 @app.get("/")
 def root():
