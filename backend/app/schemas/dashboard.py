@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+
 from app.schemas.device_event import DeviceEventRead
 
 
@@ -16,6 +17,9 @@ class DashboardOverviewRead(BaseModel):
     critical_alerts: int
     warning_alerts: int
     info_alerts: int
+
+    predictive_alerts: int
+    devices_with_predictive_risk: int
 
     network_health_score: int
 
