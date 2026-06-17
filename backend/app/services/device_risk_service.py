@@ -89,3 +89,16 @@ class DeviceRiskService:
         )
 
         return ranking
+
+    @staticmethod
+    def get_top_risk_devices(
+        db,
+        limit: int = 5,
+    ):
+        ranking = (
+            DeviceRiskService.get_risk_ranking(
+                db=db,
+            )
+        )
+
+        return ranking[:limit]

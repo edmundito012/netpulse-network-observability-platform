@@ -17,3 +17,9 @@ def test_classify_low_device_risk():
     risk_level = DeviceRiskService.classify_risk_level(20)
 
     assert risk_level == "LOW"
+
+def test_high_risk_classification():
+    assert (
+        DeviceRiskService.classify_risk_level(90)
+        == "HIGH"
+    )
