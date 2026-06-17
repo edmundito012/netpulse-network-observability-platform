@@ -68,8 +68,6 @@ class DashboardService:
             .count()
         )
 
-        predictive
-
         latest_events = DeviceEventRepository.get_all(
             db=db,
             limit=10,
