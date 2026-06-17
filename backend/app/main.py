@@ -28,7 +28,9 @@ from app.api.network_impact import router as network_impact_router
 from app.api.business_impact import (
     router as business_impact_router
 )
-
+from app.api.gaming_impact import (
+    router as gaming_impact_router,
+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting NetPulse application")
@@ -67,7 +69,7 @@ app.include_router(network_impact_router)
 app.include_router(
     business_impact_router
 )
-
+app.include_router(gaming_impact_router)
 
 @app.get("/")
 def root():
