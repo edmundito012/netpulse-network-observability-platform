@@ -1,4 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+)
 
 
 class Settings(BaseSettings):
@@ -9,13 +12,19 @@ class Settings(BaseSettings):
     )
 
     # JWT / Auth
-    SECRET_KEY: str = "netpulse-super-secret-dev-key"
+    SECRET_KEY: str = (
+        "netpulse-super-secret-dev-key"
+    )
+
     ALGORITHM: str = "HS256"
+
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Scheduler
     MONITOR_INTERVAL_SECONDS: int = 30
+
     SNMP_INTERVAL_SECONDS: int = 60
+
     DASHBOARD_BROADCAST_INTERVAL_SECONDS: int = 5
 
     # Monitoring
@@ -23,8 +32,15 @@ class Settings(BaseSettings):
 
     # SNMP
     SNMP_PORT: int = 1161
+
     SNMP_TIMEOUT_SECONDS: int = 2
+
     SNMP_RETRIES: int = 1
+
+    # Telegram Notifications
+    TELEGRAM_BOT_TOKEN: str | None = None
+
+    TELEGRAM_CHAT_ID: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
