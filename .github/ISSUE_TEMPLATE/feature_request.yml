@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest a new feature
+title: "feat: "
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Backend
+        - Frontend
+        - Authentication
+        - Devices
+        - SNMP
+        - Alerts
+        - Dashboard
+        - Notifications
+        - Docker
+        - Database
