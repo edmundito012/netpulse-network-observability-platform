@@ -25,3 +25,16 @@ class NotificationLogService:
         db.commit()
 
         return log
+
+    @staticmethod
+    def get_history(
+        db: Session,
+    ):
+        return (
+            db.query(NotificationLog)
+            .order_by(
+                NotificationLog.sent_at.desc()
+            )
+            .limit(100)
+            .all()
+        )
