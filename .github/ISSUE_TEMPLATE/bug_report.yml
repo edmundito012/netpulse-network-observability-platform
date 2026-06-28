@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a bug in NetPulse
+title: "bug: "
+labels: ["bug"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: Describe the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: How can the bug be reproduced?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Backend
+        - Frontend
+        - Authentication
+        - Devices
+        - SNMP
+        - Alerts
+        - Dashboard
+        - Notifications
+        - Docker
+        - Database
