@@ -42,6 +42,9 @@ from app.api.gaming_experience import (
 from app.api.streaming_experience import (
     router as streaming_experience_router,
 )
+from app.api.experience_summary import (
+    router as experience_summary_router,
+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting NetPulse application")
@@ -91,6 +94,9 @@ app.include_router(
 app.include_router(gaming_experience_router)
 app.include_router(
     streaming_experience_router
+)
+app.include_router(
+    experience_summary_router
 )
 
 @app.get("/")
