@@ -36,7 +36,9 @@ from app.api.device_risk import (
     router as device_risk_router,
 )
 from app.api.notifications import router as notifications_router
-
+from app.api.gaming_experience import (
+    router as gaming_experience_router,
+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting NetPulse application")
@@ -83,6 +85,7 @@ app.include_router(
 app.include_router(
     notifications_router
 )
+app.include_router(gaming_experience_router)
 
 @app.get("/")
 def root():
