@@ -51,6 +51,9 @@ from app.api.network_quality import (
 from app.api.video_call_experience import (
     router as video_call_router,
 )
+from app.api.network_trends import (
+    router as network_trends_router,
+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting NetPulse application")
@@ -110,6 +113,7 @@ app.include_router(
 app.include_router(
     video_call_router
 )
+app.include_router(network_trends_router)
 
 @app.get("/")
 def root():
