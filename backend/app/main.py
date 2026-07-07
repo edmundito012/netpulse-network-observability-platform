@@ -57,6 +57,9 @@ from app.api.network_trends import (
 from app.api.network_anomalies import (
     router as network_anomalies_router,
 )
+from app.api.network_health_score import (
+    router as network_health_score_router,
+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting NetPulse application")
@@ -118,6 +121,7 @@ app.include_router(
 )
 app.include_router(network_trends_router)
 app.include_router(network_anomalies_router)
+app.include_router(network_health_score_router)
 
 @app.get("/")
 def root():
