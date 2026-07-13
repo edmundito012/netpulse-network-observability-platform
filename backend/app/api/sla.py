@@ -1,10 +1,22 @@
-from fastapi import APIRouter, Depends, Query
+"""SLA analytics API."""
+
+from datetime import datetime
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.models.device_metric import DeviceMetric
 from app.schemas.sla import SLAResponse
-from app.services.sla_service import SLAService
+from app.services.sla_application_service import (
+    SLAApplicationService,
+)
+
 
 router = APIRouter(
     prefix="/analytics",
@@ -12,86 +24,50 @@ router = APIRouter(
 )
 
 
-def normalize_status(status: object) -> str:
-    if status is None:
-        return "UNKNOWN"
-
-    value = getattr(
-        status,
-        "value",
-        status,
-    )
-
-    normalized = str(value).upper()
-
-    if normalized.endswith(".ONLINE"):
-        return "ONLINE"
-
-    if normalized.endswith(".OFFLINE"):
-        return "OFFLINE"
-
-    if normalized.endswith(".UNKNOWN"):
-        return "UNKNOWN"
-
-    return normalized
-
-
 @router.get(
     "/sla",
     response_model=SLAResponse,
 )
 def get_sla_compliance(
-    device_id: int | None = None,
+    device_id: int | None = Query(
+        default=None,
+        ge=1,
+        description=(
+            "Device whose SLA window will be calculated. "
+            "When omitted, NetPulse selects the device with "
+            "the most recent metric sample."
+        ),
+    ),
+    start_at: datetime | None = Query(
+        default=None,
+        description="Inclusive UTC start of the SLA window.",
+    ),
+    end_at: datetime | None = Query(
+        default=None,
+        description="Inclusive UTC end of the SLA window.",
+    ),
     limit: int = Query(
         default=100,
         ge=1,
         le=10_000,
     ),
     db: Session = Depends(get_db),
-):
-    query = db.query(DeviceMetric)
+) -> SLAResponse:
+    """Calculate SLA compliance for one coherent device series."""
 
-    if device_id is not None:
-        query = query.filter(
-            DeviceMetric.device_id == device_id,
+    try:
+        result = SLAApplicationService.calculate_compliance(
+            db=db,
+            device_id=device_id,
+            start_at=start_at,
+            end_at=end_at,
+            limit=limit,
         )
-
-    metrics = (
-        query
-        .order_by(DeviceMetric.checked_at.desc())
-        .limit(limit)
-        .all()
-    )
-
-    statuses = [
-        normalize_status(metric.status)
-        for metric in metrics
-    ]
-
-    latencies = [
-        float(metric.response_time_ms)
-        for metric in metrics
-        if metric.response_time_ms is not None
-    ]
-
-    packet_losses = [
-        float(metric.packet_loss_percent)
-        for metric in metrics
-        if metric.packet_loss_percent is not None
-    ]
-
-    jitters = [
-        float(metric.jitter_ms)
-        for metric in metrics
-        if metric.jitter_ms is not None
-    ]
-
-    result = SLAService.calculate(
-        statuses=statuses,
-        latencies_ms=latencies,
-        packet_losses_percent=packet_losses,
-        jitters_ms=jitters,
-    )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
 
     return SLAResponse(
         **result.__dict__,

@@ -1,0 +1,71 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0
+rootdir: /app
+configfile: pytest.ini
+plugins: asyncio-1.4.0, anyio-4.13.0
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 118 items
+
+tests/test_alerts.py ......                                              [  5%]
+tests/test_audit_logs.py ....                                            [  8%]
+tests/test_auth.py ..                                                    [ 10%]
+tests/test_business_impact_api.py .                                      [ 11%]
+tests/test_dashboard_predictive_alerts.py .                              [ 11%]
+tests/test_device_risk_api.py .                                          [ 12%]
+tests/test_device_risk_service.py ....                                   [ 16%]
+tests/test_device_top_risk_api.py .                                      [ 16%]
+tests/test_devices.py ......                                             [ 22%]
+tests/test_experience_summary_api.py .                                   [ 22%]
+tests/test_experience_summary_service.py ..                              [ 24%]
+tests/test_gaming_experience_api.py .                                    [ 25%]
+tests/test_gaming_experience_service.py ...                              [ 27%]
+tests/test_gaming_impact_api.py .                                        [ 28%]
+tests/test_health.py .                                                   [ 29%]
+tests/test_jitter_intelligence.py ....                                   [ 33%]
+tests/test_latency_intelligence.py ...                                   [ 35%]
+tests/test_metric_series_api.py ...                                      [ 38%]
+tests/test_metric_series_service.py ........                             [ 44%]
+tests/test_network_anomaly_api.py .                                      [ 45%]
+tests/test_network_anomaly_application_service.py ...                    [ 48%]
+tests/test_network_anomaly_service.py ...                                [ 50%]
+tests/test_network_health_score_api.py .                                 [ 51%]
+tests/test_network_health_score_service.py .                             [ 52%]
+tests/test_network_impact_api.py ..                                      [ 54%]
+tests/test_network_impact_service.py ...                                 [ 56%]
+tests/test_network_quality_api.py .                                      [ 57%]
+tests/test_network_quality_service.py ..                                 [ 59%]
+tests/test_network_risk_api.py .                                         [ 60%]
+tests/test_network_risk_service.py ..                                    [ 61%]
+tests/test_network_trend_api.py .                                        [ 62%]
+tests/test_network_trend_service.py ....                                 [ 66%]
+tests/test_notification_history_api.py .                                 [ 66%]
+tests/test_notification_log_service.py .                                 [ 67%]
+tests/test_notification_service.py ..                                    [ 69%]
+tests/test_packet_loss_alerts.py ...                                     [ 72%]
+tests/test_portfolio_dashboard.py .                                      [ 72%]
+tests/test_predictive_alert_generation.py ...                            [ 75%]
+tests/test_predictive_alert_persistence.py .                             [ 76%]
+tests/test_predictive_alerts.py ...                                      [ 78%]
+tests/test_predictive_notification_service.py .                          [ 79%]
+tests/test_rbac.py ...                                                   [ 82%]
+tests/test_sla_api.py .                                                  [ 83%]
+tests/test_sla_application_service.py .....                              [ 87%]
+tests/test_sla_service.py ...                                            [ 89%]
+tests/test_streaming_experience_api.py .                                 [ 90%]
+tests/test_streaming_experience_service.py ..                            [ 92%]
+tests/test_telegram_provider.py ..                                       [ 94%]
+tests/test_users.py .....                                                [ 98%]
+tests/test_video_call_experience_api.py .                                [ 99%]
+tests/test_video_call_experience_service.py .                            [100%]
+
+=============================== warnings summary ===============================
+../usr/local/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /usr/local/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+app/schemas/notification_log.py:6
+  /app/app/schemas/notification_log.py:6: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class NotificationLogRead(BaseModel):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 118 passed, 2 warnings in 12.09s =======================

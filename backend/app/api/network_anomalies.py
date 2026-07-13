@@ -1,13 +1,25 @@
-from fastapi import APIRouter
-from fastapi import Depends
+"""Network anomaly analytics API."""
+
+from datetime import datetime
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    status,
+)
 from sqlalchemy.orm import Session
 
+from app.core.analytics import MetricName
 from app.db.session import get_db
-from app.models.device_metric import DeviceMetric
-from app.schemas.network_anomaly import NetworkAnomalyResponse
-from app.services.network_anomaly_service import (
-    NetworkAnomalyService,
+from app.schemas.network_anomaly import (
+    NetworkAnomalyResponse,
 )
+from app.services.network_anomaly_application_service import (
+    NetworkAnomalyApplicationService,
+)
+
 
 router = APIRouter(
     prefix="/analytics",
@@ -20,54 +32,65 @@ router = APIRouter(
     response_model=NetworkAnomalyResponse,
 )
 def get_network_anomalies(
-    device_id: int | None = None,
-    metric_name: str = "latency",
-    limit: int = 20,
+    device_id: int | None = Query(
+        default=None,
+        ge=1,
+        description=(
+            "Device whose metric window will be analyzed. "
+            "When omitted, NetPulse selects the device with "
+            "the most recent metric sample."
+        ),
+    ),
+    metric_name: MetricName = Query(
+        default=MetricName.LATENCY,
+    ),
+    start_at: datetime | None = Query(
+        default=None,
+        description="Inclusive UTC start of the analysis window.",
+    ),
+    end_at: datetime | None = Query(
+        default=None,
+        description="Inclusive UTC end of the analysis window.",
+    ),
+    limit: int = Query(
+        default=20,
+        ge=1,
+        le=10_000,
+    ),
     db: Session = Depends(get_db),
-):
-    query = db.query(DeviceMetric)
+) -> NetworkAnomalyResponse:
+    """Analyze a coherent historical series for one device."""
 
-    if device_id is not None:
-        query = query.filter(
-            DeviceMetric.device_id == device_id,
+    try:
+        result = (
+            NetworkAnomalyApplicationService
+            .analyze_device_metric(
+                db=db,
+                device_id=device_id,
+                metric_name=metric_name,
+                start_at=start_at,
+                end_at=end_at,
+                limit=limit,
+            )
         )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
 
-    metrics = (
-        query
-        .order_by(DeviceMetric.checked_at.desc())
-        .limit(limit)
-        .all()
-    )
-
-    metrics = list(
-        reversed(metrics)
-    )
-
-    if metric_name == "jitter":
-        values = [
-            metric.jitter_ms or 0
-            for metric in metrics
-        ]
-
-    elif metric_name == "packet_loss":
-        values = [
-            metric.packet_loss_percent or 0
-            for metric in metrics
-        ]
-
-    else:
-        values = [
-            metric.response_time_ms or 0
-            for metric in metrics
-        ]
-
-        metric_name = "latency"
-
-    result = NetworkAnomalyService.analyze(
-        values=values,
-        metric_name=metric_name,
-    )
+    analysis = result.analysis
 
     return NetworkAnomalyResponse(
-        **result.__dict__,
+        metric_name=analysis.metric_name,
+        latest_value=analysis.latest_value,
+        baseline_average=analysis.baseline_average,
+        baseline_std_deviation=(
+            analysis.baseline_std_deviation
+        ),
+        z_score=analysis.z_score,
+        severity=analysis.severity,
+        confidence=analysis.confidence,
+        anomaly_detected=analysis.anomaly_detected,
+        recommendation=analysis.recommendation,
     )
