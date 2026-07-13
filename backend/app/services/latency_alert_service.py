@@ -1,13 +1,21 @@
+"""Latency trend alert service."""
+
 from sqlalchemy.orm import Session
 
-from app.models.alert import AlertSeverity
-from app.repositories.alert_repository import AlertRepository
+from app.models.alert import (
+    AlertSeverity,
+    AlertType,
+)
 from app.repositories.device_metric_repository import (
     DeviceMetricRepository,
+)
+from app.services.alert_deduplication_service import (
+    AlertDeduplicationService,
 )
 
 
 class LatencyAlertService:
+    """Detect monotonically increasing latency degradation."""
 
     @staticmethod
     def create_latency_trend_alert_if_needed(
@@ -36,29 +44,28 @@ class LatencyAlertService:
             return None
 
         is_increasing = all(
-            latencies[i] < latencies[i + 1]
-            for i in range(len(latencies) - 1)
+            latencies[index]
+            < latencies[index + 1]
+            for index in range(
+                len(latencies) - 1
+            )
         )
 
         if not is_increasing:
             return None
 
-        active_alert = (
-            AlertRepository.get_active_alert_for_device(
+        result = (
+            AlertDeduplicationService
+            .create_or_update(
                 db=db,
                 device_id=device_id,
+                alert_type=AlertType.LATENCY_TREND,
+                severity=AlertSeverity.WARNING,
+                message=(
+                    "Latency degradation detected "
+                    f"on {device_name}"
+                ),
             )
         )
 
-        if active_alert:
-            return active_alert
-
-        return AlertRepository.create(
-            db=db,
-            device_id=device_id,
-            severity=AlertSeverity.WARNING,
-            message=(
-                f"Latency degradation detected "
-                f"on {device_name}"
-            ),
-        )
+        return result.alert
