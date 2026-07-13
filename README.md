@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-13 18:58 UTC_
+_Last automation run: 2026-07-13 20:07 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 98 passed
+- **Tests:** 99 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,6 +212,7 @@ _Last automation run: 2026-07-13 18:58 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **portfolio** — add automated observability dashboard screenshots
 - ✨ **portfolio** — automate README evidence and screenshots
 - ✨ **portfolio** — add automated project screenshots
 - ✨ **analytics** — add SLA compliance intelligence
@@ -219,6 +220,10 @@ _Last automation run: 2026-07-13 18:58 UTC_
 - ✨ **analytics** — add network anomaly detection
 
 ### 📸 Automated Screenshots
+
+#### Portfolio Dashboard
+
+![Portfolio Dashboard](docs/screenshots/portfolio-dashboard.png)
 
 #### Redoc Api
 
