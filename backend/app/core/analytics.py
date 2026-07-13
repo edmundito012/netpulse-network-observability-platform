@@ -46,3 +46,10 @@ class ConfidenceLevel(str, Enum):
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
     VERY_HIGH = "VERY_HIGH"
+
+
+class BurstStatus(str, Enum):
+    """Lifecycle status of a detected metric burst."""
+
+    COMPLETED = "COMPLETED"
+    ACTIVE = "ACTIVE"

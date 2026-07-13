@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-13 20:53 UTC_
+_Last automation run: 2026-07-13 21:26 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 118 passed
+- **Tests:** 134 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,12 +212,12 @@ _Last automation run: 2026-07-13 20:53 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **analytics** — add packet loss burst detection
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **analytics** — add temporal metric windows foundation
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **portfolio** — add automated observability dashboard screenshots
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **portfolio** — automate README evidence and screenshots
-- ✨ **portfolio** — add automated project screenshots
 
 ### 📸 Automated Screenshots
 
