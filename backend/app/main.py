@@ -39,6 +39,9 @@ from app.api.network_quality import (
 from app.api.network_risk import router as network_risk_router
 from app.api.network_trends import router as network_trends_router
 from app.api.notifications import router as notifications_router
+from app.api.packet_loss_bursts import (
+    router as packet_loss_bursts_router,
+)
 from app.api.portfolio_dashboard import (
     router as portfolio_dashboard_router,
 )
@@ -81,7 +84,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="NetPulse API",
     description="Network Observability Platform API",
-    version="0.2.0",
+    version="0.3.0",
     lifespan=lifespan,
 )
 
@@ -112,6 +115,7 @@ app.include_router(network_anomalies_router)
 app.include_router(network_health_score_router)
 app.include_router(sla_router)
 app.include_router(metric_series_router)
+app.include_router(packet_loss_bursts_router)
 app.include_router(portfolio_dashboard_router)
 
 
