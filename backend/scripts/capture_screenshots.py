@@ -27,24 +27,45 @@ def capture(
 ) -> None:
     destination = OUTPUT_DIR / f"{name}.png"
 
-    print(
-        f"Capturing {BASE_URL}{url}"
-    )
+    print(f"Capturing {BASE_URL}{url}")
 
-    page.goto(
+    response = page.goto(
         f"{BASE_URL}{url}",
-        wait_until="networkidle",
+        wait_until="domcontentloaded",
         timeout=60_000,
     )
+
+    if response is None:
+        raise RuntimeError(
+            f"No HTTP response received for {url}"
+        )
+
+    if not response.ok:
+        raise RuntimeError(
+            f"Screenshot page returned HTTP "
+            f"{response.status}: {url}"
+        )
+
+    if url == "/portfolio":
+        page.wait_for_selector(
+            'body[data-dashboard-ready="true"]',
+            state="attached",
+            timeout=30_000,
+        )
+
+        page.wait_for_timeout(1_000)
+    else:
+        page.wait_for_load_state(
+            "networkidle",
+            timeout=30_000,
+        )
 
     page.screenshot(
         path=str(destination),
         full_page=True,
     )
 
-    print(
-        f"Created {destination}"
-    )
+    print(f"Created {destination}")
 
 
 def main() -> None:
@@ -54,6 +75,7 @@ def main() -> None:
     )
 
     pages = {
+        "portfolio-dashboard": "/portfolio",
         "swagger-api": "/docs",
         "redoc-api": "/redoc",
     }
@@ -71,6 +93,21 @@ def main() -> None:
             device_scale_factor=1,
         )
 
+        page.on(
+            "console",
+            lambda message: print(
+                f"[browser:{message.type}] "
+                f"{message.text}"
+            ),
+        )
+
+        page.on(
+            "pageerror",
+            lambda error: print(
+                f"[browser-error] {error}"
+            ),
+        )
+
         try:
             for name, url in pages.items():
                 capture(
@@ -80,8 +117,24 @@ def main() -> None:
                 )
 
         except PlaywrightTimeoutError as error:
+            debug_path = (
+                OUTPUT_DIR
+                / "portfolio-timeout-debug.png"
+            )
+
+            page.screenshot(
+                path=str(debug_path),
+                full_page=True,
+            )
+
+            print(
+                f"Debug screenshot created: "
+                f"{debug_path}"
+            )
+
             raise RuntimeError(
-                "NetPulse did not become ready for screenshots."
+                "NetPulse did not become ready "
+                "for screenshots."
             ) from error
 
         finally:

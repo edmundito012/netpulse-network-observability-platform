@@ -61,6 +61,9 @@ from app.api.network_health_score import (
     router as network_health_score_router,
 )
 from app.api.sla import router as sla_router
+from app.api.portfolio_dashboard import (
+    router as portfolio_dashboard_router,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -125,6 +128,9 @@ app.include_router(network_trends_router)
 app.include_router(network_anomalies_router)
 app.include_router(network_health_score_router)
 app.include_router(sla_router)
+app.include_router(
+    portfolio_dashboard_router
+)
 
 @app.get("/")
 def root():
