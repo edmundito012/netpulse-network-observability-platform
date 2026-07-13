@@ -134,7 +134,7 @@ def upgrade() -> None:
         ],
         unique=True,
         postgresql_where=sa.text(
-            "status IN ('OPEN', 'ACKNOWLEDGED')"
+            "status <> 'RESOLVED'"
         ),
     )
 
