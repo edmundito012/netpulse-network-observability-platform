@@ -1,35 +1,65 @@
+from __future__ import annotations
+
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import (
+    Page,
+    TimeoutError as PlaywrightTimeoutError,
+    sync_playwright,
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 BASE_URL = "http://localhost:8000"
 
-OUTPUT_DIR = Path("docs/screenshots")
+OUTPUT_DIR = (
+    PROJECT_ROOT
+    / "docs"
+    / "screenshots"
+)
 
 
-def capture(page, name, url):
+def capture(
+    page: Page,
+    name: str,
+    url: str,
+) -> None:
+    destination = OUTPUT_DIR / f"{name}.png"
+
+    print(
+        f"Capturing {BASE_URL}{url}"
+    )
 
     page.goto(
         f"{BASE_URL}{url}",
         wait_until="networkidle",
+        timeout=60_000,
     )
 
     page.screenshot(
-        path=OUTPUT_DIR / f"{name}.png",
+        path=str(destination),
         full_page=True,
     )
 
+    print(
+        f"Created {destination}"
+    )
 
-def main():
 
+def main() -> None:
     OUTPUT_DIR.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    with sync_playwright() as p:
+    pages = {
+        "swagger-api": "/docs",
+        "redoc-api": "/redoc",
+    }
 
-        browser = p.chromium.launch(
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(
             headless=True,
         )
 
@@ -37,22 +67,25 @@ def main():
             viewport={
                 "width": 1600,
                 "height": 1000,
-            }
+            },
+            device_scale_factor=1,
         )
 
-        capture(
-            page,
-            "swagger",
-            "/docs",
-        )
+        try:
+            for name, url in pages.items():
+                capture(
+                    page=page,
+                    name=name,
+                    url=url,
+                )
 
-        capture(
-            page,
-            "redoc",
-            "/redoc",
-        )
+        except PlaywrightTimeoutError as error:
+            raise RuntimeError(
+                "NetPulse did not become ready for screenshots."
+            ) from error
 
-        browser.close()
+        finally:
+            browser.close()
 
 
 if __name__ == "__main__":

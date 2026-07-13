@@ -1,0 +1,138 @@
+name: Portfolio Evidence
+
+on:
+  push:
+    branches:
+      - "feat/**"
+      - "fix/**"
+      - "refactor/**"
+      - "docs/**"
+    paths-ignore:
+      - "README.md"
+      - "docs/screenshots/**"
+      - "docs/evidence/**"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: portfolio-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update-portfolio-evidence:
+    name: Tests, Screenshots and README
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+
+      - name: Configure Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Start NetPulse
+        run: |
+          docker compose up -d --build
+
+      - name: Wait for PostgreSQL and backend
+        shell: bash
+        run: |
+          set -e
+
+          for attempt in {1..60}; do
+            if curl --fail --silent \
+              http://localhost:8000/health > /dev/null; then
+              echo "NetPulse backend is ready."
+              exit 0
+            fi
+
+            echo "Waiting for backend: attempt ${attempt}/60"
+            sleep 2
+          done
+
+          echo "Backend did not become ready."
+          docker compose ps
+          docker compose logs backend
+          exit 1
+
+      - name: Apply database migrations
+        run: |
+          docker compose exec -T backend \
+            alembic upgrade head
+
+      - name: Run automated tests
+        shell: bash
+        run: |
+          set -o pipefail
+
+          mkdir -p docs/evidence
+
+          docker compose exec -T backend \
+            python -m pytest \
+            | tee docs/evidence/latest-tests.txt
+
+      - name: Capture screenshots
+        run: |
+          python backend/scripts/capture_screenshots.py
+
+      - name: Update README
+        run: |
+          python backend/scripts/update_readme.py
+
+      - name: Show generated changes
+        run: |
+          git status --short
+          git diff -- README.md || true
+
+      - name: Commit generated evidence
+        shell: bash
+        run: |
+          if git diff --quiet && \
+             git diff --cached --quiet && \
+             [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "No portfolio evidence changes detected."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add \
+            README.md \
+            docs/screenshots \
+            docs/evidence
+
+          git commit -m \
+            "docs(portfolio): update automated evidence [skip readme-sync]"
+
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Upload portfolio artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: netpulse-portfolio-evidence
+          path: |
+            docs/screenshots
+            docs/evidence/latest-tests.txt
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Stop NetPulse
+        if: always()
+        run: |
+          docker compose down -v
