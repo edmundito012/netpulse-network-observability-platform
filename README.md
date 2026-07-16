@@ -200,7 +200,7 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-16 20:02 UTC_
+_Last automation run: 2026-07-16 20:03 UTC_
 
 ### ✅ Automated Quality
 
@@ -212,6 +212,7 @@ _Last automation run: 2026-07-16 20:02 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- 📝 **portfolio** — refresh incident dashboard evidence
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — create incidents from packet loss bursts
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
@@ -221,7 +222,6 @@ _Last automation run: 2026-07-16 20:02 UTC_
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident persistence repository
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident domain foundation
 
 ### 📸 Automated Screenshots
 
