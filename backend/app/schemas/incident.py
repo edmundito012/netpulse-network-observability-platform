@@ -45,7 +45,9 @@ class IncidentCreate(BaseModel):
         IncidentPriority.MEDIUM
     )
 
-    source: IncidentSource = IncidentSource.MANUAL
+    source: IncidentSource = (
+        IncidentSource.MANUAL
+    )
 
     owner_id: int | None = Field(
         default=None,
@@ -83,7 +85,7 @@ class IncidentCreate(BaseModel):
         cls,
         value: str | None,
     ) -> str | None:
-        """Remove surrounding whitespace from user-provided text."""
+        """Remove surrounding whitespace."""
 
         if value is None:
             return None
@@ -98,7 +100,7 @@ class IncidentCreate(BaseModel):
         cls,
         value: list[str],
     ) -> list[str]:
-        """Normalize tags and remove duplicates while preserving order."""
+        """Normalize and deduplicate tags."""
 
         normalized_tags: list[str] = []
         seen: set[str] = set()
@@ -106,13 +108,17 @@ class IncidentCreate(BaseModel):
         for tag in value:
             normalized = tag.strip().lower()
 
-            if not normalized or normalized in seen:
+            if not normalized:
                 continue
 
             if len(normalized) > 64:
                 raise ValueError(
-                    "each tag must contain at most 64 characters"
+                    "each tag must contain at most "
+                    "64 characters"
                 )
+
+            if normalized in seen:
+                continue
 
             seen.add(normalized)
             normalized_tags.append(normalized)
@@ -129,14 +135,17 @@ class IncidentCreate(BaseModel):
 
         if any(alert_id < 1 for alert_id in value):
             raise ValueError(
-                "alert IDs must be greater than or equal to 1"
+                "alert IDs must be greater than "
+                "or equal to 1"
             )
 
-        return list(dict.fromkeys(value))
+        return list(
+            dict.fromkeys(value)
+        )
 
 
 class IncidentUpdate(BaseModel):
-    """Editable incident information excluding lifecycle transitions."""
+    """Editable information excluding lifecycle state."""
 
     title: str | None = Field(
         default=None,
@@ -207,13 +216,17 @@ class IncidentUpdate(BaseModel):
         for tag in value:
             normalized = tag.strip().lower()
 
-            if not normalized or normalized in seen:
+            if not normalized:
                 continue
 
             if len(normalized) > 64:
                 raise ValueError(
-                    "each tag must contain at most 64 characters"
+                    "each tag must contain at most "
+                    "64 characters"
                 )
+
+            if normalized in seen:
+                continue
 
             seen.add(normalized)
             normalized_tags.append(normalized)
@@ -267,10 +280,31 @@ class IncidentAlertAttachRequest(BaseModel):
     ) -> list[int]:
         if any(alert_id < 1 for alert_id in value):
             raise ValueError(
-                "alert IDs must be greater than or equal to 1"
+                "alert IDs must be greater than "
+                "or equal to 1"
             )
 
-        return list(dict.fromkeys(value))
+        return list(
+            dict.fromkeys(value)
+        )
+
+
+class IncidentLifecycleTransition(BaseModel):
+    """Explicit non-resolution lifecycle transition."""
+
+    target_status: IncidentStatus
+
+    @model_validator(mode="after")
+    def reject_direct_resolution(
+        self,
+    ) -> "IncidentLifecycleTransition":
+        if self.target_status == IncidentStatus.RESOLVED:
+            raise ValueError(
+                "use the incident resolution operation "
+                "to resolve an incident"
+            )
+
+        return self
 
 
 class IncidentAlertRead(BaseModel):
@@ -299,12 +333,13 @@ class IncidentAlertRead(BaseModel):
 
 
 class IncidentSummary(BaseModel):
-    """Compact incident representation for lists and dashboards."""
+    """Compact incident representation."""
 
     id: int
     public_id: str
 
     title: str
+
     status: IncidentStatus
     severity: IncidentSeverity
     priority: IncidentPriority
@@ -321,10 +356,6 @@ class IncidentSummary(BaseModel):
 
     created_at: datetime
     updated_at: datetime
-
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
 
 
 class IncidentRead(BaseModel):
@@ -362,26 +393,45 @@ class IncidentRead(BaseModel):
         default_factory=list,
     )
 
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
+
+class IncidentPaginationResponse(BaseModel):
+    """Paginated incident query response."""
+
+    items: list[IncidentSummary]
+
+    total_count: int = Field(ge=0)
+    page: int = Field(ge=1)
+    page_size: int = Field(ge=1)
+    total_pages: int = Field(ge=0)
 
 
-class IncidentLifecycleTransition(BaseModel):
-    """Explicit target status for controlled lifecycle operations."""
+class IncidentStatisticsResponse(BaseModel):
+    """Operational statistics for one incident."""
 
-    target_status: IncidentStatus
+    incident_id: int
+    public_id: str
 
-    @model_validator(mode="after")
-    def reject_direct_resolution(
-        self,
-    ) -> "IncidentLifecycleTransition":
-        """Require resolution details through the dedicated operation."""
+    alert_count: int = Field(ge=0)
+    affected_device_count: int = Field(ge=0)
 
-        if self.target_status == IncidentStatus.RESOLVED:
-            raise ValueError(
-                "use the incident resolution operation "
-                "to resolve an incident"
-            )
+    duration_seconds: float = Field(ge=0)
+    is_active: bool
 
-        return self
+
+class IncidentAlertAttachmentResponse(BaseModel):
+    """Result of attaching alerts to an incident."""
+
+    public_id: str
+
+    requested_alert_count: int = Field(ge=0)
+    attached_alert_count: int = Field(ge=0)
+
+    alert_ids: list[int]
+
+
+class IncidentAlertDetachResponse(BaseModel):
+    """Result of detaching one alert."""
+
+    public_id: str
+    alert_id: int
+    detached: bool

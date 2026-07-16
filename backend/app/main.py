@@ -25,6 +25,7 @@ from app.api.gaming_experience import (
     router as gaming_experience_router,
 )
 from app.api.gaming_impact import router as gaming_impact_router
+from app.api.incidents import router as incidents_router
 from app.api.metric_series import router as metric_series_router
 from app.api.network_anomalies import (
     router as network_anomalies_router,
@@ -84,7 +85,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="NetPulse API",
     description="Network Observability Platform API",
-    version="0.3.0",
+    version="0.4.0",
     lifespan=lifespan,
 )
 
@@ -116,6 +117,7 @@ app.include_router(network_health_score_router)
 app.include_router(sla_router)
 app.include_router(metric_series_router)
 app.include_router(packet_loss_bursts_router)
+app.include_router(incidents_router)
 app.include_router(portfolio_dashboard_router)
 
 
@@ -158,7 +160,9 @@ def health() -> dict[str, object]:
         ),
         "database": db_status,
         "scheduler_running": scheduler.running,
-        "dashboard_cache_loaded": bool(dashboard_cache),
+        "dashboard_cache_loaded": bool(
+            dashboard_cache
+        ),
         "device_state_cache_count": len(
             device_state_cache
         ),
