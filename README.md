@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-16 19:36 UTC_
+_Last automation run: 2026-07-16 19:46 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 190 passed
+- **Tests:** 194 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,6 +212,8 @@ _Last automation run: 2026-07-16 19:36 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **incident** — create incidents from packet loss bursts
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident management API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident lifecycle services
@@ -219,8 +221,6 @@ _Last automation run: 2026-07-16 19:36 UTC_
 - ✨ **incident** — add incident persistence repository
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident domain foundation
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- 🐛 **migrations** — make alert deduplication index transaction-safe
 
 ### 📸 Automated Screenshots
 
