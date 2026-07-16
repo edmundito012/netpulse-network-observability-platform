@@ -24,7 +24,10 @@ from app.api.experience_summary import (
 from app.api.gaming_experience import (
     router as gaming_experience_router,
 )
-from app.api.gaming_impact import router as gaming_impact_router
+from app.api.gaming_impact import (
+    router as gaming_impact_router,
+)
+from app.api.incidents import router as incidents_router
 from app.api.metric_series import router as metric_series_router
 from app.api.network_anomalies import (
     router as network_anomalies_router,
@@ -32,18 +35,29 @@ from app.api.network_anomalies import (
 from app.api.network_health_score import (
     router as network_health_score_router,
 )
-from app.api.network_impact import router as network_impact_router
+from app.api.network_impact import (
+    router as network_impact_router,
+)
 from app.api.network_quality import (
     router as network_quality_router,
 )
-from app.api.network_risk import router as network_risk_router
-from app.api.network_trends import router as network_trends_router
-from app.api.notifications import router as notifications_router
+from app.api.network_risk import (
+    router as network_risk_router,
+)
+from app.api.network_trends import (
+    router as network_trends_router,
+)
+from app.api.notifications import (
+    router as notifications_router,
+)
 from app.api.packet_loss_bursts import (
     router as packet_loss_bursts_router,
 )
 from app.api.portfolio_dashboard import (
     router as portfolio_dashboard_router,
+)
+from app.api.portfolio_incidents import (
+    router as portfolio_incidents_router,
 )
 from app.api.sla import router as sla_router
 from app.api.streaming_experience import (
@@ -53,12 +67,20 @@ from app.api.users import router as users_router
 from app.api.video_call_experience import (
     router as video_call_router,
 )
-from app.api.websocket import router as websocket_router
-from app.core.dashboard_cache import get_dashboard_state
-from app.core.device_state_cache import get_all_device_states
+from app.api.websocket import (
+    router as websocket_router,
+)
+from app.core.dashboard_cache import (
+    get_dashboard_state,
+)
+from app.core.device_state_cache import (
+    get_all_device_states,
+)
 from app.core.logging import logger
 from app.db.session import SessionLocal
-from app.middleware.request_logging import RequestLoggingMiddleware
+from app.middleware.request_logging import (
+    RequestLoggingMiddleware,
+)
 from app.services.scheduler_service import (
     scheduler,
     start_scheduler,
@@ -70,25 +92,33 @@ from app.services.scheduler_service import (
 async def lifespan(app: FastAPI):
     """Start and stop application-owned resources."""
 
-    logger.info("Starting NetPulse application")
+    logger.info(
+        "Starting NetPulse application"
+    )
 
     start_scheduler()
 
     yield
 
-    logger.info("Stopping NetPulse application")
+    logger.info(
+        "Stopping NetPulse application"
+    )
 
     stop_scheduler()
 
 
 app = FastAPI(
     title="NetPulse API",
-    description="Network Observability Platform API",
-    version="0.3.0",
+    description=(
+        "Network Observability Platform API"
+    ),
+    version="0.4.0",
     lifespan=lifespan,
 )
 
-app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(
+    RequestLoggingMiddleware
+)
 
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -116,7 +146,9 @@ app.include_router(network_health_score_router)
 app.include_router(sla_router)
 app.include_router(metric_series_router)
 app.include_router(packet_loss_bursts_router)
+app.include_router(incidents_router)
 app.include_router(portfolio_dashboard_router)
+app.include_router(portfolio_incidents_router)
 
 
 @app.get("/")
@@ -139,7 +171,9 @@ def health() -> dict[str, object]:
     db = SessionLocal()
 
     try:
-        db.execute(text("SELECT 1"))
+        db.execute(
+            text("SELECT 1")
+        )
 
     except Exception:
         db_status = "error"
@@ -147,8 +181,13 @@ def health() -> dict[str, object]:
     finally:
         db.close()
 
-    dashboard_cache = get_dashboard_state()
-    device_state_cache = get_all_device_states()
+    dashboard_cache = (
+        get_dashboard_state()
+    )
+
+    device_state_cache = (
+        get_all_device_states()
+    )
 
     return {
         "status": (
@@ -157,8 +196,12 @@ def health() -> dict[str, object]:
             else "degraded"
         ),
         "database": db_status,
-        "scheduler_running": scheduler.running,
-        "dashboard_cache_loaded": bool(dashboard_cache),
+        "scheduler_running": (
+            scheduler.running
+        ),
+        "dashboard_cache_loaded": bool(
+            dashboard_cache
+        ),
         "device_state_cache_count": len(
             device_state_cache
         ),

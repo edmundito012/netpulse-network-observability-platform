@@ -9,7 +9,11 @@ from playwright.sync_api import (
 )
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = (
+    Path(__file__)
+    .resolve()
+    .parents[2]
+)
 
 BASE_URL = "http://localhost:8000"
 
@@ -25,9 +29,14 @@ def capture(
     name: str,
     url: str,
 ) -> None:
-    destination = OUTPUT_DIR / f"{name}.png"
+    destination = (
+        OUTPUT_DIR
+        / f"{name}.png"
+    )
 
-    print(f"Capturing {BASE_URL}{url}")
+    print(
+        f"Capturing {BASE_URL}{url}"
+    )
 
     response = page.goto(
         f"{BASE_URL}{url}",
@@ -37,23 +46,31 @@ def capture(
 
     if response is None:
         raise RuntimeError(
-            f"No HTTP response received for {url}"
+            "No HTTP response received "
+            f"for {url}"
         )
 
     if not response.ok:
         raise RuntimeError(
-            f"Screenshot page returned HTTP "
+            "Screenshot page returned HTTP "
             f"{response.status}: {url}"
         )
 
-    if url == "/portfolio":
+    if url.startswith("/portfolio"):
         page.wait_for_selector(
-            'body[data-dashboard-ready="true"]',
+            (
+                'body['
+                'data-dashboard-ready="true"'
+                ']'
+            ),
             state="attached",
             timeout=30_000,
         )
 
-        page.wait_for_timeout(1_000)
+        page.wait_for_timeout(
+            1_000
+        )
+
     else:
         page.wait_for_load_state(
             "networkidle",
@@ -65,7 +82,9 @@ def capture(
         full_page=True,
     )
 
-    print(f"Created {destination}")
+    print(
+        f"Created {destination}"
+    )
 
 
 def main() -> None:
@@ -75,14 +94,23 @@ def main() -> None:
     )
 
     pages = {
-        "portfolio-dashboard": "/portfolio",
+        "portfolio-dashboard": (
+            "/portfolio"
+        ),
+        "incident-operations-dashboard": (
+            "/portfolio/incidents"
+        ),
         "swagger-api": "/docs",
         "redoc-api": "/redoc",
     }
 
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(
-            headless=True,
+        browser = (
+            playwright
+            .chromium
+            .launch(
+                headless=True,
+            )
         )
 
         page = browser.new_page(
@@ -128,7 +156,7 @@ def main() -> None:
             )
 
             print(
-                f"Debug screenshot created: "
+                "Debug screenshot created: "
                 f"{debug_path}"
             )
 
