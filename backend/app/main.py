@@ -27,8 +27,13 @@ from app.api.gaming_experience import (
 from app.api.gaming_impact import (
     router as gaming_impact_router,
 )
+from app.api.incident_timeline import (
+    router as incident_timeline_router,
+)
 from app.api.incidents import router as incidents_router
-from app.api.metric_series import router as metric_series_router
+from app.api.metric_series import (
+    router as metric_series_router,
+)
 from app.api.network_anomalies import (
     router as network_anomalies_router,
 )
@@ -112,7 +117,7 @@ app = FastAPI(
     description=(
         "Network Observability Platform API"
     ),
-    version="0.4.0",
+    version="0.5.0",
     lifespan=lifespan,
 )
 
@@ -147,6 +152,7 @@ app.include_router(sla_router)
 app.include_router(metric_series_router)
 app.include_router(packet_loss_bursts_router)
 app.include_router(incidents_router)
+app.include_router(incident_timeline_router)
 app.include_router(portfolio_dashboard_router)
 app.include_router(portfolio_incidents_router)
 
