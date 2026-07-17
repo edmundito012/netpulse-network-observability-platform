@@ -200,18 +200,20 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-16 20:04 UTC_
+_Last automation run: 2026-07-17 20:22 UTC_
 
 ### ✅ Automated Quality
 
 - **Tests:** 197 passed
-- **Warnings:** 2
+- **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
 - **Workflow:** Feature branch → Pull Request → CI → Merge
 
 ### 🧠 Recent Engineering Milestones
 
+- ♻️ **schemas** — migrate notification log to pydantic v2
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - 📝 **portfolio** — refresh incident dashboard evidence
 - 📝 **portfolio** — refresh incident dashboard evidence
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
@@ -219,9 +221,6 @@ _Last automation run: 2026-07-16 20:04 UTC_
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident management API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident lifecycle services
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident persistence repository
 
 ### 📸 Automated Screenshots
 
