@@ -6,12 +6,18 @@ from app.models.incident import (
     Incident,
     IncidentStatus,
 )
+from app.models.incident_timeline_event import (
+    IncidentTimelineActorType,
+)
 from app.repositories.incident_lifecycle_repository import (
     IncidentLifecycleRepository,
 )
 from app.services.incident_exceptions import (
     IncidentResolutionError,
     InvalidIncidentTransitionError,
+)
+from app.services.incident_timeline_recorder_service import (
+    IncidentTimelineRecorderService,
 )
 
 
@@ -52,6 +58,11 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
         """Acknowledge an open incident."""
 
@@ -61,6 +72,9 @@ class IncidentLifecycleService:
             target_status=(
                 IncidentStatus.ACKNOWLEDGED
             ),
+            actor_type=actor_type,
+            actor_id=actor_id,
+            actor_label=actor_label,
         )
 
     @classmethod
@@ -69,6 +83,11 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
         """Move an incident into active investigation."""
 
@@ -78,6 +97,9 @@ class IncidentLifecycleService:
             target_status=(
                 IncidentStatus.INVESTIGATING
             ),
+            actor_type=actor_type,
+            actor_id=actor_id,
+            actor_label=actor_label,
         )
 
     @classmethod
@@ -86,6 +108,11 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
         """Mark an incident as remediated and under observation."""
 
@@ -93,6 +120,9 @@ class IncidentLifecycleService:
             db=db,
             incident=incident,
             target_status=IncidentStatus.MONITORING,
+            actor_type=actor_type,
+            actor_id=actor_id,
+            actor_label=actor_label,
         )
 
     @classmethod
@@ -102,14 +132,21 @@ class IncidentLifecycleService:
         *,
         incident: Incident,
         target_status: IncidentStatus,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
-        """Validate and persist a non-resolution transition."""
+        """Validate, persist and record a lifecycle transition."""
 
         if incident.status == target_status:
             return incident
 
+        previous_status = incident.status
+
         cls.validate_transition(
-            current_status=incident.status,
+            current_status=previous_status,
             target_status=target_status,
         )
 
@@ -119,7 +156,7 @@ class IncidentLifecycleService:
                 "the dedicated resolution operation"
             )
 
-        return (
+        updated = (
             IncidentLifecycleRepository
             .transition(
                 db=db,
@@ -127,6 +164,21 @@ class IncidentLifecycleService:
                 target_status=target_status,
             )
         )
+
+        (
+            IncidentTimelineRecorderService
+            .record_status_changed(
+                db=db,
+                incident=updated,
+                previous_status=previous_status,
+                new_status=target_status,
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
+            )
+        )
+
+        return updated
 
     @classmethod
     def resolve(
@@ -136,8 +188,13 @@ class IncidentLifecycleService:
         incident: Incident,
         resolution_summary: str,
         root_cause: str | None = None,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
-        """Resolve a monitored incident with operational context."""
+        """Resolve and record a monitored incident."""
 
         normalized_summary = (
             resolution_summary.strip()
@@ -158,12 +215,14 @@ class IncidentLifecycleService:
         if normalized_root_cause == "":
             normalized_root_cause = None
 
+        previous_status = incident.status
+
         cls.validate_transition(
-            current_status=incident.status,
+            current_status=previous_status,
             target_status=IncidentStatus.RESOLVED,
         )
 
-        return (
+        updated = (
             IncidentLifecycleRepository
             .resolve(
                 db=db,
@@ -174,6 +233,26 @@ class IncidentLifecycleService:
                 root_cause=normalized_root_cause,
             )
         )
+
+        (
+            IncidentTimelineRecorderService
+            .record_incident_resolved(
+                db=db,
+                incident=updated,
+                previous_status=previous_status,
+                resolution_summary=(
+                    normalized_summary
+                ),
+                root_cause=(
+                    normalized_root_cause
+                ),
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
+            )
+        )
+
+        return updated
 
     @classmethod
     def validate_transition(

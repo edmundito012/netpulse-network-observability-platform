@@ -23,18 +23,34 @@ from app.services.incident_exceptions import (
 from app.services.incident_service import (
     IncidentService,
 )
-
+from app.models.incident_timeline_event import (
+    IncidentTimelineActorType,
+)
 
 def build_incident():
-    """Create an incident application test double."""
-
-    started_at = datetime(
-        2026,
-        7,
-        16,
-        10,
-        0,
-        tzinfo=UTC,
+    return SimpleNamespace(
+        id=21,
+        public_id="INC-2026-000021",
+        title="WAN degradation",
+        description=None,
+        status=IncidentStatus.OPEN,
+        severity=IncidentSeverity.CRITICAL,
+        priority=IncidentPriority.HIGH,
+        source=IncidentSource.ALERT_ENGINE,
+        owner_id=None,
+        business_impact=None,
+        root_cause=None,
+        tags=[],
+        incident_metadata={},
+        started_at=datetime(
+            2026,
+            7,
+            16,
+            10,
+            0,
+            tzinfo=UTC,
+        ),
+        resolved_at=None,
     )
 
     return SimpleNamespace(
@@ -118,6 +134,10 @@ def test_create_incident_validates_and_attaches_alerts(
         db=db,
         incident=incident,
         alert_id=7,
+        actor_type=(
+            IncidentTimelineActorType.AUTOMATION
+        ),
+        actor_label="NetPulse ALERT_ENGINE",
     )
 
 

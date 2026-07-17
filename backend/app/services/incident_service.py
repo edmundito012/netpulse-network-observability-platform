@@ -15,6 +15,9 @@ from app.models.incident import (
     IncidentStatus,
 )
 from app.models.incident_alert import IncidentAlert
+from app.models.incident_timeline_event import (
+    IncidentTimelineActorType,
+)
 from app.repositories.alert_repository import (
     AlertRepository,
 )
@@ -34,6 +37,9 @@ from app.services.incident_exceptions import (
     IncidentAlertNotFoundError,
     IncidentNotFoundError,
     IncidentOwnerNotFoundError,
+)
+from app.services.incident_timeline_recorder_service import (
+    IncidentTimelineRecorderService,
 )
 
 
@@ -91,11 +97,29 @@ class IncidentService:
             ),
         )
 
+        (
+            IncidentTimelineRecorderService
+            .record_incident_created(
+                db=db,
+                incident=incident,
+            )
+        )
+
         for alert_id in incident_data.alert_ids:
             cls.attach_alert(
                 db=db,
                 incident=incident,
                 alert_id=alert_id,
+                actor_type=(
+                    cls._actor_type_for_source(
+                        incident.source
+                    )
+                ),
+                actor_label=(
+                    cls._actor_label_for_source(
+                        incident.source
+                    )
+                ),
             )
 
         refreshed_incident = (
@@ -157,14 +181,22 @@ class IncidentService:
         *,
         incident: Incident,
         incident_data: IncidentUpdate,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
-        """Update editable incident information."""
+        """Update editable incident information and record changes."""
 
         update_data = (
             incident_data.model_dump(
                 exclude_unset=True
             )
         )
+
+        if not update_data:
+            return incident
 
         if "owner_id" in update_data:
             owner_id = update_data.pop(
@@ -175,6 +207,9 @@ class IncidentService:
                 db=db,
                 incident=incident,
                 owner_id=owner_id,
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
             )
 
         metadata = update_data.pop(
@@ -185,28 +220,196 @@ class IncidentService:
         if not update_data and metadata is None:
             return incident
 
-        return IncidentRepository.update_details(
-            db=db,
-            incident=incident,
-            title=update_data.get("title"),
-            description=update_data.get(
-                "description"
-            ),
-            severity=update_data.get(
-                "severity"
-            ),
-            priority=update_data.get(
-                "priority"
-            ),
-            business_impact=update_data.get(
-                "business_impact"
-            ),
-            root_cause=update_data.get(
-                "root_cause"
-            ),
-            tags=update_data.get("tags"),
-            incident_metadata=metadata,
+        previous_severity = (
+            incident.severity
         )
+
+        previous_priority = (
+            incident.priority
+        )
+
+        previous_business_impact = (
+            incident.business_impact
+        )
+
+        previous_root_cause = (
+            incident.root_cause
+        )
+
+        detail_fields = {
+            "title",
+            "description",
+            "tags",
+        }
+
+        previous_details: dict[str, Any] = {}
+        new_details: dict[str, Any] = {}
+
+        for field_name in detail_fields:
+            if field_name not in update_data:
+                continue
+
+            previous_details[field_name] = getattr(
+                incident,
+                field_name,
+            )
+
+            new_details[field_name] = (
+                update_data[field_name]
+            )
+
+        if metadata is not None:
+            previous_details["metadata"] = dict(
+                incident.incident_metadata or {}
+            )
+
+            new_details["metadata"] = dict(
+                metadata
+            )
+
+        updated = (
+            IncidentRepository.update_details(
+                db=db,
+                incident=incident,
+                title=update_data.get("title"),
+                description=update_data.get(
+                    "description"
+                ),
+                severity=update_data.get(
+                    "severity"
+                ),
+                priority=update_data.get(
+                    "priority"
+                ),
+                business_impact=update_data.get(
+                    "business_impact"
+                ),
+                root_cause=update_data.get(
+                    "root_cause"
+                ),
+                tags=update_data.get("tags"),
+                incident_metadata=metadata,
+            )
+        )
+
+        if (
+            "severity" in update_data
+            and updated.severity
+            != previous_severity
+        ):
+            (
+                IncidentTimelineRecorderService
+                .record_severity_changed(
+                    db=db,
+                    incident=updated,
+                    previous_severity=(
+                        previous_severity.value
+                    ),
+                    new_severity=(
+                        updated.severity.value
+                    ),
+                    actor_type=actor_type,
+                    actor_id=actor_id,
+                    actor_label=actor_label,
+                )
+            )
+
+        if (
+            "priority" in update_data
+            and updated.priority
+            != previous_priority
+        ):
+            (
+                IncidentTimelineRecorderService
+                .record_priority_changed(
+                    db=db,
+                    incident=updated,
+                    previous_priority=(
+                        previous_priority.value
+                    ),
+                    new_priority=(
+                        updated.priority.value
+                    ),
+                    actor_type=actor_type,
+                    actor_id=actor_id,
+                    actor_label=actor_label,
+                )
+            )
+
+        if (
+            "business_impact" in update_data
+            and updated.business_impact
+            != previous_business_impact
+        ):
+            (
+                IncidentTimelineRecorderService
+                .record_business_impact_updated(
+                    db=db,
+                    incident=updated,
+                    previous_value=(
+                        previous_business_impact
+                    ),
+                    new_value=(
+                        updated.business_impact
+                    ),
+                    actor_type=actor_type,
+                    actor_id=actor_id,
+                    actor_label=actor_label,
+                )
+            )
+
+        if (
+            "root_cause" in update_data
+            and updated.root_cause
+            != previous_root_cause
+        ):
+            (
+                IncidentTimelineRecorderService
+                .record_root_cause_updated(
+                    db=db,
+                    incident=updated,
+                    previous_value=(
+                        previous_root_cause
+                    ),
+                    new_value=updated.root_cause,
+                    actor_type=actor_type,
+                    actor_id=actor_id,
+                    actor_label=actor_label,
+                )
+            )
+
+        changed_previous_details = {
+            key: value
+            for key, value
+            in previous_details.items()
+            if value != new_details.get(key)
+        }
+
+        changed_new_details = {
+            key: new_details[key]
+            for key
+            in changed_previous_details
+        }
+
+        if changed_new_details:
+            (
+                IncidentTimelineRecorderService
+                .record_details_updated(
+                    db=db,
+                    incident=updated,
+                    previous_value=(
+                        changed_previous_details
+                    ),
+                    new_value=(
+                        changed_new_details
+                    ),
+                    actor_type=actor_type,
+                    actor_id=actor_id,
+                    actor_label=actor_label,
+                )
+            )
+
+        return updated
 
     @classmethod
     def assign_owner(
@@ -215,6 +418,11 @@ class IncidentService:
         *,
         incident: Incident,
         owner_id: int | None,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> Incident:
         """Assign an existing user or remove the owner."""
 
@@ -223,11 +431,35 @@ class IncidentService:
             owner_id=owner_id,
         )
 
-        return IncidentRepository.assign_owner(
+        previous_owner_id = (
+            incident.owner_id
+        )
+
+        if previous_owner_id == owner_id:
+            return incident
+
+        updated = IncidentRepository.assign_owner(
             db=db,
             incident=incident,
             owner_id=owner_id,
         )
+
+        (
+            IncidentTimelineRecorderService
+            .record_owner_changed(
+                db=db,
+                incident=updated,
+                previous_owner_id=(
+                    previous_owner_id
+                ),
+                new_owner_id=owner_id,
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
+            )
+        )
+
+        return updated
 
     @classmethod
     def attach_alert(
@@ -236,6 +468,11 @@ class IncidentService:
         *,
         incident: Incident,
         alert_id: int,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> IncidentAlert:
         """Attach alert evidence idempotently to an incident."""
 
@@ -273,11 +510,12 @@ class IncidentService:
             )
 
         try:
-            return IncidentRepository.attach_alert(
+            link = IncidentRepository.attach_alert(
                 db=db,
                 incident_id=incident.id,
                 alert_id=alert_id,
             )
+
         except IntegrityError:
             db.rollback()
 
@@ -307,12 +545,31 @@ class IncidentService:
                 ),
             )
 
+        (
+            IncidentTimelineRecorderService
+            .record_alert_attached(
+                db=db,
+                incident=incident,
+                alert_id=alert_id,
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
+            )
+        )
+
+        return link
+
     @staticmethod
     def detach_alert(
         db: Session,
         *,
         incident: Incident,
         alert_id: int,
+        actor_type: IncidentTimelineActorType = (
+            IncidentTimelineActorType.SYSTEM
+        ),
+        actor_id: int | None = None,
+        actor_label: str | None = None,
     ) -> None:
         """Detach alert evidence from an incident."""
 
@@ -330,6 +587,18 @@ class IncidentService:
                 public_id=incident.public_id,
             )
 
+        (
+            IncidentTimelineRecorderService
+            .record_alert_detached(
+                db=db,
+                incident=incident,
+                alert_id=alert_id,
+                actor_type=actor_type,
+                actor_id=actor_id,
+                actor_label=actor_label,
+            )
+        )
+
     @staticmethod
     def get_statistics(
         db: Session,
@@ -339,7 +608,10 @@ class IncidentService:
     ) -> IncidentStatistics:
         """Calculate current operational incident statistics."""
 
-        effective_now = now or datetime.now(UTC)
+        effective_now = (
+            now
+            or datetime.now(UTC)
+        )
 
         end_at = (
             incident.resolved_at
@@ -460,3 +732,38 @@ class IncidentService:
                         .public_id
                     ),
                 )
+
+    @staticmethod
+    def _actor_type_for_source(
+        source: IncidentSource,
+    ) -> IncidentTimelineActorType:
+        if source in {
+            IncidentSource.ALERT_ENGINE,
+            IncidentSource.CORRELATION_ENGINE,
+            IncidentSource.ROOT_CAUSE_ENGINE,
+        }:
+            return (
+                IncidentTimelineActorType
+                .AUTOMATION
+            )
+
+        if source == IncidentSource.API:
+            return IncidentTimelineActorType.API
+
+        return IncidentTimelineActorType.SYSTEM
+
+    @staticmethod
+    def _actor_label_for_source(
+        source: IncidentSource,
+    ) -> str:
+        if source in {
+            IncidentSource.ALERT_ENGINE,
+            IncidentSource.CORRELATION_ENGINE,
+            IncidentSource.ROOT_CAUSE_ENGINE,
+        }:
+            return f"NetPulse {source.value}"
+
+        if source == IncidentSource.API:
+            return "NetPulse API"
+
+        return "NetPulse Incident Engine"
