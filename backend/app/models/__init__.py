@@ -32,7 +32,14 @@ from app.models.incident import (
     IncidentStatus,
 )
 from app.models.incident_alert import IncidentAlert
-from app.models.notification_log import NotificationLog
+from app.models.incident_timeline_event import (
+    IncidentTimelineActorType,
+    IncidentTimelineEvent,
+    IncidentTimelineEventType,
+)
+from app.models.notification_log import (
+    NotificationLog,
+)
 from app.models.user import (
     User,
     UserRole,
@@ -57,6 +64,9 @@ __all__ = [
     "IncidentSeverity",
     "IncidentSource",
     "IncidentStatus",
+    "IncidentTimelineActorType",
+    "IncidentTimelineEvent",
+    "IncidentTimelineEventType",
     "NotificationLog",
     "User",
     "UserRole",
