@@ -54,7 +54,7 @@ from app.services.incident_response_service import (
 from app.services.incident_service import (
     IncidentService,
 )
-
+from app.api.incident_actor import build_user_actor
 
 router = APIRouter(
     prefix="/incidents",
@@ -276,14 +276,15 @@ def update_incident(
 ) -> IncidentRead:
     """Update editable incident information."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService.update(
                 db=db,
                 public_id=public_id,
                 incident_data=incident_data,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -310,14 +311,15 @@ def acknowledge_incident(
 ) -> IncidentRead:
     """Acknowledge an open incident."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService
             .acknowledge(
                 db=db,
                 public_id=public_id,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -344,14 +346,15 @@ def investigate_incident(
 ) -> IncidentRead:
     """Move an incident into investigation."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService
             .investigate(
                 db=db,
                 public_id=public_id,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -378,13 +381,14 @@ def monitor_incident(
 ) -> IncidentRead:
     """Move an investigated incident into monitoring."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService.monitor(
                 db=db,
                 public_id=public_id,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -412,14 +416,15 @@ def resolve_incident(
 ) -> IncidentRead:
     """Resolve a monitored incident."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService.resolve(
                 db=db,
                 public_id=public_id,
                 resolution_data=resolution_data,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -447,8 +452,6 @@ def attach_incident_alerts(
 ) -> IncidentRead:
     """Attach one or more alerts to an incident."""
 
-    del current_user
-
     try:
         incident = (
             IncidentCommandService
@@ -456,6 +459,9 @@ def attach_incident_alerts(
                 db=db,
                 public_id=public_id,
                 attachment_data=attachment_data,
+                actor=build_user_actor(
+                    current_user
+                ),
             )
         )
     except IncidentError as exc:
@@ -466,7 +472,6 @@ def attach_incident_alerts(
     return IncidentResponseService.to_read(
         incident
     )
-
 
 @router.delete(
     "/{public_id}/alerts/{alert_id}",
@@ -483,13 +488,14 @@ def detach_incident_alert(
 ) -> IncidentAlertDetachResponse:
     """Detach an alert from an incident."""
 
-    del current_user
-
     try:
         IncidentCommandService.detach_alert(
             db=db,
             public_id=public_id,
             alert_id=alert_id,
+            actor=build_user_actor(
+                current_user
+            ),
         )
     except IncidentError as exc:
         raise translate_incident_error(

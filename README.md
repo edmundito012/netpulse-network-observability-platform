@@ -200,7 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
+<<<<<<< HEAD
 _Last automation run: 2026-07-17 21:51 UTC_
+=======
+_Last automation run: 2026-07-17 22:00 UTC_
+>>>>>>> 3970318 (feat(incident): attribute timeline events to authenticated actors)
 
 ### ✅ Automated Quality
 

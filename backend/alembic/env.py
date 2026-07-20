@@ -18,6 +18,7 @@ from app.models import device_metric
 from app.models import device_snmp_system_snapshot
 from app.models import incident
 from app.models import incident_alert
+from app.models import incident_correlation
 from app.models import incident_timeline_event
 from app.models import user
 
