@@ -200,15 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-<<<<<<< HEAD
-_Last automation run: 2026-07-17 21:51 UTC_
-=======
-_Last automation run: 2026-07-17 22:00 UTC_
->>>>>>> 3970318 (feat(incident): attribute timeline events to authenticated actors)
+_Last automation run: 2026-07-20 18:54 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 236 passed
+- **Tests:** 270 passed
 - **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -216,6 +212,8 @@ _Last automation run: 2026-07-17 22:00 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **correlation** — add correlation domain foundation
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident timeline API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — record incident timeline automatically
@@ -223,8 +221,6 @@ _Last automation run: 2026-07-17 22:00 UTC_
 - ✨ **incident** — add append-only timeline services
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident timeline domain foundation
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ♻️ **schemas** — migrate notification log to pydantic v2
 
 ### 📸 Automated Screenshots
 
