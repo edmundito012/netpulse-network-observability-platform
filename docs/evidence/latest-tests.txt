@@ -96,4 +96,4 @@ tests/test_video_call_experience_service.py .                            [100%]
     from crypt import crypt as _crypt
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================= 333 passed, 1 warning in 13.49s ========================
+======================= 333 passed, 1 warning in 11.67s ========================

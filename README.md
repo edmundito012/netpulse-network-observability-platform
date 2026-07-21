@@ -200,7 +200,7 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-21 18:40 UTC_
+_Last automation run: 2026-07-21 19:17 UTC_
 
 ### ✅ Automated Quality
 
@@ -212,6 +212,8 @@ _Last automation run: 2026-07-21 18:40 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **correlation** — add background correlation worker
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — expose correlation engine API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — apply correlation decisions
@@ -219,9 +221,6 @@ _Last automation run: 2026-07-21 18:40 UTC_
 - ✨ **correlation** — add candidate evaluation persistence
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — implement deterministic scoring engine
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **correlation** — add correlation domain foundation
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
 
 ### 📸 Automated Screenshots
 
