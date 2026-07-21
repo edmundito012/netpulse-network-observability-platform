@@ -449,9 +449,34 @@ class IncidentCorrelationRepository:
         db: Session,
         *,
         correlation: IncidentCorrelation,
+        applied_incident_id: int | None = None,
+        applied_incident_public_id: str | None = None,
+        incident_created: bool = False,
+        alert_attached: bool = False,
         applied_at: datetime | None = None,
     ) -> IncidentCorrelation:
-        """Mark a previously evaluated decision as applied."""
+        """Mark a correlation decision as successfully applied."""
+
+        metadata = dict(
+            correlation.correlation_metadata or {}
+        )
+
+        metadata.update(
+            {
+                "applied_incident_id": (
+                    applied_incident_id
+                ),
+                "applied_incident_public_id": (
+                    applied_incident_public_id
+                ),
+                "incident_created": (
+                    incident_created
+                ),
+                "alert_attached": (
+                    alert_attached
+                ),
+            }
+        )
 
         correlation.application_status = (
             CorrelationApplicationStatus.APPLIED
@@ -463,6 +488,8 @@ class IncidentCorrelationRepository:
         )
 
         correlation.failure_reason = None
+
+        correlation.correlation_metadata = metadata
 
         db.commit()
         db.refresh(correlation)
@@ -485,6 +512,14 @@ class IncidentCorrelationRepository:
                 "failure_reason must not be empty"
             )
 
+        metadata = dict(
+            correlation.correlation_metadata or {}
+        )
+
+        metadata["application_failure"] = (
+            normalized_reason
+        )
+
         correlation.application_status = (
             CorrelationApplicationStatus.FAILED
         )
@@ -494,6 +529,7 @@ class IncidentCorrelationRepository:
         )
 
         correlation.applied_at = None
+        correlation.correlation_metadata = metadata
 
         db.commit()
         db.refresh(correlation)
