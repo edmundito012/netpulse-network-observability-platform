@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-17 21:51 UTC_
+_Last automation run: 2026-07-21 19:17 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 236 passed
+- **Tests:** 333 passed
 - **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,15 +212,15 @@ _Last automation run: 2026-07-17 21:51 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **incident** — add incident timeline API
+- ✨ **correlation** — add background correlation worker
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — record incident timeline automatically
+- ✨ **correlation** — expose correlation engine API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add append-only timeline services
+- ✨ **correlation** — apply correlation decisions
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident timeline domain foundation
+- ✨ **correlation** — add candidate evaluation persistence
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ♻️ **schemas** — migrate notification log to pydantic v2
+- ✨ **correlation** — implement deterministic scoring engine
 
 ### 📸 Automated Screenshots
 
