@@ -32,7 +32,12 @@ from app.services.latency_alert_service import (
 from app.services.flapping_alert_service import (
     FlappingAlertService,
 )
-
+from app.core.correlation import (
+    CorrelationConfiguration,
+)
+from app.services.correlation_worker_service import (
+    CorrelationWorkerService,
+)
 scheduler = BackgroundScheduler()
 
 
@@ -365,6 +370,61 @@ def warm_up_caches():
     finally:
         db.close()
 
+def run_correlation_worker():
+    """Process alerts awaiting automatic correlation."""
+
+    if not settings.CORRELATION_WORKER_ENABLED:
+        logger.debug(
+            "Correlation worker is disabled"
+        )
+        return
+
+    db: Session = SessionLocal()
+
+    try:
+        configuration = CorrelationConfiguration(
+            window_seconds=(
+                settings.CORRELATION_WINDOW_SECONDS
+            ),
+            threshold=(
+                settings.CORRELATION_THRESHOLD
+            ),
+            max_candidates=(
+                settings.CORRELATION_MAX_CANDIDATES
+            ),
+        )
+
+        result = (
+            CorrelationWorkerService.run_batch(
+                db=db,
+                batch_size=(
+                    settings
+                    .CORRELATION_WORKER_BATCH_SIZE
+                ),
+                configuration=configuration,
+            )
+        )
+
+        logger.info(
+            "Correlation worker cycle completed: "
+            "discovered=%s processed=%s "
+            "applied=%s replayed=%s failed=%s",
+            result.discovered,
+            result.processed,
+            result.applied,
+            result.replayed,
+            result.failed,
+        )
+
+    except Exception:
+        db.rollback()
+
+        logger.exception(
+            "Correlation worker cycle failed"
+        )
+
+    finally:
+        db.close()
 
 def start_scheduler():
     if scheduler.running:
@@ -400,6 +460,19 @@ def start_scheduler():
         max_instances=1,
         coalesce=True,
     )
+    if settings.CORRELATION_WORKER_ENABLED:
+        scheduler.add_job(
+            run_correlation_worker,
+            "interval",
+            seconds=(
+                settings
+                .CORRELATION_WORKER_INTERVAL_SECONDS
+            ),
+            id="correlation_worker",
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+        )
 
     warm_up_caches()
 
