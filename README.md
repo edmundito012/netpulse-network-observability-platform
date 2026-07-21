@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-20 18:54 UTC_
+_Last automation run: 2026-07-21 14:58 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 270 passed
+- **Tests:** 304 passed
 - **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,6 +212,8 @@ _Last automation run: 2026-07-20 18:54 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **correlation** — implement deterministic scoring engine
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — add correlation domain foundation
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add incident timeline API
@@ -220,7 +222,6 @@ _Last automation run: 2026-07-20 18:54 UTC_
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **incident** — add append-only timeline services
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident timeline domain foundation
 
 ### 📸 Automated Screenshots
 
