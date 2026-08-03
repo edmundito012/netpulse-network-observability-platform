@@ -12,6 +12,7 @@ from app.models.alert import (
     Alert,
     AlertStatus,
 )
+from app.models.incident_alert import IncidentAlert
 from app.models.incident_correlation import (
     IncidentCorrelation,
 )
@@ -26,7 +27,15 @@ class CorrelationWorkerRepository:
         *,
         limit: int,
     ) -> list[int]:
-        """Return open alerts without a persisted correlation."""
+        """
+        Return alerts eligible for automatic correlation.
+
+        An alert is eligible only when:
+
+        - it is open or acknowledged;
+        - it has no persisted correlation evaluation;
+        - it is not already attached to an incident.
+        """
 
         if limit < 1 or limit > 500:
             raise ValueError(
@@ -41,6 +50,14 @@ class CorrelationWorkerRepository:
             )
         )
 
+        incident_link_exists = exists(
+            select(IncidentAlert.id)
+            .where(
+                IncidentAlert.alert_id
+                == Alert.id
+            )
+        )
+
         statement = (
             select(Alert.id)
             .where(
@@ -51,6 +68,7 @@ class CorrelationWorkerRepository:
                     )
                 ),
                 ~correlation_exists,
+                ~incident_link_exists,
             )
             .order_by(
                 Alert.created_at.asc(),
