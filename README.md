@@ -200,7 +200,7 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-08-03 14:19 UTC_
+_Last automation run: 2026-08-03 14:39 UTC_
 
 ### ✅ Automated Quality
 
@@ -212,6 +212,9 @@ _Last automation run: 2026-08-03 14:19 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- 🔧 **scripts** — remove broken PowerShell finalizer
+- 📝 **correlation** — document engine architecture and dashboard
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **portfolio** — add correlation intelligence dashboard
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — add correlation analytics API
@@ -219,10 +222,12 @@ _Last automation run: 2026-08-03 14:19 UTC_
 - ✨ **correlation** — add PostgreSQL advisory worker lock
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - 🐛 **correlation** — add worker metrics and idempotent selection
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **correlation** — add background correlation worker
 
 ### 📸 Automated Screenshots
+
+#### Correlation Intelligence Dashboard
+
+![Correlation Intelligence Dashboard](docs/screenshots/correlation-intelligence-dashboard.png)
 
 #### Incident Operations Dashboard
 
