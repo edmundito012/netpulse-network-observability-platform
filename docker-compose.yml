@@ -1,14 +1,13 @@
-
-services:
-
+﻿services:
   postgres:
     image: postgres:16
     container_name: netpulse-postgres
+    restart: unless-stopped
 
     environment:
-      POSTGRES_DB: netpulse
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
 
     ports:
       - "5433:5432"
@@ -17,35 +16,75 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d netpulse"]
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
   backend:
     build:
       context: ./backend
+      dockerfile: Dockerfile
 
     container_name: netpulse-backend
+    restart: unless-stopped
 
     depends_on:
       postgres:
         condition: service_healthy
 
-    env_file:
-      - ./backend/.env
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      TEST_DATABASE_URL: ${TEST_DATABASE_URL:-}
+      SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+
+      MONITOR_INTERVAL_SECONDS: ${MONITOR_INTERVAL_SECONDS:-30}
+      SNMP_INTERVAL_SECONDS: ${SNMP_INTERVAL_SECONDS:-60}
+      DASHBOARD_BROADCAST_INTERVAL_SECONDS: ${DASHBOARD_BROADCAST_INTERVAL_SECONDS:-5}
+
+      CORRELATION_WORKER_ENABLED: ${CORRELATION_WORKER_ENABLED:-false}
+      CORRELATION_WORKER_INTERVAL_SECONDS: ${CORRELATION_WORKER_INTERVAL_SECONDS:-30}
+      CORRELATION_WORKER_BATCH_SIZE: ${CORRELATION_WORKER_BATCH_SIZE:-25}
+      CORRELATION_WINDOW_SECONDS: ${CORRELATION_WINDOW_SECONDS:-900}
+      CORRELATION_THRESHOLD: ${CORRELATION_THRESHOLD:-0.65}
+      CORRELATION_MAX_CANDIDATES: ${CORRELATION_MAX_CANDIDATES:-25}
+
+      PING_TIMEOUT_SECONDS: ${PING_TIMEOUT_SECONDS:-2}
+      SNMP_PORT: ${SNMP_PORT:-1161}
+      SNMP_TIMEOUT_SECONDS: ${SNMP_TIMEOUT_SECONDS:-2}
+      SNMP_RETRIES: ${SNMP_RETRIES:-1}
+
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
 
     ports:
       - "8000:8000"
 
-    volumes:
-      - ./backend:/app
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=5)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-    command: >
-      sh -c "
-      alembic upgrade head &&
-      uvicorn app.main:app --host 0.0.0.0 --port 8000
-      "
+    command:
+      - sh
+      - -c
+      - >
+        alembic upgrade head &&
+        uvicorn app.main:app
+        --host 0.0.0.0
+        --port 8000
 
 volumes:
   postgres_data:

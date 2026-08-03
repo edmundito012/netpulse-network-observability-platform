@@ -1,19 +1,40 @@
-# Python
+﻿# Python
 venv/
+.venv/
 __pycache__/
-*.pyc
-
-# IntelliJ
-.idea/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 
 # Node
 node_modules/
+frontend/dist/
+frontend/.vite/
 
-# Environment
-backend/alembic/env.py
+# Environment and secrets
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# IDE
+.idea/
+.vscode/
 
 # Logs
 *.log
 
-# Build
+# Build artifacts
+build/
 dist/
+*.egg-info/
+
+# Operating systems
+.DS_Store
+Thumbs.db
