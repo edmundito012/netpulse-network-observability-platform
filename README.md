@@ -257,3 +257,35 @@ Choose your preferred open-source license (MIT recommended).
 
 Made with â¤ï¸ using FastAPI, React and Docker.
 
+<!-- correlation-intelligence:start -->
+## Correlation Intelligence
+
+NetPulse includes an explainable Correlation Engine that groups related
+network alerts into operational incidents using deterministic scoring,
+idempotent persistence and PostgreSQL concurrency protection.
+
+Highlights:
+
+- deterministic correlation scoring;
+- existing-incident matching;
+- automatic incident creation;
+- background batch processing;
+- PostgreSQL advisory locking;
+- Prometheus metrics;
+- correlation analytics API;
+- public correlation intelligence dashboard.
+
+Dashboard:
+
+```text
+http://localhost:8000/portfolio/correlations
+```
+
+Technical documentation:
+
+```text
+docs/correlation-engine.md
+```
+
+![Correlation Intelligence dashboard](docs/screenshots/correlation-intelligence-dashboard.png)
+<!-- correlation-intelligence:end -->
