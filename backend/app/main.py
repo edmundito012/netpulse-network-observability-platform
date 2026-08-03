@@ -94,7 +94,9 @@ from app.services.scheduler_service import (
     start_scheduler,
     stop_scheduler,
 )
-
+from app.api.correlation_analytics import (
+    router as correlation_analytics_router,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -157,6 +159,9 @@ app.include_router(packet_loss_bursts_router)
 app.include_router(incidents_router)
 app.include_router(
     incident_correlations_router
+)
+app.include_router(
+    correlation_analytics_router
 )
 app.include_router(incident_timeline_router)
 app.include_router(portfolio_dashboard_router)
