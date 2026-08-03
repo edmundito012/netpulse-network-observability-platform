@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-08-03 13:47 UTC_
+_Last automation run: 2026-08-03 13:58 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 341 passed
+- **Tests:** 343 passed
 - **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,6 +212,8 @@ _Last automation run: 2026-08-03 13:47 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
+- ✨ **correlation** — add PostgreSQL advisory worker lock
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
 - 🐛 **correlation** — add worker metrics and idempotent selection
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — add background correlation worker
@@ -219,8 +221,6 @@ _Last automation run: 2026-08-03 13:47 UTC_
 - ✨ **correlation** — expose correlation engine API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - ✨ **correlation** — apply correlation decisions
-- 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **correlation** — add candidate evaluation persistence
 
 ### 📸 Automated Screenshots
 
