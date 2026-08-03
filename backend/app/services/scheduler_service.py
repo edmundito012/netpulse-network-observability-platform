@@ -12,7 +12,10 @@ from app.core.device_state_cache import (
 )
 from app.core.logging import logger
 from app.core.metrics import device_status_total
-from app.db.session import SessionLocal
+from app.db.session import (
+    SessionLocal,
+    engine,
+)
 from app.models.alert import AlertSeverity
 from app.models.device import DeviceStatus
 from app.models.device_event import DeviceEventType
@@ -39,6 +42,11 @@ from app.services.correlation_worker_service import (
     CorrelationWorkerService,
 )
 scheduler = BackgroundScheduler()
+from app.db.session import SessionLocal
+
+from app.services.correlation_worker_lock_service import (
+    CorrelationWorkerLockService,
+)
 
 
 def update_device_status_metrics():
@@ -379,52 +387,71 @@ def run_correlation_worker():
         )
         return
 
-    db: Session = SessionLocal()
+    with engine.connect() as connection:
 
-    try:
-        configuration = CorrelationConfiguration(
-            window_seconds=(
-                settings.CORRELATION_WINDOW_SECONDS
-            ),
-            threshold=(
-                settings.CORRELATION_THRESHOLD
-            ),
-            max_candidates=(
-                settings.CORRELATION_MAX_CANDIDATES
-            ),
-        )
+        with CorrelationWorkerLockService.acquire(
+            connection,
+        ) as acquired:
 
-        result = (
-            CorrelationWorkerService.run_batch(
-                db=db,
-                batch_size=(
-                    settings
-                    .CORRELATION_WORKER_BATCH_SIZE
-                ),
-                configuration=configuration,
+            if not acquired:
+                logger.info(
+                    "Correlation worker skipped "
+                    "(lock already acquired)"
+                )
+                return
+
+            db: Session = SessionLocal(
+                bind=connection,
             )
-        )
 
-        logger.info(
-            "Correlation worker cycle completed: "
-            "discovered=%s processed=%s "
-            "applied=%s replayed=%s failed=%s",
-            result.discovered,
-            result.processed,
-            result.applied,
-            result.replayed,
-            result.failed,
-        )
+            try:
+                configuration = CorrelationConfiguration(
+                    window_seconds=(
+                        settings
+                        .CORRELATION_WINDOW_SECONDS
+                    ),
+                    threshold=(
+                        settings
+                        .CORRELATION_THRESHOLD
+                    ),
+                    max_candidates=(
+                        settings
+                        .CORRELATION_MAX_CANDIDATES
+                    ),
+                )
 
-    except Exception:
-        db.rollback()
+                result = (
+                    CorrelationWorkerService
+                    .run_batch(
+                        db=db,
+                        batch_size=(
+                            settings
+                            .CORRELATION_WORKER_BATCH_SIZE
+                        ),
+                        configuration=configuration,
+                    )
+                )
 
-        logger.exception(
-            "Correlation worker cycle failed"
-        )
+                logger.info(
+                    "Correlation worker cycle completed: "
+                    "discovered=%s processed=%s "
+                    "applied=%s replayed=%s failed=%s",
+                    result.discovered,
+                    result.processed,
+                    result.applied,
+                    result.replayed,
+                    result.failed,
+                )
 
-    finally:
-        db.close()
+            except Exception:
+                db.rollback()
+
+                logger.exception(
+                    "Correlation worker cycle failed"
+                )
+
+            finally:
+                db.close()
 
 def start_scheduler():
     if scheduler.running:
