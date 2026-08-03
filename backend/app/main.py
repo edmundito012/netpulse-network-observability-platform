@@ -67,6 +67,9 @@ from app.api.portfolio_dashboard import (
 from app.api.portfolio_incidents import (
     router as portfolio_incidents_router,
 )
+from app.api.portfolio_correlations import (
+    router as portfolio_correlations_router,
+)
 from app.api.sla import router as sla_router
 from app.api.streaming_experience import (
     router as streaming_experience_router,
@@ -159,6 +162,9 @@ app.include_router(packet_loss_bursts_router)
 app.include_router(incidents_router)
 app.include_router(
     incident_correlations_router
+)
+app.include_router(
+    portfolio_correlations_router
 )
 app.include_router(
     correlation_analytics_router
