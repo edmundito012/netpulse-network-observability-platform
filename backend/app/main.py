@@ -27,6 +27,9 @@ from app.api.gaming_experience import (
 from app.api.gaming_impact import (
     router as gaming_impact_router,
 )
+from app.api.incident_correlations import (
+    router as incident_correlations_router,
+)
 from app.api.incident_timeline import (
     router as incident_timeline_router,
 )
@@ -64,6 +67,9 @@ from app.api.portfolio_dashboard import (
 from app.api.portfolio_incidents import (
     router as portfolio_incidents_router,
 )
+from app.api.portfolio_correlations import (
+    router as portfolio_correlations_router,
+)
 from app.api.sla import router as sla_router
 from app.api.streaming_experience import (
     router as streaming_experience_router,
@@ -91,7 +97,9 @@ from app.services.scheduler_service import (
     start_scheduler,
     stop_scheduler,
 )
-
+from app.api.correlation_analytics import (
+    router as correlation_analytics_router,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -152,6 +160,15 @@ app.include_router(sla_router)
 app.include_router(metric_series_router)
 app.include_router(packet_loss_bursts_router)
 app.include_router(incidents_router)
+app.include_router(
+    incident_correlations_router
+)
+app.include_router(
+    portfolio_correlations_router
+)
+app.include_router(
+    correlation_analytics_router
+)
 app.include_router(incident_timeline_router)
 app.include_router(portfolio_dashboard_router)
 app.include_router(portfolio_incidents_router)

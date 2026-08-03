@@ -9,6 +9,9 @@ from app.schemas.incident import (
     IncidentResolveRequest,
     IncidentUpdate,
 )
+from app.services.incident_actor_context import (
+    IncidentActorContext,
+)
 from app.services.incident_lifecycle_service import (
     IncidentLifecycleService,
 )
@@ -39,6 +42,7 @@ class IncidentCommandService:
         *,
         public_id: str,
         incident_data: IncidentUpdate,
+        actor: IncidentActorContext,
     ) -> Incident:
         """Update editable incident information."""
 
@@ -54,6 +58,9 @@ class IncidentCommandService:
             db=db,
             incident=incident,
             incident_data=incident_data,
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )
 
         return (
@@ -69,6 +76,7 @@ class IncidentCommandService:
         db: Session,
         *,
         public_id: str,
+        actor: IncidentActorContext,
     ) -> Incident:
         """Acknowledge an incident."""
 
@@ -85,6 +93,9 @@ class IncidentCommandService:
             .acknowledge(
                 db=db,
                 incident=incident,
+                actor_type=actor.actor_type,
+                actor_id=actor.actor_id,
+                actor_label=actor.actor_label,
             )
         )
 
@@ -101,6 +112,7 @@ class IncidentCommandService:
         db: Session,
         *,
         public_id: str,
+        actor: IncidentActorContext,
     ) -> Incident:
         """Start incident investigation."""
 
@@ -117,6 +129,9 @@ class IncidentCommandService:
             .start_investigation(
                 db=db,
                 incident=incident,
+                actor_type=actor.actor_type,
+                actor_id=actor.actor_id,
+                actor_label=actor.actor_label,
             )
         )
 
@@ -133,6 +148,7 @@ class IncidentCommandService:
         db: Session,
         *,
         public_id: str,
+        actor: IncidentActorContext,
     ) -> Incident:
         """Move an incident into monitoring."""
 
@@ -149,6 +165,9 @@ class IncidentCommandService:
             .start_monitoring(
                 db=db,
                 incident=incident,
+                actor_type=actor.actor_type,
+                actor_id=actor.actor_id,
+                actor_label=actor.actor_label,
             )
         )
 
@@ -166,6 +185,7 @@ class IncidentCommandService:
         *,
         public_id: str,
         resolution_data: IncidentResolveRequest,
+        actor: IncidentActorContext,
     ) -> Incident:
         """Resolve an incident with operational context."""
 
@@ -188,6 +208,9 @@ class IncidentCommandService:
                 root_cause=(
                     resolution_data.root_cause
                 ),
+                actor_type=actor.actor_type,
+                actor_id=actor.actor_id,
+                actor_label=actor.actor_label,
             )
         )
 
@@ -207,6 +230,7 @@ class IncidentCommandService:
         attachment_data: (
             IncidentAlertAttachRequest
         ),
+        actor: IncidentActorContext,
     ) -> Incident:
         """Attach multiple alerts to an incident."""
 
@@ -223,6 +247,9 @@ class IncidentCommandService:
                 db=db,
                 incident=incident,
                 alert_id=alert_id,
+                actor_type=actor.actor_type,
+                actor_id=actor.actor_id,
+                actor_label=actor.actor_label,
             )
 
         return (
@@ -239,6 +266,7 @@ class IncidentCommandService:
         *,
         public_id: str,
         alert_id: int,
+        actor: IncidentActorContext,
     ) -> None:
         """Detach one alert from an incident."""
 
@@ -254,4 +282,7 @@ class IncidentCommandService:
             db=db,
             incident=incident,
             alert_id=alert_id,
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )

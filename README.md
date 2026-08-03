@@ -200,11 +200,11 @@ See `SECURITY.md` for details.
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-07-17 21:51 UTC_
+_Last automation run: 2026-08-03 14:39 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 236 passed
+- **Tests:** 354 passed
 - **Warnings:** 1
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -212,17 +212,22 @@ _Last automation run: 2026-07-17 21:51 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **incident** — add incident timeline API
+- 🔧 **scripts** — remove broken PowerShell finalizer
+- 📝 **correlation** — document engine architecture and dashboard
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — record incident timeline automatically
+- ✨ **portfolio** — add correlation intelligence dashboard
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add append-only timeline services
+- ✨ **correlation** — add correlation analytics API
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **incident** — add incident timeline domain foundation
+- ✨ **correlation** — add PostgreSQL advisory worker lock
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ♻️ **schemas** — migrate notification log to pydantic v2
+- 🐛 **correlation** — add worker metrics and idempotent selection
 
 ### 📸 Automated Screenshots
+
+#### Correlation Intelligence Dashboard
+
+![Correlation Intelligence Dashboard](docs/screenshots/correlation-intelligence-dashboard.png)
 
 #### Incident Operations Dashboard
 
@@ -257,3 +262,35 @@ Choose your preferred open-source license (MIT recommended).
 
 Made with â¤ï¸ using FastAPI, React and Docker.
 
+<!-- correlation-intelligence:start -->
+## Correlation Intelligence
+
+NetPulse includes an explainable Correlation Engine that groups related
+network alerts into operational incidents using deterministic scoring,
+idempotent persistence and PostgreSQL concurrency protection.
+
+Highlights:
+
+- deterministic correlation scoring;
+- existing-incident matching;
+- automatic incident creation;
+- background batch processing;
+- PostgreSQL advisory locking;
+- Prometheus metrics;
+- correlation analytics API;
+- public correlation intelligence dashboard.
+
+Dashboard:
+
+```text
+http://localhost:8000/portfolio/correlations
+```
+
+Technical documentation:
+
+```text
+docs/correlation-engine.md
+```
+
+![Correlation Intelligence dashboard](docs/screenshots/correlation-intelligence-dashboard.png)
+<!-- correlation-intelligence:end -->

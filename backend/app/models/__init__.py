@@ -32,6 +32,9 @@ from app.models.incident import (
     IncidentStatus,
 )
 from app.models.incident_alert import IncidentAlert
+from app.models.incident_correlation import (
+    IncidentCorrelation,
+)
 from app.models.incident_timeline_event import (
     IncidentTimelineActorType,
     IncidentTimelineEvent,
@@ -60,6 +63,7 @@ __all__ = [
     "DeviceStatus",
     "Incident",
     "IncidentAlert",
+    "IncidentCorrelation",
     "IncidentPriority",
     "IncidentSeverity",
     "IncidentSource",
