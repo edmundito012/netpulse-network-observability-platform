@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-08-17 20:52 UTC_
+_Last automation run: 2026-08-17 21:06 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 354 passed
+- **Tests:** 359 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,13 +346,14 @@ _Last automation run: 2026-08-17 20:52 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **ci** — run portfolio tests with uv environment
+- ♻️ **health** — add live ready and startup probes
 - ♻️ **api** — centralize application router registration
 - 🔧 **config** — improve security and reproducibility (#31)
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - 🔧 **scripts** — remove broken PowerShell finalizer
 - 📝 **correlation** — document engine architecture and dashboard
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
+- ✨ **portfolio** — add correlation intelligence dashboard
 
 ### 📸 Automated Screenshots
 
