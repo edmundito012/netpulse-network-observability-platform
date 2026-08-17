@@ -1,8 +1,26 @@
-﻿FROM python:3.12-slim
+﻿FROM ghcr.io/astral-sh/uv:0.12.1 AS uv
+
+FROM python:3.12-slim AS builder
+
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+
+WORKDIR /app
+
+COPY --from=uv /uv /uvx /bin/
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync \
+    --frozen \
+    --no-dev \
+    --no-install-project
+
+FROM python:3.12-slim AS runtime
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
@@ -14,10 +32,10 @@ RUN groupadd --system netpulse \
         netpulse \
     && chown netpulse:netpulse /app
 
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+COPY --from=builder \
+    --chown=netpulse:netpulse \
+    /app/.venv \
+    /app/.venv
 
 COPY --chown=netpulse:netpulse . .
 

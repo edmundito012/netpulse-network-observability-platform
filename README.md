@@ -198,7 +198,7 @@ Windows PowerShell:
 cd backend
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+uv sync --locked --all-groups
 ```
 
 Linux or macOS:
@@ -207,14 +207,14 @@ Linux or macOS:
 cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv sync --locked --all-groups
 ```
 
 Set the required environment variables, apply migrations and start the application:
 
 ```bash
-alembic upgrade head
-uvicorn app.main:app --reload
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload
 ```
 
 The backend will be available at:
