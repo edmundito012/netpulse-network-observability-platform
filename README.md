@@ -332,26 +332,57 @@ Technical documentation:
 
 <!-- NETPULSE:AUTO:START -->
 
-Generated automatically from tests, commits and screenshots.
+Generated automatically from tests, commits, and screenshots.
 
-*Last automation run: 2026-08-03 14:39 UTC.*
+_Last automation run: 2026-08-17 20:52 UTC_
 
-### Automated Quality
+### ✅ Automated Quality
 
-* **Tests:** 354 passed
-* **Warnings:** 1
-* **CI:** GitHub Actions
-* **Security:** CodeQL
-* **Workflow:** Feature branch to pull request to CI to merge
+- **Tests:** 354 passed
+- **Warnings:** 2
+- **CI:** GitHub Actions
+- **Security:** CodeQL
+- **Workflow:** Feature branch → Pull Request → CI → Merge
 
-### Recent Engineering Milestones
+### 🧠 Recent Engineering Milestones
 
-* Removed a broken PowerShell finalizer
-* Documented the correlation-engine architecture and dashboard
-* Added the Correlation Intelligence dashboard
-* Added the correlation analytics API
-* Added PostgreSQL advisory locking
-* Added worker metrics and idempotent alert selection
+- 🐛 **ci** — run portfolio tests with uv environment
+- ♻️ **api** — centralize application router registration
+- 🔧 **config** — improve security and reproducibility (#31)
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
+- 🔧 **scripts** — remove broken PowerShell finalizer
+- 📝 **correlation** — document engine architecture and dashboard
+- 📝 **portfolio** — update automated evidence [skip readme-sync]
+
+### 📸 Automated Screenshots
+
+#### Correlation Intelligence Dashboard
+
+![Correlation Intelligence Dashboard](docs/screenshots/correlation-intelligence-dashboard.png)
+
+#### Incident Operations Dashboard
+
+![Incident Operations Dashboard](docs/screenshots/incident-operations-dashboard.png)
+
+#### Portfolio Dashboard
+
+![Portfolio Dashboard](docs/screenshots/portfolio-dashboard.png)
+
+#### Redoc Api
+
+![Redoc Api](docs/screenshots/redoc-api.png)
+
+#### Redoc
+
+![Redoc](docs/screenshots/redoc.png)
+
+#### Swagger Api
+
+![Swagger Api](docs/screenshots/swagger-api.png)
+
+#### Swagger
+
+![Swagger](docs/screenshots/swagger.png)
 
 <!-- NETPULSE:AUTO:END -->
 
