@@ -1,4 +1,4 @@
-﻿"""NetPulse FastAPI application entrypoint."""
+"""NetPulse FastAPI application entrypoint."""
 
 from contextlib import asynccontextmanager
 
@@ -75,19 +75,11 @@ def health() -> dict[str, object]:
     device_state_cache = get_all_device_states()
 
     return {
-        "status": (
-            "ok"
-            if db_status == "ok"
-            else "degraded"
-        ),
+        "status": ("ok" if db_status == "ok" else "degraded"),
         "database": db_status,
         "scheduler_running": scheduler.running,
-        "dashboard_cache_loaded": bool(
-            dashboard_cache
-        ),
-        "device_state_cache_count": len(
-            device_state_cache
-        ),
+        "dashboard_cache_loaded": bool(dashboard_cache),
+        "device_state_cache_count": len(device_state_cache),
     }
 
 

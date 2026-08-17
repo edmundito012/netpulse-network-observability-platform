@@ -1,4 +1,4 @@
-﻿"""Application-level FastAPI router registry."""
+"""Application-level FastAPI router registry."""
 
 from fastapi import APIRouter
 
@@ -35,7 +35,6 @@ from app.api.streaming_experience import router as streaming_experience_router
 from app.api.users import router as users_router
 from app.api.video_call_experience import router as video_call_router
 from app.api.websocket import router as websocket_router
-
 
 router = APIRouter()
 
