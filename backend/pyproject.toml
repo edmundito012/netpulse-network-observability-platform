@@ -16,7 +16,7 @@ dependencies = [
     "psycopg2-binary==2.9.12",
     "pydantic==2.13.4",
     "pydantic-settings==2.14.1",
-    "pysnmp==7.1.26",
+    "pysnmp==7.1.28",
     "python-dotenv==1.2.2",
     "python-jose==3.5.0",
     "python-multipart==0.0.28",
