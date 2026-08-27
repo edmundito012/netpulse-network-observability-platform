@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-08-17 21:06 UTC_
+_Last automation run: 2026-08-27 13:07 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 359 passed
+- **Tests:** 362 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,14 +346,14 @@ _Last automation run: 2026-08-17 21:06 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ♻️ **health** — add live ready and startup probes
+- ♻️ **api** — introduce versioned v1 routes
+- ♻️ **health** — add live ready and startup probes (#34)
 - ♻️ **api** — centralize application router registration
 - 🔧 **config** — improve security and reproducibility (#31)
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
 - 🔧 **scripts** — remove broken PowerShell finalizer
 - 📝 **correlation** — document engine architecture and dashboard
 - 📝 **portfolio** — update automated evidence [skip readme-sync]
-- ✨ **portfolio** — add correlation intelligence dashboard
 
 ### 📸 Automated Screenshots
 
