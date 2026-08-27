@@ -8,6 +8,7 @@ from prometheus_client import generate_latest
 
 from app.api.health import router as health_router
 from app.api.router import router as application_router
+from app.api.v1.router import router as api_v1_router
 from app.core.logging import logger
 from app.middleware.request_logging import RequestLoggingMiddleware
 from app.services.scheduler_service import (
@@ -47,6 +48,7 @@ app.state.startup_complete = False
 app.add_middleware(RequestLoggingMiddleware)
 app.include_router(health_router)
 app.include_router(application_router)
+app.include_router(api_v1_router, prefix="/api/v1")
 
 
 @app.get("/")
