@@ -28,7 +28,6 @@ class SLAResult:
 
 
 class SLAService:
-
     @staticmethod
     def calculate_compliance(
         values: list[float],
@@ -37,10 +36,7 @@ class SLAService:
         if not values:
             return 0
 
-        compliant_samples = sum(
-            value <= maximum_allowed
-            for value in values
-        )
+        compliant_samples = sum(value <= maximum_allowed for value in values)
 
         return round(
             compliant_samples / len(values) * 100,
@@ -54,10 +50,7 @@ class SLAService:
         if not statuses:
             return 0
 
-        online_samples = sum(
-            status.upper() == "ONLINE"
-            for status in statuses
-        )
+        online_samples = sum(status.upper() == "ONLINE" for status in statuses)
 
         return round(
             online_samples / len(statuses) * 100,
@@ -93,19 +86,12 @@ class SLAService:
             )
 
         if status == "PASS":
-            return (
-                "Network service is meeting the configured SLA targets."
-            )
+            return "Network service is meeting the configured SLA targets."
 
         if not breached_metrics:
-            return (
-                "SLA compliance is below target. "
-                "Review recent network metrics."
-            )
+            return "SLA compliance is below target. Review recent network metrics."
 
-        metrics = ", ".join(
-            breached_metrics
-        )
+        metrics = ", ".join(breached_metrics)
 
         if status == "WARNING":
             return (
@@ -113,10 +99,7 @@ class SLAService:
                 f"Review: {metrics}."
             )
 
-        return (
-            "SLA breach detected. "
-            f"Investigate: {metrics}."
-        )
+        return f"SLA breach detected. Investigate: {metrics}."
 
     @staticmethod
     def calculate(
@@ -144,13 +127,9 @@ class SLAService:
             maximum_allowed=thresholds.latency_ms,
         )
 
-        packet_loss_compliance = (
-            SLAService.calculate_compliance(
-                values=packet_losses_percent,
-                maximum_allowed=(
-                    thresholds.packet_loss_percent
-                ),
-            )
+        packet_loss_compliance = SLAService.calculate_compliance(
+            values=packet_losses_percent,
+            maximum_allowed=(thresholds.packet_loss_percent),
         )
 
         jitter_compliance = SLAService.calculate_compliance(
@@ -177,37 +156,23 @@ class SLAService:
 
         breached_metrics = []
 
-        if (
-            availability
-            < thresholds.pass_compliance_percent
-        ):
+        if availability < thresholds.pass_compliance_percent:
             breached_metrics.append("availability")
 
-        if (
-            latency_compliance
-            < thresholds.pass_compliance_percent
-        ):
+        if latency_compliance < thresholds.pass_compliance_percent:
             breached_metrics.append("latency")
 
-        if (
-            packet_loss_compliance
-            < thresholds.pass_compliance_percent
-        ):
+        if packet_loss_compliance < thresholds.pass_compliance_percent:
             breached_metrics.append("packet_loss")
 
-        if (
-            jitter_compliance
-            < thresholds.pass_compliance_percent
-        ):
+        if jitter_compliance < thresholds.pass_compliance_percent:
             breached_metrics.append("jitter")
 
         return SLAResult(
             samples_analyzed=samples_analyzed,
             availability_percent=availability,
             latency_compliance_percent=latency_compliance,
-            packet_loss_compliance_percent=(
-                packet_loss_compliance
-            ),
+            packet_loss_compliance_percent=(packet_loss_compliance),
             jitter_compliance_percent=jitter_compliance,
             overall_compliance_percent=overall_compliance,
             status=status,

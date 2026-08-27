@@ -113,12 +113,7 @@ def test_generic_transition_rejects_direct_resolution() -> None:
 
 def test_generic_transition_accepts_investigating() -> None:
     transition = IncidentLifecycleTransition(
-        target_status=(
-            IncidentStatus.INVESTIGATING
-        ),
+        target_status=(IncidentStatus.INVESTIGATING),
     )
 
-    assert (
-        transition.target_status
-        == IncidentStatus.INVESTIGATING
-    )
+    assert transition.target_status == IncidentStatus.INVESTIGATING

@@ -22,7 +22,6 @@ class NetworkAnomalyResult:
 
 
 class NetworkAnomalyService:
-
     @staticmethod
     def calculate_z_score(
         latest_value: float,
@@ -86,9 +85,7 @@ class NetworkAnomalyService:
                 "Monitor this metric closely."
             )
 
-        return (
-            f"{metric_name} is within normal baseline range."
-        )
+        return f"{metric_name} is within normal baseline range."
 
     @staticmethod
     def analyze(
@@ -105,9 +102,7 @@ class NetworkAnomalyService:
                 severity="UNKNOWN",
                 confidence="LOW",
                 anomaly_detected=False,
-                recommendation=(
-                    f"No samples available for {metric_name}."
-                ),
+                recommendation=(f"No samples available for {metric_name}."),
             )
 
         if len(values) == 1:
@@ -122,9 +117,7 @@ class NetworkAnomalyService:
                 severity="NORMAL",
                 confidence="LOW",
                 anomaly_detected=False,
-                recommendation=(
-                    f"Not enough baseline samples for {metric_name}."
-                ),
+                recommendation=(f"Not enough baseline samples for {metric_name}."),
             )
 
         baseline_values = values[:-1]
@@ -135,18 +128,14 @@ class NetworkAnomalyService:
             baseline_values,
         )
 
-        z_score = (
-            NetworkAnomalyService.calculate_z_score(
-                latest_value=latest_value,
-                average=baseline_average,
-                std_deviation=baseline_std_deviation,
-            )
+        z_score = NetworkAnomalyService.calculate_z_score(
+            latest_value=latest_value,
+            average=baseline_average,
+            std_deviation=baseline_std_deviation,
         )
 
-        severity = (
-            NetworkAnomalyService.classify_severity(
-                z_score,
-            )
+        severity = NetworkAnomalyService.classify_severity(
+            z_score,
         )
 
         return NetworkAnomalyResult(
@@ -163,19 +152,18 @@ class NetworkAnomalyService:
             z_score=z_score,
             severity=severity,
             confidence=(
-                NetworkAnomalyService
-                .classify_confidence(
+                NetworkAnomalyService.classify_confidence(
                     z_score=z_score,
                     sample_count=len(values),
                 )
             ),
-            anomaly_detected=severity in [
+            anomaly_detected=severity
+            in [
                 "WARNING",
                 "CRITICAL",
             ],
             recommendation=(
-                NetworkAnomalyService
-                .build_recommendation(
+                NetworkAnomalyService.build_recommendation(
                     metric_name=metric_name,
                     severity=severity,
                 )

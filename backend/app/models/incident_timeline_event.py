@@ -103,9 +103,7 @@ class IncidentTimelineEvent(Base):
         nullable=False,
     )
 
-    event_type: Mapped[
-        IncidentTimelineEventType
-    ] = mapped_column(
+    event_type: Mapped[IncidentTimelineEventType] = mapped_column(
         SQLEnum(
             IncidentTimelineEventType,
             native_enum=False,
@@ -114,9 +112,7 @@ class IncidentTimelineEvent(Base):
         nullable=False,
     )
 
-    actor_type: Mapped[
-        IncidentTimelineActorType
-    ] = mapped_column(
+    actor_type: Mapped[IncidentTimelineActorType] = mapped_column(
         SQLEnum(
             IncidentTimelineActorType,
             native_enum=False,
@@ -124,9 +120,7 @@ class IncidentTimelineEvent(Base):
         ),
         nullable=False,
         default=IncidentTimelineActorType.SYSTEM,
-        server_default=(
-            IncidentTimelineActorType.SYSTEM.value
-        ),
+        server_default=(IncidentTimelineActorType.SYSTEM.value),
     )
 
     actor_id: Mapped[int | None] = mapped_column(
@@ -147,23 +141,17 @@ class IncidentTimelineEvent(Base):
         nullable=False,
     )
 
-    previous_value: Mapped[
-        dict[str, Any] | None
-    ] = mapped_column(
+    previous_value: Mapped[dict[str, Any] | None] = mapped_column(
         JSON,
         nullable=True,
     )
 
-    new_value: Mapped[
-        dict[str, Any] | None
-    ] = mapped_column(
+    new_value: Mapped[dict[str, Any] | None] = mapped_column(
         JSON,
         nullable=True,
     )
 
-    event_metadata: Mapped[
-        dict[str, Any]
-    ] = mapped_column(
+    event_metadata: Mapped[dict[str, Any]] = mapped_column(
         "metadata",
         JSON,
         nullable=False,

@@ -28,7 +28,6 @@ class NetworkTrendResult:
 
 
 class NetworkTrendService:
-
     STABLE_SLOPE_THRESHOLD = 0.5
 
     @staticmethod
@@ -53,10 +52,7 @@ class NetworkTrendService:
             )
         )
 
-        denominator = sum(
-            (x - x_mean) ** 2
-            for x in x_values
-        )
+        denominator = sum((x - x_mean) ** 2 for x in x_values)
 
         if denominator == 0:
             return 0
@@ -148,16 +144,10 @@ class NetworkTrendService:
         volatility: str,
         predicted_next_latency: float,
     ) -> str:
-        if (
-            predicted_next_latency >= 120
-            or volatility == "HIGH"
-        ):
+        if predicted_next_latency >= 120 or volatility == "HIGH":
             return "HIGH"
 
-        if (
-            predicted_next_latency >= 70
-            or trend == "INCREASING"
-        ):
+        if predicted_next_latency >= 70 or trend == "INCREASING":
             return "MEDIUM"
 
         return "LOW"
@@ -174,18 +164,12 @@ class NetworkTrendService:
             )
 
         if trend == "INCREASING":
-            return (
-                "Latency is increasing. Monitor WAN utilization."
-            )
+            return "Latency is increasing. Monitor WAN utilization."
 
         if trend == "DECREASING":
-            return (
-                "Latency trend is improving."
-            )
+            return "Latency trend is improving."
 
-        return (
-            "Network latency trend is stable."
-        )
+        return "Network latency trend is stable."
 
     @staticmethod
     def analyze(
@@ -244,27 +228,19 @@ class NetworkTrendService:
             minimum=min(values),
             maximum=max(values),
             slope=slope,
-            growth_percent=(
-                NetworkTrendService
-                .calculate_growth_percent(values)
-            ),
-            moving_average=(
-                NetworkTrendService
-                .calculate_moving_average(values)
-            ),
+            growth_percent=(NetworkTrendService.calculate_growth_percent(values)),
+            moving_average=(NetworkTrendService.calculate_moving_average(values)),
             volatility=volatility,
             predicted_next_latency=predicted_next_latency,
             confidence=(
-                NetworkTrendService
-                .classify_confidence(
+                NetworkTrendService.classify_confidence(
                     volatility=volatility,
                     sample_count=len(values),
                 )
             ),
             risk=risk,
             recommendation=(
-                NetworkTrendService
-                .build_recommendation(
+                NetworkTrendService.build_recommendation(
                     trend=trend,
                     risk=risk,
                 )

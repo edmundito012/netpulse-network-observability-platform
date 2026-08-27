@@ -54,23 +54,16 @@ class CorrelationWorkerService:
         db: Session,
         *,
         batch_size: int = 25,
-        configuration: (
-            CorrelationConfiguration | None
-        ) = None,
+        configuration: (CorrelationConfiguration | None) = None,
     ) -> CorrelationWorkerResult:
         """Evaluate and apply a bounded batch of pending alerts."""
 
         if batch_size < 1 or batch_size > 500:
-            raise ValueError(
-                "batch_size must be between 1 and 500"
-            )
+            raise ValueError("batch_size must be between 1 and 500")
 
         started_at = perf_counter()
 
-        effective_configuration = (
-            configuration
-            or CorrelationConfiguration()
-        )
+        effective_configuration = configuration or CorrelationConfiguration()
 
         alert_ids: list[int] = []
         processed = 0
@@ -79,31 +72,21 @@ class CorrelationWorkerService:
         failed_alert_ids: list[int] = []
 
         try:
-            alert_ids = (
-                CorrelationWorkerRepository
-                .get_pending_alert_ids(
-                    db=db,
-                    limit=batch_size,
-                )
+            alert_ids = CorrelationWorkerRepository.get_pending_alert_ids(
+                db=db,
+                limit=batch_size,
             )
 
-            correlation_worker_pending_alerts.set(
-                len(alert_ids)
-            )
+            correlation_worker_pending_alerts.set(len(alert_ids))
 
             for alert_id in alert_ids:
                 processed += 1
 
                 try:
-                    result = (
-                        IncidentCorrelationApplicationService
-                        .evaluate_and_apply(
-                            db=db,
-                            source_alert_id=alert_id,
-                            configuration=(
-                                effective_configuration
-                            ),
-                        )
+                    result = IncidentCorrelationApplicationService.evaluate_and_apply(
+                        db=db,
+                        source_alert_id=alert_id,
+                        configuration=(effective_configuration),
                     )
 
                     cls._record_success_metrics(
@@ -137,18 +120,14 @@ class CorrelationWorkerService:
                 except Exception as exc:
                     db.rollback()
 
-                    failed_alert_ids.append(
-                        alert_id
-                    )
+                    failed_alert_ids.append(alert_id)
 
                     correlation_worker_processed_alerts_total.labels(
                         status="failed",
                     ).inc()
 
                     correlation_failures_total.labels(
-                        exception_type=(
-                            type(exc).__name__
-                        ),
+                        exception_type=(type(exc).__name__),
                     ).inc()
 
                     logger.exception(
@@ -171,9 +150,7 @@ class CorrelationWorkerService:
                 applied=applied,
                 replayed=replayed,
                 failed=len(failed_alert_ids),
-                failed_alert_ids=tuple(
-                    failed_alert_ids
-                ),
+                failed_alert_ids=tuple(failed_alert_ids),
             )
 
         except Exception as exc:
@@ -188,9 +165,7 @@ class CorrelationWorkerService:
             raise
 
         finally:
-            correlation_worker_duration_seconds.observe(
-                perf_counter() - started_at
-            )
+            correlation_worker_duration_seconds.observe(perf_counter() - started_at)
 
     @staticmethod
     def _record_success_metrics(
@@ -205,11 +180,7 @@ class CorrelationWorkerService:
             outcome=outcome.value,
         ).inc()
 
-        application_status = (
-            "replayed"
-            if result.replayed
-            else "applied"
-        )
+        application_status = "replayed" if result.replayed else "applied"
 
         correlation_applications_total.labels(
             status=application_status,
@@ -221,10 +192,7 @@ class CorrelationWorkerService:
         if result.incident_created:
             correlation_incidents_created_total.inc()
 
-        if (
-            outcome
-            == CorrelationOutcome.MATCHED_EXISTING
-        ):
+        if outcome == CorrelationOutcome.MATCHED_EXISTING:
             correlation_existing_incidents_matched_total.inc()
 
         if outcome == CorrelationOutcome.NO_ACTION:

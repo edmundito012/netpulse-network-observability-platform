@@ -5,7 +5,6 @@ from app.repositories.device_metric_repository import DeviceMetricRepository
 
 
 class RecommendationService:
-
     @staticmethod
     def generate(
         db: Session,

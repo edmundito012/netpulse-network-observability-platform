@@ -9,10 +9,6 @@ client = TestClient(app)
 
 def test_notification_history():
 
-    response = client.get(
-        "/notifications/history"
-    )
+    response = client.get("/notifications/history")
 
-    assert (
-        response.status_code == 200
-    )
+    assert response.status_code == 200

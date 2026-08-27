@@ -13,9 +13,7 @@ import sqlalchemy as sa
 
 revision: str = "d8f31a72c640"
 
-down_revision: str | Sequence[str] | None = (
-    "c7e4a91d2f10"
-)
+down_revision: str | Sequence[str] | None = "c7e4a91d2f10"
 
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -101,39 +99,22 @@ def upgrade() -> None:
             "'INCIDENT_RESOLVED', "
             "'AUTOMATION_ACTION'"
             ")",
-            name=(
-                "ck_incident_timeline_events_"
-                "event_type"
-            ),
+            name=("ck_incident_timeline_events_event_type"),
         ),
         sa.CheckConstraint(
-            "actor_type IN ("
-            "'USER', "
-            "'SYSTEM', "
-            "'API', "
-            "'AUTOMATION'"
-            ")",
-            name=(
-                "ck_incident_timeline_events_"
-                "actor_type"
-            ),
+            "actor_type IN ('USER', 'SYSTEM', 'API', 'AUTOMATION')",
+            name=("ck_incident_timeline_events_actor_type"),
         ),
         sa.ForeignKeyConstraint(
             ["incident_id"],
             ["incidents.id"],
-            name=(
-                "fk_incident_timeline_events_"
-                "incident_id_incidents"
-            ),
+            name=("fk_incident_timeline_events_incident_id_incidents"),
             ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["actor_id"],
             ["users.id"],
-            name=(
-                "fk_incident_timeline_events_"
-                "actor_id_users"
-            ),
+            name=("fk_incident_timeline_events_actor_id_users"),
             ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint(
@@ -143,10 +124,7 @@ def upgrade() -> None:
     )
 
     op.create_index(
-        (
-            "ix_incident_timeline_events_"
-            "incident_occurred"
-        ),
+        ("ix_incident_timeline_events_incident_occurred"),
         "incident_timeline_events",
         [
             "incident_id",
@@ -156,30 +134,21 @@ def upgrade() -> None:
     )
 
     op.create_index(
-        (
-            "ix_incident_timeline_events_"
-            "event_type"
-        ),
+        ("ix_incident_timeline_events_event_type"),
         "incident_timeline_events",
         ["event_type"],
         unique=False,
     )
 
     op.create_index(
-        (
-            "ix_incident_timeline_events_"
-            "actor_id"
-        ),
+        ("ix_incident_timeline_events_actor_id"),
         "incident_timeline_events",
         ["actor_id"],
         unique=False,
     )
 
     op.create_index(
-        (
-            "ix_incident_timeline_events_"
-            "occurred_at"
-        ),
+        ("ix_incident_timeline_events_occurred_at"),
         "incident_timeline_events",
         ["occurred_at"],
         unique=False,
@@ -190,37 +159,23 @@ def downgrade() -> None:
     """Remove incident timeline persistence."""
 
     op.drop_index(
-        (
-            "ix_incident_timeline_events_"
-            "occurred_at"
-        ),
+        ("ix_incident_timeline_events_occurred_at"),
         table_name="incident_timeline_events",
     )
 
     op.drop_index(
-        (
-            "ix_incident_timeline_events_"
-            "actor_id"
-        ),
+        ("ix_incident_timeline_events_actor_id"),
         table_name="incident_timeline_events",
     )
 
     op.drop_index(
-        (
-            "ix_incident_timeline_events_"
-            "event_type"
-        ),
+        ("ix_incident_timeline_events_event_type"),
         table_name="incident_timeline_events",
     )
 
     op.drop_index(
-        (
-            "ix_incident_timeline_events_"
-            "incident_occurred"
-        ),
+        ("ix_incident_timeline_events_incident_occurred"),
         table_name="incident_timeline_events",
     )
 
-    op.drop_table(
-        "incident_timeline_events"
-    )
+    op.drop_table("incident_timeline_events")

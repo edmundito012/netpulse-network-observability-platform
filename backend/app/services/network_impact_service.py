@@ -21,7 +21,6 @@ class NetworkImpactResult:
 
 
 class NetworkImpactService:
-
     @staticmethod
     def get_network_summary(db: Session) -> NetworkSummary:
         metrics = (
@@ -38,20 +37,15 @@ class NetworkImpactService:
                 average_jitter_ms=0,
             )
 
-        avg_latency = sum(
-            metric.response_time_ms or 0
-            for metric in metrics
-        ) / len(metrics)
+        avg_latency = sum(metric.response_time_ms or 0 for metric in metrics) / len(
+            metrics
+        )
 
         avg_packet_loss = sum(
-            metric.packet_loss_percent or 0
-            for metric in metrics
+            metric.packet_loss_percent or 0 for metric in metrics
         ) / len(metrics)
 
-        avg_jitter = sum(
-            metric.jitter_ms or 0
-            for metric in metrics
-        ) / len(metrics)
+        avg_jitter = sum(metric.jitter_ms or 0 for metric in metrics) / len(metrics)
 
         return NetworkSummary(
             average_latency_ms=round(avg_latency, 2),
@@ -119,30 +113,20 @@ class NetworkImpactService:
         affected_services: list[str] = []
 
         if jitter_ms >= 40:
-            affected_services.extend(
-                ["video_calls", "voip", "gaming"]
-            )
+            affected_services.extend(["video_calls", "voip", "gaming"])
 
         if packet_loss_percent >= 10:
-            affected_services.extend(
-                ["gaming", "video_calls", "voip", "vpn"]
-            )
+            affected_services.extend(["gaming", "video_calls", "voip", "vpn"])
 
         if latency_ms >= 150:
-            affected_services.extend(
-                ["gaming", "video_calls", "vpn"]
-            )
+            affected_services.extend(["gaming", "video_calls", "vpn"])
 
         if failure_risk >= 60:
-            affected_services.extend(
-                ["business_apps", "saas", "vpn"]
-            )
+            affected_services.extend(["business_apps", "saas", "vpn"])
 
         affected_services = sorted(set(affected_services))
 
-        status = NetworkImpactService.calculate_status(
-            impact_score
-        )
+        status = NetworkImpactService.calculate_status(impact_score)
 
         message = NetworkImpactService.build_message(
             status=status,
@@ -174,6 +158,5 @@ class NetworkImpactService:
             return "Users may experience lag spikes and unstable calls."
 
         return (
-            "Critical network degradation detected. "
-            "Business services may be impacted."
+            "Critical network degradation detected. Business services may be impacted."
         )

@@ -56,13 +56,10 @@ def get_correlation_portfolio_data(
 ) -> CorrelationAnalyticsSummary:
     """Return real data for the public correlation dashboard."""
 
-    return (
-        CorrelationAnalyticsService
-        .get_summary(
-            db=db,
-            window_hours=window_hours,
-            recent_limit=recent_limit,
-        )
+    return CorrelationAnalyticsService.get_summary(
+        db=db,
+        window_hours=window_hours,
+        recent_limit=recent_limit,
     )
 
 

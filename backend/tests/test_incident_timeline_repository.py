@@ -44,9 +44,7 @@ def create_incident(
     return IncidentRepository.create(
         db=db,
         title="Timeline repository incident",
-        description=(
-            "Incident created for timeline tests."
-        ),
+        description=("Incident created for timeline tests."),
         severity=IncidentSeverity.CRITICAL,
         priority=IncidentPriority.HIGH,
         source=IncidentSource.API,
@@ -59,38 +57,26 @@ def test_append_timeline_event() -> None:
     try:
         incident = create_incident(db)
 
-        event = (
-            IncidentTimelineRepository.append(
-                db=db,
-                incident_id=incident.id,
-                event_type=(
-                    IncidentTimelineEventType
-                    .INCIDENT_CREATED
-                ),
-                actor_type=(
-                    IncidentTimelineActorType
-                    .SYSTEM
-                ),
-                actor_label="NetPulse",
-                message="Incident created",
-                new_value={
-                    "status": "OPEN",
-                },
-                event_metadata={
-                    "source": "test",
-                },
-                occurred_at=NOW,
-            )
+        event = IncidentTimelineRepository.append(
+            db=db,
+            incident_id=incident.id,
+            event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
+            actor_label="NetPulse",
+            message="Incident created",
+            new_value={
+                "status": "OPEN",
+            },
+            event_metadata={
+                "source": "test",
+            },
+            occurred_at=NOW,
         )
 
         assert event.id is not None
         assert event.incident_id == incident.id
 
-        assert (
-            event.event_type
-            == IncidentTimelineEventType
-            .INCIDENT_CREATED
-        )
+        assert event.event_type == IncidentTimelineEventType.INCIDENT_CREATED
 
         assert event.new_value == {
             "status": "OPEN",
@@ -118,18 +104,9 @@ def test_timeline_is_returned_chronologically() -> None:
         ]
 
         event_types = [
-            (
-                IncidentTimelineEventType
-                .INCIDENT_CREATED
-            ),
-            (
-                IncidentTimelineEventType
-                .STATUS_CHANGED
-            ),
-            (
-                IncidentTimelineEventType
-                .COMMENT_ADDED
-            ),
+            (IncidentTimelineEventType.INCIDENT_CREATED),
+            (IncidentTimelineEventType.STATUS_CHANGED),
+            (IncidentTimelineEventType.COMMENT_ADDED),
         ]
 
         for event_type, occurred_at in zip(
@@ -141,32 +118,23 @@ def test_timeline_is_returned_chronologically() -> None:
                 db=db,
                 incident_id=incident.id,
                 event_type=event_type,
-                actor_type=(
-                    IncidentTimelineActorType
-                    .SYSTEM
-                ),
+                actor_type=(IncidentTimelineActorType.SYSTEM),
                 message=event_type.value,
                 occurred_at=occurred_at,
             )
 
-        result = (
-            IncidentTimelineRepository
-            .get_paginated(
-                db=db,
-                incident_id=incident.id,
-                page=1,
-                page_size=50,
-            )
+        result = IncidentTimelineRepository.get_paginated(
+            db=db,
+            incident_id=incident.id,
+            page=1,
+            page_size=50,
         )
 
         items = result["items"]
 
         assert result["total_count"] == 3
 
-        assert [
-            item.event_type
-            for item in items
-        ] == event_types
+        assert [item.event_type for item in items] == event_types
     finally:
         db.close()
 
@@ -177,50 +145,28 @@ def test_timeline_can_be_returned_newest_first() -> None:
     try:
         incident = create_incident(db)
 
-        first = (
-            IncidentTimelineRepository.append(
-                db=db,
-                incident_id=incident.id,
-                event_type=(
-                    IncidentTimelineEventType
-                    .INCIDENT_CREATED
-                ),
-                actor_type=(
-                    IncidentTimelineActorType
-                    .SYSTEM
-                ),
-                message="Incident created",
-                occurred_at=NOW,
-            )
+        first = IncidentTimelineRepository.append(
+            db=db,
+            incident_id=incident.id,
+            event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
+            message="Incident created",
+            occurred_at=NOW,
         )
 
-        latest = (
-            IncidentTimelineRepository.append(
-                db=db,
-                incident_id=incident.id,
-                event_type=(
-                    IncidentTimelineEventType
-                    .STATUS_CHANGED
-                ),
-                actor_type=(
-                    IncidentTimelineActorType
-                    .SYSTEM
-                ),
-                message="Status changed",
-                occurred_at=(
-                    NOW
-                    + timedelta(minutes=5)
-                ),
-            )
+        latest = IncidentTimelineRepository.append(
+            db=db,
+            incident_id=incident.id,
+            event_type=(IncidentTimelineEventType.STATUS_CHANGED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
+            message="Status changed",
+            occurred_at=(NOW + timedelta(minutes=5)),
         )
 
-        result = (
-            IncidentTimelineRepository
-            .get_paginated(
-                db=db,
-                incident_id=incident.id,
-                newest_first=True,
-            )
+        result = IncidentTimelineRepository.get_paginated(
+            db=db,
+            incident_id=incident.id,
+            newest_first=True,
         )
 
         items = result["items"]
@@ -240,51 +186,29 @@ def test_timeline_filters_by_event_type() -> None:
         IncidentTimelineRepository.append(
             db=db,
             incident_id=incident.id,
-            event_type=(
-                IncidentTimelineEventType
-                .INCIDENT_CREATED
-            ),
-            actor_type=(
-                IncidentTimelineActorType
-                .SYSTEM
-            ),
+            event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
             message="Incident created",
         )
 
         IncidentTimelineRepository.append(
             db=db,
             incident_id=incident.id,
-            event_type=(
-                IncidentTimelineEventType
-                .COMMENT_ADDED
-            ),
-            actor_type=(
-                IncidentTimelineActorType
-                .USER
-            ),
+            event_type=(IncidentTimelineEventType.COMMENT_ADDED),
+            actor_type=(IncidentTimelineActorType.USER),
             actor_label="NOC Operator",
             message="Investigation started",
         )
 
-        result = (
-            IncidentTimelineRepository
-            .get_paginated(
-                db=db,
-                incident_id=incident.id,
-                event_type=(
-                    IncidentTimelineEventType
-                    .COMMENT_ADDED
-                ),
-            )
+        result = IncidentTimelineRepository.get_paginated(
+            db=db,
+            incident_id=incident.id,
+            event_type=(IncidentTimelineEventType.COMMENT_ADDED),
         )
 
         assert result["total_count"] == 1
 
-        assert (
-            result["items"][0].event_type
-            == IncidentTimelineEventType
-            .COMMENT_ADDED
-        )
+        assert result["items"][0].event_type == IncidentTimelineEventType.COMMENT_ADDED
     finally:
         db.close()
 
@@ -298,52 +222,31 @@ def test_get_latest_and_timeline_statistics() -> None:
         IncidentTimelineRepository.append(
             db=db,
             incident_id=incident.id,
-            event_type=(
-                IncidentTimelineEventType
-                .INCIDENT_CREATED
-            ),
-            actor_type=(
-                IncidentTimelineActorType
-                .SYSTEM
-            ),
+            event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
             message="Incident created",
             occurred_at=NOW,
         )
 
-        latest = (
-            IncidentTimelineRepository.append(
-                db=db,
-                incident_id=incident.id,
-                event_type=(
-                    IncidentTimelineEventType
-                    .STATUS_CHANGED
-                ),
-                actor_type=(
-                    IncidentTimelineActorType
-                    .SYSTEM
-                ),
-                message="Investigation started",
-                occurred_at=(
-                    NOW
-                    + timedelta(minutes=10)
-                ),
-            )
+        latest = IncidentTimelineRepository.append(
+            db=db,
+            incident_id=incident.id,
+            event_type=(IncidentTimelineEventType.STATUS_CHANGED),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
+            message="Investigation started",
+            occurred_at=(NOW + timedelta(minutes=10)),
         )
 
-        stored_latest = (
-            IncidentTimelineRepository
-            .get_latest(
-                db=db,
-                incident_id=incident.id,
-            )
+        stored_latest = IncidentTimelineRepository.get_latest(
+            db=db,
+            incident_id=incident.id,
         )
 
         assert stored_latest is not None
         assert stored_latest.id == latest.id
 
         assert (
-            IncidentTimelineRepository
-            .count_events(
+            IncidentTimelineRepository.count_events(
                 db=db,
                 incident_id=incident.id,
             )
@@ -351,25 +254,17 @@ def test_get_latest_and_timeline_statistics() -> None:
         )
 
         assert (
-            IncidentTimelineRepository
-            .get_first_occurred_at(
+            IncidentTimelineRepository.get_first_occurred_at(
                 db=db,
                 incident_id=incident.id,
             )
             == NOW
         )
 
-        assert (
-            IncidentTimelineRepository
-            .get_latest_occurred_at(
-                db=db,
-                incident_id=incident.id,
-            )
-            == (
-                NOW
-                + timedelta(minutes=10)
-            )
-        )
+        assert IncidentTimelineRepository.get_latest_occurred_at(
+            db=db,
+            incident_id=incident.id,
+        ) == (NOW + timedelta(minutes=10))
     finally:
         db.close()
 
@@ -391,8 +286,7 @@ def test_invalid_timeline_pagination_is_rejected(
     try:
         with pytest.raises(ValueError):
             (
-                IncidentTimelineRepository
-                .get_paginated(
+                IncidentTimelineRepository.get_paginated(
                     db=db,
                     incident_id=1,
                     page=page,

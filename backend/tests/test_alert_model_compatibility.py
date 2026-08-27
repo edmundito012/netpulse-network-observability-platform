@@ -24,11 +24,7 @@ def create_test_device() -> int:
 
     device = Device(
         name=f"legacy-alert-device-{unique_id}",
-        ip_address=(
-            f"10.72."
-            f"{int(unique_id[:2], 16)}."
-            f"{int(unique_id[2:4], 16)}"
-        ),
+        ip_address=(f"10.72.{int(unique_id[:2], 16)}.{int(unique_id[2:4], 16)}"),
         hostname=f"legacy-alert-{unique_id}",
         device_type="router",
         location="alert-model-test",
@@ -65,9 +61,7 @@ def test_direct_alert_construction_generates_legacy_key() -> None:
 
     assert alert.id is not None
     assert alert.alert_type == AlertType.GENERIC
-    assert alert.deduplication_key.startswith(
-        "legacy:"
-    )
+    assert alert.deduplication_key.startswith("legacy:")
     assert alert.occurrence_count == 1
     assert alert.first_seen_at is not None
     assert alert.last_seen_at is not None
@@ -106,9 +100,6 @@ def test_direct_generic_alerts_receive_different_keys() -> None:
     db.refresh(first_alert)
     db.refresh(second_alert)
 
-    assert (
-        first_alert.deduplication_key
-        != second_alert.deduplication_key
-    )
+    assert first_alert.deduplication_key != second_alert.deduplication_key
 
     db.close()

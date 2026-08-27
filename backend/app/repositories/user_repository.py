@@ -5,7 +5,6 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class UserRepository:
-
     @staticmethod
     def get_all(db: Session):
         return db.query(User).order_by(User.id.asc()).all()

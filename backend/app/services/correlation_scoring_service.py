@@ -27,9 +27,7 @@ from app.services.correlation_signal_service import (
 class CorrelationScoringService:
     """Score an alert against one candidate incident."""
 
-    _ACTIVE_STATUSES: frozenset[
-        IncidentStatus
-    ] = frozenset(
+    _ACTIVE_STATUSES: frozenset[IncidentStatus] = frozenset(
         {
             IncidentStatus.OPEN,
             IncidentStatus.ACKNOWLEDGED,
@@ -62,30 +60,18 @@ class CorrelationScoringService:
         *,
         alert: CorrelationAlertSnapshot,
         incident: CorrelationIncidentSnapshot,
-        configuration: (
-            CorrelationConfiguration
-            | None
-        ) = None,
+        configuration: (CorrelationConfiguration | None) = None,
     ) -> CorrelationScoreBreakdown:
         """Calculate one deterministic candidate score."""
 
-        config = (
-            configuration
-            or CorrelationConfiguration()
-        )
+        config = configuration or CorrelationConfiguration()
 
         reasons: list[CorrelationReason] = []
 
-        alert_family = (
-            CorrelationSignalService.classify(
-                alert.alert_type
-            )
-        )
+        alert_family = CorrelationSignalService.classify(alert.alert_type)
 
-        candidate_families = (
-            CorrelationSignalService.classify_many(
-                incident.alert_types
-            )
+        candidate_families = CorrelationSignalService.classify_many(
+            incident.alert_types
         )
 
         device_component = cls._score_device(
@@ -158,28 +144,17 @@ class CorrelationScoringService:
             reasons=reasons,
         )
 
-        accepted = (
-            not blocked
-            and (
-                score > config.threshold
-                or isclose(
-                    score,
-                    config.threshold,
-                    abs_tol=0.000001,
-                )
+        accepted = not blocked and (
+            score > config.threshold
+            or isclose(
+                score,
+                config.threshold,
+                abs_tol=0.000001,
             )
         )
 
-        if (
-            not accepted
-            and CorrelationReason
-            .SCORE_BELOW_THRESHOLD
-            not in reasons
-        ):
-            reasons.append(
-                CorrelationReason
-                .SCORE_BELOW_THRESHOLD
-            )
+        if not accepted and CorrelationReason.SCORE_BELOW_THRESHOLD not in reasons:
+            reasons.append(CorrelationReason.SCORE_BELOW_THRESHOLD)
 
         components = CorrelationScoreComponents(
             device=round(
@@ -211,22 +186,16 @@ class CorrelationScoringService:
         return CorrelationScoreBreakdown(
             source_alert_id=alert.id,
             incident_id=incident.id,
-            incident_public_id=(
-                incident.public_id
-            ),
+            incident_public_id=(incident.public_id),
             alert_family=alert_family,
-            candidate_families=(
-                candidate_families
-            ),
+            candidate_families=(candidate_families),
             score=score,
             threshold=config.threshold,
             accepted=accepted,
             blocked=blocked,
             reasons=reasons,
             components=components,
-            time_distance_seconds=(
-                time_distance_seconds
-            ),
+            time_distance_seconds=(time_distance_seconds),
             explanation=cls._build_explanation(
                 score=score,
                 threshold=config.threshold,
@@ -247,19 +216,11 @@ class CorrelationScoringService:
         """Score whether the incident contains the alert device."""
 
         if alert.device_id in incident.device_ids:
-            reasons.append(
-                CorrelationReason.SAME_DEVICE
-            )
+            reasons.append(CorrelationReason.SAME_DEVICE)
 
-            return (
-                configuration
-                .weights
-                .same_device
-            )
+            return configuration.weights.same_device
 
-        reasons.append(
-            CorrelationReason.DEVICE_MISMATCH
-        )
+        reasons.append(CorrelationReason.DEVICE_MISMATCH)
 
         return 0.0
 
@@ -279,34 +240,19 @@ class CorrelationScoringService:
         )
 
         if distance > configuration.window_seconds:
-            reasons.append(
-                CorrelationReason
-                .OUTSIDE_TEMPORAL_WINDOW
-            )
+            reasons.append(CorrelationReason.OUTSIDE_TEMPORAL_WINDOW)
 
             return (
                 0.0,
                 distance,
             )
 
-        reasons.append(
-            CorrelationReason
-            .WITHIN_TEMPORAL_WINDOW
-        )
+        reasons.append(CorrelationReason.WITHIN_TEMPORAL_WINDOW)
 
-        proximity_ratio = (
-            1.0
-            - (
-                distance
-                / configuration.window_seconds
-            )
-        )
+        proximity_ratio = 1.0 - (distance / configuration.window_seconds)
 
         return (
-            configuration
-            .weights
-            .temporal_proximity
-            * proximity_ratio,
+            configuration.weights.temporal_proximity * proximity_ratio,
             distance,
         )
 
@@ -316,52 +262,28 @@ class CorrelationScoringService:
         alert: CorrelationAlertSnapshot,
         incident: CorrelationIncidentSnapshot,
         alert_family: CorrelationSignalFamily,
-        candidate_families: frozenset[
-            CorrelationSignalFamily
-        ],
+        candidate_families: frozenset[CorrelationSignalFamily],
         configuration: CorrelationConfiguration,
         reasons: list[CorrelationReason],
     ) -> float:
         """Score exact alert types and compatible families."""
 
         if alert.alert_type in incident.alert_types:
-            reasons.append(
-                CorrelationReason.SAME_ALERT_TYPE
-            )
+            reasons.append(CorrelationReason.SAME_ALERT_TYPE)
 
-            reasons.append(
-                CorrelationReason
-                .COMPATIBLE_SIGNAL_FAMILY
-            )
+            reasons.append(CorrelationReason.COMPATIBLE_SIGNAL_FAMILY)
 
-            return (
-                configuration
-                .weights
-                .signal_compatibility
-            )
+            return configuration.weights.signal_compatibility
 
-        if (
-            CorrelationSignalService
-            .has_compatible_family(
-                alert_family,
-                candidate_families,
-            )
+        if CorrelationSignalService.has_compatible_family(
+            alert_family,
+            candidate_families,
         ):
-            reasons.append(
-                CorrelationReason
-                .COMPATIBLE_SIGNAL_FAMILY
-            )
+            reasons.append(CorrelationReason.COMPATIBLE_SIGNAL_FAMILY)
 
-            return (
-                configuration
-                .weights
-                .signal_compatibility
-            )
+            return configuration.weights.signal_compatibility
 
-        reasons.append(
-            CorrelationReason
-            .INCOMPATIBLE_SIGNAL_FAMILY
-        )
+        reasons.append(CorrelationReason.INCOMPATIBLE_SIGNAL_FAMILY)
 
         return 0.0
 
@@ -379,39 +301,19 @@ class CorrelationScoringService:
         del alert
 
         if alert_family in candidate_families:
-            reasons.append(
-                CorrelationReason
-                .COMPATIBLE_SIGNAL_FAMILY
-            )
+            reasons.append(CorrelationReason.COMPATIBLE_SIGNAL_FAMILY)
 
-            return (
-                configuration
-                .weights
-                .signal_compatibility
-            )
+            return configuration.weights.signal_compatibility
 
-        if (
-            CorrelationSignalService
-            .has_compatible_family(
-                alert_family,
-                candidate_families,
-            )
+        if CorrelationSignalService.has_compatible_family(
+            alert_family,
+            candidate_families,
         ):
-            reasons.append(
-                CorrelationReason
-                .COMPATIBLE_SIGNAL_FAMILY
-            )
+            reasons.append(CorrelationReason.COMPATIBLE_SIGNAL_FAMILY)
 
-            return (
-                configuration
-                .weights
-                .signal_compatibility
-            )
+            return configuration.weights.signal_compatibility
 
-        reasons.append(
-            CorrelationReason
-            .INCOMPATIBLE_SIGNAL_FAMILY
-        )
+        reasons.append(CorrelationReason.INCOMPATIBLE_SIGNAL_FAMILY)
 
         return 0.0
 
@@ -426,37 +328,19 @@ class CorrelationScoringService:
     ) -> float:
         """Score exact or adjacent severity alignment."""
 
-        alert_rank = cls._ALERT_SEVERITY_RANK[
-            alert.severity
-        ]
+        alert_rank = cls._ALERT_SEVERITY_RANK[alert.severity]
 
-        incident_rank = cls._INCIDENT_SEVERITY_RANK[
-            incident.severity
-        ]
+        incident_rank = cls._INCIDENT_SEVERITY_RANK[incident.severity]
 
-        difference = abs(
-            alert_rank - incident_rank
-        )
+        difference = abs(alert_rank - incident_rank)
 
         if difference == 0:
-            reasons.append(
-                CorrelationReason
-                .SEVERITY_ALIGNED
-            )
+            reasons.append(CorrelationReason.SEVERITY_ALIGNED)
 
-            return (
-                configuration
-                .weights
-                .severity_alignment
-            )
+            return configuration.weights.severity_alignment
 
         if difference == 1:
-            return (
-                configuration
-                .weights
-                .severity_alignment
-                * 0.5
-            )
+            return configuration.weights.severity_alignment * 0.5
 
         return 0.0
 
@@ -470,25 +354,12 @@ class CorrelationScoringService:
     ) -> float:
         """Score whether the candidate is active."""
 
-        if (
-            incident.status
-            in cls._ACTIVE_STATUSES
-        ):
-            reasons.append(
-                CorrelationReason
-                .ACTIVE_INCIDENT_AVAILABLE
-            )
+        if incident.status in cls._ACTIVE_STATUSES:
+            reasons.append(CorrelationReason.ACTIVE_INCIDENT_AVAILABLE)
 
-            return (
-                configuration
-                .weights
-                .active_incident
-            )
+            return configuration.weights.active_incident
 
-        reasons.append(
-            CorrelationReason
-            .INCIDENT_ALREADY_RESOLVED
-        )
+        reasons.append(CorrelationReason.INCIDENT_ALREADY_RESOLVED)
 
         return 0.0
 
@@ -510,25 +381,11 @@ class CorrelationScoringService:
         if distance > configuration.window_seconds:
             return 0.0
 
-        reasons.append(
-            CorrelationReason
-            .INCIDENT_RECENTLY_DETECTED
-        )
+        reasons.append(CorrelationReason.INCIDENT_RECENTLY_DETECTED)
 
-        recency_ratio = (
-            1.0
-            - (
-                distance
-                / configuration.window_seconds
-            )
-        )
+        recency_ratio = 1.0 - (distance / configuration.window_seconds)
 
-        return (
-            configuration
-            .weights
-            .recent_detection
-            * recency_ratio
-        )
+        return configuration.weights.recent_detection * recency_ratio
 
     @staticmethod
     def _distance_seconds(
@@ -537,11 +394,7 @@ class CorrelationScoringService:
     ) -> float:
         """Return absolute temporal distance."""
 
-        return abs(
-            (
-                first - second
-            ).total_seconds()
-        )
+        return abs((first - second).total_seconds())
 
     @staticmethod
     def _is_blocked(
@@ -552,20 +405,11 @@ class CorrelationScoringService:
 
         blockers = {
             CorrelationReason.DEVICE_MISMATCH,
-            (
-                CorrelationReason
-                .OUTSIDE_TEMPORAL_WINDOW
-            ),
-            (
-                CorrelationReason
-                .INCIDENT_ALREADY_RESOLVED
-            ),
+            (CorrelationReason.OUTSIDE_TEMPORAL_WINDOW),
+            (CorrelationReason.INCIDENT_ALREADY_RESOLVED),
         }
 
-        return any(
-            reason in blockers
-            for reason in reasons
-        )
+        return any(reason in blockers for reason in reasons)
 
     @staticmethod
     def _build_explanation(
@@ -578,23 +422,14 @@ class CorrelationScoringService:
     ) -> str:
         """Build a stable human-readable explanation."""
 
-        reason_text = ", ".join(
-            reason.value
-            for reason in reasons
-        )
+        reason_text = ", ".join(reason.value for reason in reasons)
 
         if accepted:
-            decision = (
-                "candidate accepted"
-            )
+            decision = "candidate accepted"
         elif blocked:
-            decision = (
-                "candidate rejected by a hard rule"
-            )
+            decision = "candidate rejected by a hard rule"
         else:
-            decision = (
-                "candidate rejected below threshold"
-            )
+            decision = "candidate rejected below threshold"
 
         return (
             f"{decision}; score={score:.4f}; "

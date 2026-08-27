@@ -46,64 +46,40 @@ class IncidentCorrelation(Base):
     __table_args__ = (
         CheckConstraint(
             "score >= 0 AND score <= 1",
-            name=(
-                "ck_incident_correlations_"
-                "score_range"
-            ),
+            name=("ck_incident_correlations_score_range"),
         ),
         CheckConstraint(
             "threshold >= 0 AND threshold <= 1",
-            name=(
-                "ck_incident_correlations_"
-                "threshold_range"
-            ),
+            name=("ck_incident_correlations_threshold_range"),
         ),
         CheckConstraint(
             "candidate_count >= 0",
-            name=(
-                "ck_incident_correlations_"
-                "candidate_count_non_negative"
-            ),
+            name=("ck_incident_correlations_candidate_count_non_negative"),
         ),
         CheckConstraint(
             "window_seconds >= 60",
-            name=(
-                "ck_incident_correlations_"
-                "window_seconds_minimum"
-            ),
+            name=("ck_incident_correlations_window_seconds_minimum"),
         ),
         Index(
             "ix_incident_correlations_source_alert",
             "source_alert_id",
         ),
         Index(
-            (
-                "ix_incident_correlations_"
-                "target_incident_evaluated"
-            ),
+            ("ix_incident_correlations_target_incident_evaluated"),
             "target_incident_id",
             "evaluated_at",
         ),
         Index(
-            (
-                "ix_incident_correlations_"
-                "outcome_status"
-            ),
+            ("ix_incident_correlations_outcome_status"),
             "outcome",
             "application_status",
         ),
         Index(
-            (
-                "ix_incident_correlations_"
-                "signal_family"
-            ),
+            ("ix_incident_correlations_signal_family"),
             "signal_family",
         ),
         Index(
-            (
-                "ix_incident_correlations_"
-                "evaluated_at"
-            ),
+            ("ix_incident_correlations_evaluated_at"),
             "evaluated_at",
         ),
     )
@@ -127,9 +103,7 @@ class IncidentCorrelation(Base):
         nullable=False,
     )
 
-    target_incident_id: Mapped[
-        int | None
-    ] = mapped_column(
+    target_incident_id: Mapped[int | None] = mapped_column(
         ForeignKey(
             "incidents.id",
             ondelete="SET NULL",
@@ -137,9 +111,7 @@ class IncidentCorrelation(Base):
         nullable=True,
     )
 
-    outcome: Mapped[
-        CorrelationOutcome
-    ] = mapped_column(
+    outcome: Mapped[CorrelationOutcome] = mapped_column(
         SQLEnum(
             CorrelationOutcome,
             native_enum=False,
@@ -148,28 +120,18 @@ class IncidentCorrelation(Base):
         nullable=False,
     )
 
-    application_status: Mapped[
-        CorrelationApplicationStatus
-    ] = mapped_column(
+    application_status: Mapped[CorrelationApplicationStatus] = mapped_column(
         SQLEnum(
             CorrelationApplicationStatus,
             native_enum=False,
             length=32,
         ),
         nullable=False,
-        default=(
-            CorrelationApplicationStatus.EVALUATED
-        ),
-        server_default=(
-            CorrelationApplicationStatus
-            .EVALUATED
-            .value
-        ),
+        default=(CorrelationApplicationStatus.EVALUATED),
+        server_default=(CorrelationApplicationStatus.EVALUATED.value),
     )
 
-    signal_family: Mapped[
-        CorrelationSignalFamily
-    ] = mapped_column(
+    signal_family: Mapped[CorrelationSignalFamily] = mapped_column(
         SQLEnum(
             CorrelationSignalFamily,
             native_enum=False,
@@ -218,9 +180,7 @@ class IncidentCorrelation(Base):
         nullable=False,
     )
 
-    correlation_metadata: Mapped[
-        dict[str, Any]
-    ] = mapped_column(
+    correlation_metadata: Mapped[dict[str, Any]] = mapped_column(
         "metadata",
         JSON,
         nullable=False,
@@ -228,9 +188,7 @@ class IncidentCorrelation(Base):
         server_default=text("'{}'::json"),
     )
 
-    failure_reason: Mapped[
-        str | None
-    ] = mapped_column(
+    failure_reason: Mapped[str | None] = mapped_column(
         Text,
         nullable=True,
     )
@@ -241,9 +199,7 @@ class IncidentCorrelation(Base):
         server_default=text("now()"),
     )
 
-    applied_at: Mapped[
-        datetime | None
-    ] = mapped_column(
+    applied_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
@@ -253,9 +209,7 @@ class IncidentCorrelation(Base):
         lazy="joined",
     )
 
-    target_incident: Mapped[
-        Incident | None
-    ] = relationship(
+    target_incident: Mapped[Incident | None] = relationship(
         "Incident",
         lazy="joined",
     )

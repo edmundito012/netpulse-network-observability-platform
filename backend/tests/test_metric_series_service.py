@@ -34,10 +34,7 @@ def build_metric(
     )
 
 
-@patch(
-    "app.services.metric_series_service."
-    "DeviceMetricRepository.get_window"
-)
+@patch("app.services.metric_series_service.DeviceMetricRepository.get_window")
 def test_get_series_drops_missing_values_without_using_zero(
     get_window_mock: Mock,
 ) -> None:
@@ -83,10 +80,7 @@ def test_get_series_drops_missing_values_without_using_zero(
     assert result.samples[0].value == 0.0
 
 
-@patch(
-    "app.services.metric_series_service."
-    "DeviceMetricRepository.get_window"
-)
+@patch("app.services.metric_series_service.DeviceMetricRepository.get_window")
 def test_get_series_preserves_missing_values_when_requested(
     get_window_mock: Mock,
 ) -> None:
@@ -118,10 +112,7 @@ def test_get_series_preserves_missing_values_when_requested(
     assert result.samples[0].value is None
 
 
-@patch(
-    "app.services.metric_series_service."
-    "DeviceMetricRepository.get_window"
-)
+@patch("app.services.metric_series_service.DeviceMetricRepository.get_window")
 def test_values_from_result_only_returns_measured_values(
     get_window_mock: Mock,
 ) -> None:
@@ -150,9 +141,7 @@ def test_values_from_result_only_returns_measured_values(
         missing_value_policy=MissingValuePolicy.PRESERVE,
     )
 
-    assert MetricSeriesService.values_from_result(
-        result
-    ) == [0.0, 15.5]
+    assert MetricSeriesService.values_from_result(result) == [0.0, 15.5]
 
 
 def test_get_series_rejects_invalid_temporal_window() -> None:
@@ -195,10 +184,7 @@ def test_get_series_rejects_invalid_limits(
         )
 
 
-@patch(
-    "app.services.metric_series_service."
-    "DeviceMetricRepository.get_window"
-)
+@patch("app.services.metric_series_service.DeviceMetricRepository.get_window")
 def test_get_series_passes_window_to_repository(
     get_window_mock: Mock,
 ) -> None:

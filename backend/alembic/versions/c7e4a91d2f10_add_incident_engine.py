@@ -12,9 +12,7 @@ import sqlalchemy as sa
 
 
 revision: str = "c7e4a91d2f10"
-down_revision: str | Sequence[str] | None = (
-    "a4c9e2d71b30"
-)
+down_revision: str | Sequence[str] | None = "a4c9e2d71b30"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -166,20 +164,11 @@ def upgrade() -> None:
             name="ck_incidents_status",
         ),
         sa.CheckConstraint(
-            "severity IN ("
-            "'INFO', "
-            "'WARNING', "
-            "'CRITICAL'"
-            ")",
+            "severity IN ('INFO', 'WARNING', 'CRITICAL')",
             name="ck_incidents_severity",
         ),
         sa.CheckConstraint(
-            "priority IN ("
-            "'LOW', "
-            "'MEDIUM', "
-            "'HIGH', "
-            "'CRITICAL'"
-            ")",
+            "priority IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')",
             name="ck_incidents_priority",
         ),
         sa.CheckConstraint(
@@ -193,8 +182,7 @@ def upgrade() -> None:
             name="ck_incidents_source",
         ),
         sa.CheckConstraint(
-            "resolved_at IS NULL "
-            "OR status = 'RESOLVED'",
+            "resolved_at IS NULL OR status = 'RESOLVED'",
             name="ck_incidents_resolution_status",
         ),
         sa.ForeignKeyConstraint(
@@ -307,10 +295,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["incident_id"],
             ["incidents.id"],
-            name=(
-                "fk_incident_alerts_incident_id_"
-                "incidents"
-            ),
+            name=("fk_incident_alerts_incident_id_incidents"),
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint(
@@ -395,6 +380,4 @@ def downgrade() -> None:
 
     op.drop_table("incidents")
 
-    op.execute(
-        "DROP SEQUENCE incident_public_id_seq"
-    )
+    op.execute("DROP SEQUENCE incident_public_id_seq")

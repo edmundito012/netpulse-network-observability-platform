@@ -51,14 +51,8 @@ def create_device(
 
     device = Device(
         name=f"incident-device-{unique_id}",
-        ip_address=(
-            f"10.{second_octet}."
-            f"{third_octet}."
-            f"{fourth_octet}"
-        ),
-        hostname=(
-            f"incident-device-{unique_id}"
-        ),
+        ip_address=(f"10.{second_octet}.{third_octet}.{fourth_octet}"),
+        hostname=(f"incident-device-{unique_id}"),
         device_type="router",
         location="incident-test",
         status=DeviceStatus.ONLINE,
@@ -83,11 +77,7 @@ def create_alert(
     alert = Alert(
         device_id=device_id,
         alert_type=alert_type,
-        deduplication_key=(
-            f"incident-test:"
-            f"{device_id}:"
-            f"{uuid4().hex}"
-        ),
+        deduplication_key=(f"incident-test:{device_id}:{uuid4().hex}"),
         severity=AlertSeverity.CRITICAL,
         status=AlertStatus.OPEN,
         message=message,
@@ -107,15 +97,11 @@ def test_create_incident_generates_public_id() -> None:
         incident = IncidentRepository.create(
             db=db,
             title="WAN degradation in Madrid",
-            description=(
-                "Packet loss affecting headquarters."
-            ),
+            description=("Packet loss affecting headquarters."),
             severity=IncidentSeverity.CRITICAL,
             priority=IncidentPriority.HIGH,
             source=IncidentSource.ALERT_ENGINE,
-            business_impact=(
-                "Video conferencing is degraded."
-            ),
+            business_impact=("Video conferencing is degraded."),
             tags=[
                 "wan",
                 "madrid",
@@ -126,18 +112,10 @@ def test_create_incident_generates_public_id() -> None:
         )
 
         assert incident.id is not None
-        assert incident.public_id.startswith(
-            "INC-"
-        )
+        assert incident.public_id.startswith("INC-")
         assert incident.status == IncidentStatus.OPEN
-        assert (
-            incident.severity
-            == IncidentSeverity.CRITICAL
-        )
-        assert (
-            incident.priority
-            == IncidentPriority.HIGH
-        )
+        assert incident.severity == IncidentSeverity.CRITICAL
+        assert incident.priority == IncidentPriority.HIGH
         assert incident.tags == [
             "wan",
             "madrid",
@@ -160,20 +138,14 @@ def test_get_incident_by_public_id() -> None:
             title="Public ID lookup incident",
         )
 
-        result = (
-            IncidentRepository
-            .get_by_public_id(
-                db=db,
-                public_id=created.public_id,
-            )
+        result = IncidentRepository.get_by_public_id(
+            db=db,
+            public_id=created.public_id,
         )
 
         assert result is not None
         assert result.id == created.id
-        assert (
-            result.public_id
-            == created.public_id
-        )
+        assert result.public_id == created.public_id
     finally:
         db.close()
 
@@ -212,17 +184,9 @@ def test_paginated_incidents_support_filters() -> None:
         assert result["page"] == 1
         assert result["page_size"] == 100
 
-        assert all(
-            incident.severity
-            == IncidentSeverity.CRITICAL
-            for incident in items
-        )
+        assert all(incident.severity == IncidentSeverity.CRITICAL for incident in items)
 
-        assert all(
-            incident.source
-            == IncidentSource.ALERT_ENGINE
-            for incident in items
-        )
+        assert all(incident.source == IncidentSource.ALERT_ENGINE for incident in items)
     finally:
         db.close()
 
@@ -242,9 +206,7 @@ def test_update_incident_details() -> None:
             title="Updated incident title",
             severity=IncidentSeverity.CRITICAL,
             priority=IncidentPriority.HIGH,
-            business_impact=(
-                "Headquarters connectivity affected."
-            ),
+            business_impact=("Headquarters connectivity affected."),
             root_cause="Upstream WAN router",
             tags=[
                 "wan",
@@ -255,29 +217,11 @@ def test_update_incident_details() -> None:
             },
         )
 
-        assert (
-            updated.title
-            == "Updated incident title"
-        )
-        assert (
-            updated.severity
-            == IncidentSeverity.CRITICAL
-        )
-        assert (
-            updated.priority
-            == IncidentPriority.HIGH
-        )
-        assert (
-            updated.business_impact
-            == (
-                "Headquarters connectivity "
-                "affected."
-            )
-        )
-        assert (
-            updated.root_cause
-            == "Upstream WAN router"
-        )
+        assert updated.title == "Updated incident title"
+        assert updated.severity == IncidentSeverity.CRITICAL
+        assert updated.priority == IncidentPriority.HIGH
+        assert updated.business_impact == ("Headquarters connectivity affected.")
+        assert updated.root_cause == "Upstream WAN router"
         assert updated.tags == [
             "wan",
             "critical",
@@ -323,31 +267,19 @@ def test_attach_and_detach_alert() -> None:
             == 1
         )
 
-        stored_incident = (
-            IncidentRepository.get_by_id(
-                db=db,
-                incident_id=incident.id,
-            )
+        stored_incident = IncidentRepository.get_by_id(
+            db=db,
+            incident_id=incident.id,
         )
 
         assert stored_incident is not None
-        assert len(
-            stored_incident.alert_links
-        ) == 1
-        assert (
-            stored_incident
-            .alert_links[0]
-            .alert
-            .id
-            == alert.id
-        )
+        assert len(stored_incident.alert_links) == 1
+        assert stored_incident.alert_links[0].alert.id == alert.id
 
-        detached = (
-            IncidentRepository.detach_alert(
-                db=db,
-                incident_id=incident.id,
-                alert_id=alert.id,
-            )
+        detached = IncidentRepository.detach_alert(
+            db=db,
+            incident_id=incident.id,
+            alert_id=alert.id,
         )
 
         assert detached is True
@@ -408,18 +340,13 @@ def test_alert_cannot_belong_to_two_incidents() -> None:
 
         db.rollback()
 
-        existing_link = (
-            IncidentRepository.get_alert_link(
-                db=db,
-                alert_id=alert.id,
-            )
+        existing_link = IncidentRepository.get_alert_link(
+            db=db,
+            alert_id=alert.id,
         )
 
         assert existing_link is not None
-        assert (
-            existing_link.incident_id
-            == first_incident.id
-        )
+        assert existing_link.incident_id == first_incident.id
     finally:
         db.close()
 
@@ -475,8 +402,7 @@ def test_affected_device_count_uses_distinct_devices() -> None:
         )
 
         assert (
-            IncidentRepository
-            .get_affected_device_count(
+            IncidentRepository.get_affected_device_count(
                 db=db,
                 incident_id=incident.id,
             )

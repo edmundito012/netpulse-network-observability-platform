@@ -20,14 +20,10 @@ router = APIRouter(
 )
 def get_video_call_experience():
 
-    result = (
-        VideoCallExperienceService.analyze(
-            latency_ms=30,
-            jitter_ms=8,
-            packet_loss_percent=0,
-        )
+    result = VideoCallExperienceService.analyze(
+        latency_ms=30,
+        jitter_ms=8,
+        packet_loss_percent=0,
     )
 
-    return VideoCallExperienceResponse(
-        **result.__dict__
-    )
+    return VideoCallExperienceResponse(**result.__dict__)

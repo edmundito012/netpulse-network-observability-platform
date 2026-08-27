@@ -6,9 +6,7 @@ client = TestClient(app)
 
 
 def test_sla_endpoint():
-    response = client.get(
-        "/analytics/sla"
-    )
+    response = client.get("/analytics/sla")
 
     assert response.status_code == 200
 

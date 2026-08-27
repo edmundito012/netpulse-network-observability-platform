@@ -5,7 +5,6 @@ from app.schemas.device import DeviceCreate, DeviceUpdate
 
 
 class DeviceRepository:
-
     @staticmethod
     def get_all(db: Session):
         return db.query(Device).all()

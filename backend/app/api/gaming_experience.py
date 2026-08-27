@@ -56,10 +56,7 @@ def get_gaming_experience(
 
         return GamingExperienceResponse(**result.__dict__)
 
-    latencies = [
-        metric.response_time_ms or 0
-        for metric in metrics
-    ]
+    latencies = [metric.response_time_ms or 0 for metric in metrics]
 
     latency_intelligence = LatencyIntelligenceService.analyze(
         latencies=latencies,
@@ -72,9 +69,7 @@ def get_gaming_experience(
         jitter_ms=latest_metric.jitter_ms or 0,
         packet_loss_percent=latest_metric.packet_loss_percent or 0,
         latency_spread_ms=latency_intelligence.latency_spread_ms,
-        latency_spike_detected=(
-            latency_intelligence.latency_spike_detected
-        ),
+        latency_spike_detected=(latency_intelligence.latency_spike_detected),
     )
 
     return GamingExperienceResponse(**result.__dict__)

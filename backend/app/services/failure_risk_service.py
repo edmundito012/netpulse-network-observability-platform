@@ -9,8 +9,8 @@ from app.services.health_score_service import (
 )
 from app.services.recommendation_service import RecommendationService
 
-class FailureRiskService:
 
+class FailureRiskService:
     @staticmethod
     def calculate(
         db: Session,
@@ -25,16 +25,13 @@ class FailureRiskService:
 
         risk = 100 - health_score
 
-        metrics = (
-            DeviceMetricRepository.get_latest_metrics(
-                db=db,
-                device_id=device.id,
-                limit=1,
-            )
+        metrics = DeviceMetricRepository.get_latest_metrics(
+            db=db,
+            device_id=device.id,
+            limit=1,
         )
 
         if metrics:
-
             metric = metrics[0]
 
             packet_loss = metric.packet_loss_percent or 0
@@ -45,11 +42,9 @@ class FailureRiskService:
             elif packet_loss > 5:
                 risk += 10
 
-        active_alert = (
-            AlertRepository.get_active_alert_for_device(
-                db=db,
-                device_id=device.id,
-            )
+        active_alert = AlertRepository.get_active_alert_for_device(
+            db=db,
+            device_id=device.id,
         )
 
         if active_alert:

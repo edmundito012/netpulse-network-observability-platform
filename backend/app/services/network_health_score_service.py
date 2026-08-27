@@ -18,7 +18,6 @@ class NetworkHealthScoreResult:
 
 
 class NetworkHealthScoreService:
-
     @staticmethod
     def latency_score(latency: float) -> int:
 
@@ -120,17 +119,11 @@ class NetworkHealthScoreService:
         )
 
         if health >= 90:
-            recommendation = (
-                "Network is operating at an excellent level."
-            )
+            recommendation = "Network is operating at an excellent level."
         elif health >= 75:
-            recommendation = (
-                "Minor degradation detected."
-            )
+            recommendation = "Minor degradation detected."
         else:
-            recommendation = (
-                f"Improve {bottleneck} to increase overall health."
-            )
+            recommendation = f"Improve {bottleneck} to increase overall health."
 
         return NetworkHealthScoreResult(
             health_score=health,

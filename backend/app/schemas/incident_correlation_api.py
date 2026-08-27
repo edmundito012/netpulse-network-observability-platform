@@ -32,9 +32,7 @@ class CorrelationExecutionOptions(BaseModel):
     )
 
 
-class CorrelationEvaluationResponse(
-    CorrelationEvaluationResult
-):
+class CorrelationEvaluationResponse(CorrelationEvaluationResult):
     """Persisted correlation evaluation returned over HTTP."""
 
     correlation_id: int = Field(

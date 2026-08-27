@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_network_quality_api():
 
-    response = client.get(
-        "/analytics/network-quality"
-    )
+    response = client.get("/analytics/network-quality")
 
     assert response.status_code == 200
 

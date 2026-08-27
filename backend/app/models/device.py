@@ -16,54 +16,31 @@ class DeviceStatus(str, enum.Enum):
 class Device(Base):
     __tablename__ = "devices"
 
-    id: Mapped[int] = mapped_column(
-        primary_key=True,
-        index=True
-    )
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
-    name: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        index=True
-    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
 
     ip_address: Mapped[str] = mapped_column(
-        String(45),
-        nullable=False,
-        unique=True,
-        index=True
+        String(45), nullable=False, unique=True, index=True
     )
 
-    hostname: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True
-    )
+    hostname: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    device_type: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False
-    )
+    device_type: Mapped[str] = mapped_column(String(100), nullable=False)
 
-    location: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True
-    )
+    location: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     status: Mapped[DeviceStatus] = mapped_column(
-        Enum(DeviceStatus),
-        default=DeviceStatus.UNKNOWN,
-        nullable=False
+        Enum(DeviceStatus), default=DeviceStatus.UNKNOWN, nullable=False
     )
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=lambda: datetime.now(UTC),
-        nullable=False
+        DateTime, default=lambda: datetime.now(UTC), nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
-        nullable=False
+        nullable=False,
     )

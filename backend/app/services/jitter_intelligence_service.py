@@ -19,7 +19,6 @@ class JitterIntelligenceResult:
 
 
 class JitterIntelligenceService:
-
     SPIKE_THRESHOLD_MS = 30
 
     @staticmethod
@@ -28,7 +27,6 @@ class JitterIntelligenceService:
     ) -> JitterIntelligenceResult:
 
         if not jitters:
-
             return JitterIntelligenceResult(
                 average_jitter_ms=0,
                 min_jitter_ms=0,
@@ -41,30 +39,18 @@ class JitterIntelligenceService:
                 gaming_risk="UNKNOWN",
             )
 
-        avg_jitter = (
-            sum(jitters)
-            / len(jitters)
-        )
+        avg_jitter = sum(jitters) / len(jitters)
 
         min_jitter = min(jitters)
         max_jitter = max(jitters)
 
-        spread = (
-            max_jitter
-            - min_jitter
-        )
+        spread = max_jitter - min_jitter
 
         spike_detected = (
-            max_jitter
-            - avg_jitter
-            >= JitterIntelligenceService.SPIKE_THRESHOLD_MS
+            max_jitter - avg_jitter >= JitterIntelligenceService.SPIKE_THRESHOLD_MS
         )
 
-        degradation_detected = (
-            jitters[-1]
-            > jitters[0] * 2
-            and len(jitters) >= 5
-        )
+        degradation_detected = jitters[-1] > jitters[0] * 2 and len(jitters) >= 5
 
         if spread >= 25:
             stability = "UNSTABLE"

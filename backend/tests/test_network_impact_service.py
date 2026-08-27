@@ -15,6 +15,7 @@ def test_network_impact_healthy():
     assert result.status == "HEALTHY"
     assert result.impact_score < 31
 
+
 def test_network_impact_degraded():
 
     result = NetworkImpactService.calculate_impact(

@@ -13,7 +13,6 @@ class BusinessImpactResult:
 
 
 class BusinessImpactService:
-
     @staticmethod
     def classify_quality(
         latency: float,
@@ -21,18 +20,10 @@ class BusinessImpactService:
         jitter: float,
     ) -> str:
 
-        if (
-            latency >= 150
-            or packet_loss >= 10
-            or jitter >= 40
-        ):
+        if latency >= 150 or packet_loss >= 10 or jitter >= 40:
             return "POOR"
 
-        if (
-            latency >= 80
-            or packet_loss >= 3
-            or jitter >= 20
-        ):
+        if latency >= 80 or packet_loss >= 3 or jitter >= 20:
             return "FAIR"
 
         return "GOOD"

@@ -43,10 +43,7 @@ def create_device(db) -> Device:
         name=f"application-device-{suffix}",
         hostname=f"application-device-{suffix}",
         ip_address=(
-            f"10."
-            f"{int(suffix[:2], 16)}."
-            f"{int(suffix[2:4], 16)}."
-            f"{int(suffix[4:6], 16)}"
+            f"10.{int(suffix[:2], 16)}.{int(suffix[2:4], 16)}.{int(suffix[4:6], 16)}"
         ),
         device_type="router",
         location="correlation-application-test",
@@ -65,9 +62,7 @@ def create_alert(
     *,
     device_id: int,
     alert_type: AlertType,
-    severity: AlertSeverity = (
-        AlertSeverity.CRITICAL
-    ),
+    severity: AlertSeverity = (AlertSeverity.CRITICAL),
 ) -> Alert:
     """Persist an alert with explicit timestamps."""
 
@@ -76,11 +71,7 @@ def create_alert(
     alert = Alert(
         device_id=device_id,
         alert_type=alert_type,
-        deduplication_key=(
-            f"correlation-application:"
-            f"{device_id}:"
-            f"{uuid4().hex}"
-        ),
+        deduplication_key=(f"correlation-application:{device_id}:{uuid4().hex}"),
         severity=severity,
         status=AlertStatus.OPEN,
         message="Correlation application test alert",
@@ -105,9 +96,7 @@ def test_apply_match_attaches_alert_to_existing_incident() -> None:
         existing_alert = create_alert(
             db,
             device_id=device.id,
-            alert_type=(
-                AlertType.PACKET_LOSS_BURST
-            ),
+            alert_type=(AlertType.PACKET_LOSS_BURST),
         )
 
         source_alert = create_alert(
@@ -129,23 +118,14 @@ def test_apply_match_attaches_alert_to_existing_incident() -> None:
             alert_id=existing_alert.id,
         )
 
-        result = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=source_alert.id,
-            )
+        result = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=source_alert.id,
         )
 
-        assert (
-            result.outcome
-            == CorrelationOutcome.MATCHED_EXISTING
-        )
+        assert result.outcome == CorrelationOutcome.MATCHED_EXISTING
 
-        assert (
-            result.application_status
-            == CorrelationApplicationStatus.APPLIED
-        )
+        assert result.application_status == CorrelationApplicationStatus.APPLIED
 
         assert result.incident_id == incident.id
         assert result.incident_created is False
@@ -176,23 +156,14 @@ def test_apply_create_new_creates_incident() -> None:
             severity=AlertSeverity.WARNING,
         )
 
-        result = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=source_alert.id,
-            )
+        result = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=source_alert.id,
         )
 
-        assert (
-            result.outcome
-            == CorrelationOutcome.CREATE_NEW
-        )
+        assert result.outcome == CorrelationOutcome.CREATE_NEW
 
-        assert (
-            result.application_status
-            == CorrelationApplicationStatus.APPLIED
-        )
+        assert result.application_status == CorrelationApplicationStatus.APPLIED
 
         assert result.incident_id is not None
         assert result.incident_created is True
@@ -205,15 +176,9 @@ def test_apply_create_new_creates_incident() -> None:
 
         assert incident is not None
 
-        assert (
-            incident.source
-            == IncidentSource.CORRELATION_ENGINE
-        )
+        assert incident.source == IncidentSource.CORRELATION_ENGINE
 
-        assert (
-            incident.severity
-            == IncidentSeverity.WARNING
-        )
+        assert incident.severity == IncidentSeverity.WARNING
 
         link = IncidentRepository.get_alert_link(
             db=db,
@@ -242,27 +207,19 @@ def test_repeated_application_is_idempotent() -> None:
             threshold=0.65,
         )
 
-        first = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=source_alert.id,
-                configuration=configuration,
-            )
+        first = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=source_alert.id,
+            configuration=configuration,
         )
 
-        second = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=source_alert.id,
-                configuration=configuration,
-            )
+        second = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=source_alert.id,
+            configuration=configuration,
         )
 
-        assert first.correlation_id == (
-            second.correlation_id
-        )
+        assert first.correlation_id == (second.correlation_id)
 
         assert first.incident_id == second.incident_id
 
@@ -296,38 +253,28 @@ def test_configuration_change_can_produce_new_application() -> None:
             alert_type=AlertType.FLAPPING,
         )
 
-        first = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=first_alert.id,
-                configuration=(
-                    CorrelationConfiguration(
-                        threshold=0.65,
-                    )
-                ),
-            )
+        first = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=first_alert.id,
+            configuration=(
+                CorrelationConfiguration(
+                    threshold=0.65,
+                )
+            ),
         )
 
-        second = (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=second_alert.id,
-                configuration=(
-                    CorrelationConfiguration(
-                        threshold=0.75,
-                    )
-                ),
-            )
+        second = IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=second_alert.id,
+            configuration=(
+                CorrelationConfiguration(
+                    threshold=0.75,
+                )
+            ),
         )
 
-        assert first.correlation_id != (
-            second.correlation_id
-        )
+        assert first.correlation_id != (second.correlation_id)
 
-        assert first.incident_id != (
-            second.incident_id
-        )
+        assert first.incident_id != (second.incident_id)
     finally:
         db.close()

@@ -35,14 +35,8 @@ def build_incident():
         severity=IncidentSeverity.CRITICAL,
         priority=IncidentPriority.CRITICAL,
         source=IncidentSource.ALERT_ENGINE,
-        started_at=(
-            NOW
-            - timedelta(minutes=10)
-        ),
-        detected_at=(
-            NOW
-            - timedelta(minutes=9)
-        ),
+        started_at=(NOW - timedelta(minutes=10)),
+        detected_at=(NOW - timedelta(minutes=9)),
         resolved_at=None,
         alert_links=[
             SimpleNamespace(),
@@ -51,10 +45,7 @@ def build_incident():
     )
 
 
-@patch(
-    "app.services.incident_portfolio_service."
-    "IncidentPortfolioRepository.get_latest"
-)
+@patch("app.services.incident_portfolio_service.IncidentPortfolioRepository.get_latest")
 @patch(
     "app.services.incident_portfolio_service."
     "IncidentPortfolioRepository."
@@ -81,14 +72,9 @@ def build_incident():
     "count_active_critical"
 )
 @patch(
-    "app.services.incident_portfolio_service."
-    "IncidentPortfolioRepository."
-    "count_active"
+    "app.services.incident_portfolio_service.IncidentPortfolioRepository.count_active"
 )
-@patch(
-    "app.services.incident_portfolio_service."
-    "IncidentPortfolioRepository.count_all"
-)
+@patch("app.services.incident_portfolio_service.IncidentPortfolioRepository.count_all")
 def test_summary_contains_operational_metrics(
     count_all_mock: Mock,
     count_active_mock: Mock,
@@ -119,12 +105,9 @@ def test_summary_contains_operational_metrics(
         build_incident(),
     ]
 
-    result = (
-        IncidentPortfolioService
-        .get_summary(
-            db=Mock(),
-            now=NOW,
-        )
+    result = IncidentPortfolioService.get_summary(
+        db=Mock(),
+        now=NOW,
     )
 
     assert result.total_incidents == 12
@@ -134,19 +117,12 @@ def test_summary_contains_operational_metrics(
     assert result.correlated_alerts == 9
     assert result.affected_devices == 3
 
-    assert (
-        result.mean_resolution_seconds
-        == 1320.0
-    )
+    assert result.mean_resolution_seconds == 1320.0
 
-    assert len(
-        result.latest_incidents
-    ) == 1
+    assert len(result.latest_incidents) == 1
 
     latest = result.latest_incidents[0]
 
-    assert latest.public_id == (
-        "INC-2026-000001"
-    )
+    assert latest.public_id == ("INC-2026-000001")
     assert latest.alert_count == 2
     assert latest.duration_seconds == 600.0

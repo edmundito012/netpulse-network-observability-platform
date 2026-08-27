@@ -61,9 +61,7 @@ def test_invalid_weights_are_rejected(
     weights: dict[str, float],
 ) -> None:
     with pytest.raises(ValueError):
-        CorrelationScoringWeights(
-            **weights
-        )
+        CorrelationScoringWeights(**weights)
 
 
 def test_default_configuration() -> None:
@@ -119,6 +117,4 @@ def test_invalid_configuration_is_rejected(
     data[field_name] = value
 
     with pytest.raises(ValueError):
-        CorrelationConfiguration(
-            **data
-        )
+        CorrelationConfiguration(**data)

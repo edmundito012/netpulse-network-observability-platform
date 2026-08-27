@@ -8,7 +8,6 @@ class NotificationMessage:
 
 
 class NotificationService:
-
     @staticmethod
     def build_predictive_alert_message(
         device_name: str,
@@ -18,11 +17,7 @@ class NotificationService:
 
         return NotificationMessage(
             title="Predictive Alert",
-            body=(
-                f"Device: {device_name}\n"
-                f"Risk Score: {risk_score}\n"
-                f"Reason: {reason}"
-            ),
+            body=(f"Device: {device_name}\nRisk Score: {risk_score}\nReason: {reason}"),
         )
 
     @staticmethod
@@ -33,8 +28,5 @@ class NotificationService:
 
         return NotificationMessage(
             title="Network Risk Alert",
-            body=(
-                f"Risk Score: {risk_score}\n"
-                f"Risk Level: {risk_level}"
-            ),
+            body=(f"Risk Score: {risk_score}\nRisk Level: {risk_level}"),
         )

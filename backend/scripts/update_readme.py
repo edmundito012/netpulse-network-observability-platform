@@ -10,12 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 README_PATH = PROJECT_ROOT / "README.md"
 SCREENSHOTS_DIR = PROJECT_ROOT / "docs" / "screenshots"
-TEST_RESULTS_PATH = (
-    PROJECT_ROOT
-    / "docs"
-    / "evidence"
-    / "latest-tests.txt"
-)
+TEST_RESULTS_PATH = PROJECT_ROOT / "docs" / "evidence" / "latest-tests.txt"
 
 START_MARKER = "<!-- NETPULSE:AUTO:START -->"
 END_MARKER = "<!-- NETPULSE:AUTO:END -->"
@@ -57,17 +52,9 @@ def get_test_summary() -> tuple[int | None, int | None]:
         content,
     )
 
-    passed = (
-        int(passed_match.group(1))
-        if passed_match
-        else None
-    )
+    passed = int(passed_match.group(1)) if passed_match else None
 
-    warnings = (
-        int(warnings_match.group(1))
-        if warnings_match
-        else 0
-    )
+    warnings = int(warnings_match.group(1)) if warnings_match else 0
 
     return passed, warnings
 
@@ -132,9 +119,7 @@ def format_commit(commit: str) -> str:
 
     icon = icons.get(commit_type, "•")
 
-    return (
-        f"{icon} **{scope}** — {message}"
-    )
+    return f"{icon} **{scope}** — {message}"
 
 
 def get_screenshots() -> list[Path]:
@@ -151,10 +136,7 @@ def get_screenshots() -> list[Path]:
     return sorted(
         path
         for path in SCREENSHOTS_DIR.iterdir()
-        if (
-            path.is_file()
-            and path.suffix.lower() in extensions
-        )
+        if (path.is_file() and path.suffix.lower() in extensions)
     )
 
 
@@ -167,19 +149,13 @@ def build_test_section() -> list[str]:
     ]
 
     if passed is None:
-        lines.append(
-            "Test results are not available yet."
-        )
+        lines.append("Test results are not available yet.")
 
         return lines
 
-    lines.append(
-        f"- **Tests:** {passed} passed"
-    )
+    lines.append(f"- **Tests:** {passed} passed")
 
-    lines.append(
-        f"- **Warnings:** {warnings or 0}"
-    )
+    lines.append(f"- **Warnings:** {warnings or 0}")
 
     lines.extend(
         [
@@ -201,16 +177,12 @@ def build_feature_section() -> list[str]:
     ]
 
     if not commits:
-        lines.append(
-            "No recent conventional commits were found."
-        )
+        lines.append("No recent conventional commits were found.")
 
         return lines
 
     for commit in commits:
-        lines.append(
-            f"- {format_commit(commit)}"
-        )
+        lines.append(f"- {format_commit(commit)}")
 
     return lines
 
@@ -224,23 +196,14 @@ def build_screenshot_section() -> list[str]:
     ]
 
     if not screenshots:
-        lines.append(
-            "Screenshots will appear after the visual workflow runs."
-        )
+        lines.append("Screenshots will appear after the visual workflow runs.")
 
         return lines
 
     for screenshot in screenshots:
-        relative_path = screenshot.relative_to(
-            PROJECT_ROOT
-        )
+        relative_path = screenshot.relative_to(PROJECT_ROOT)
 
-        display_name = (
-            screenshot.stem
-            .replace("-", " ")
-            .replace("_", " ")
-            .title()
-        )
+        display_name = screenshot.stem.replace("-", " ").replace("_", " ").title()
 
         markdown_path = relative_path.as_posix()
 
@@ -257,9 +220,7 @@ def build_screenshot_section() -> list[str]:
 
 
 def build_generated_content() -> str:
-    updated_at = datetime.now(UTC).strftime(
-        "%Y-%m-%d %H:%M UTC"
-    )
+    updated_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
 
     sections = [
         "Generated automatically from tests, commits, and screenshots.",
@@ -278,30 +239,18 @@ def build_generated_content() -> str:
 
 def update_readme() -> None:
     if not README_PATH.exists():
-        raise FileNotFoundError(
-            f"README not found: {README_PATH}"
-        )
+        raise FileNotFoundError(f"README not found: {README_PATH}")
 
-    readme = read_text_with_fallback(
-        README_PATH
-    )
+    readme = read_text_with_fallback(README_PATH)
 
-    if (
-        START_MARKER not in readme
-        or END_MARKER not in readme
-    ):
+    if START_MARKER not in readme or END_MARKER not in readme:
         raise RuntimeError(
-            "README markers were not found. Add "
-            f"{START_MARKER} and {END_MARKER}."
+            f"README markers were not found. Add {START_MARKER} and {END_MARKER}."
         )
 
     generated_content = build_generated_content()
 
-    replacement = (
-        f"{START_MARKER}\n\n"
-        f"{generated_content}\n\n"
-        f"{END_MARKER}"
-    )
+    replacement = f"{START_MARKER}\n\n{generated_content}\n\n{END_MARKER}"
 
     pattern = re.compile(
         rf"{re.escape(START_MARKER)}"
@@ -321,9 +270,7 @@ def update_readme() -> None:
         encoding="utf-8",
     )
 
-    print(
-        f"README updated successfully: {README_PATH}"
-    )
+    print(f"README updated successfully: {README_PATH}")
 
 
 def read_text_with_fallback(
@@ -345,9 +292,8 @@ def read_text_with_fallback(
         except UnicodeDecodeError:
             continue
 
-    raise RuntimeError(
-        f"Unable to decode file: {path}"
-    )
+    raise RuntimeError(f"Unable to decode file: {path}")
+
 
 if __name__ == "__main__":
     update_readme()

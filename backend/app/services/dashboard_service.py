@@ -8,64 +8,44 @@ from app.core.dashboard_cache import update_dashboard_state
 from app.services.health_score_service import HealthScoreService
 from app.services.failure_risk_service import FailureRiskService
 
-class DashboardService:
 
+class DashboardService:
     @staticmethod
     def get_dashboard_overview(db: Session):
         total_devices = db.query(Device).count()
 
         online_devices = (
-            db.query(Device)
-            .filter(Device.status == DeviceStatus.ONLINE)
-            .count()
+            db.query(Device).filter(Device.status == DeviceStatus.ONLINE).count()
         )
 
         offline_devices = (
-            db.query(Device)
-            .filter(Device.status == DeviceStatus.OFFLINE)
-            .count()
+            db.query(Device).filter(Device.status == DeviceStatus.OFFLINE).count()
         )
 
         unknown_devices = (
-            db.query(Device)
-            .filter(Device.status == DeviceStatus.UNKNOWN)
-            .count()
+            db.query(Device).filter(Device.status == DeviceStatus.UNKNOWN).count()
         )
 
-        open_alerts = (
-            db.query(Alert)
-            .filter(Alert.status == AlertStatus.OPEN)
-            .count()
-        )
+        open_alerts = db.query(Alert).filter(Alert.status == AlertStatus.OPEN).count()
 
         acknowledged_alerts = (
-            db.query(Alert)
-            .filter(Alert.status == AlertStatus.ACKNOWLEDGED)
-            .count()
+            db.query(Alert).filter(Alert.status == AlertStatus.ACKNOWLEDGED).count()
         )
 
         resolved_alerts = (
-            db.query(Alert)
-            .filter(Alert.status == AlertStatus.RESOLVED)
-            .count()
+            db.query(Alert).filter(Alert.status == AlertStatus.RESOLVED).count()
         )
 
         critical_alerts = (
-            db.query(Alert)
-            .filter(Alert.severity == AlertSeverity.CRITICAL)
-            .count()
+            db.query(Alert).filter(Alert.severity == AlertSeverity.CRITICAL).count()
         )
 
         warning_alerts = (
-            db.query(Alert)
-            .filter(Alert.severity == AlertSeverity.WARNING)
-            .count()
+            db.query(Alert).filter(Alert.severity == AlertSeverity.WARNING).count()
         )
 
         info_alerts = (
-            db.query(Alert)
-            .filter(Alert.severity == AlertSeverity.INFO)
-            .count()
+            db.query(Alert).filter(Alert.severity == AlertSeverity.INFO).count()
         )
 
         latest_events = DeviceEventRepository.get_all(
@@ -88,15 +68,12 @@ class DashboardService:
         network_health_score = 100
 
         if health_scores:
-            network_health_score = int(
-                sum(health_scores) / len(health_scores)
-            )
+            network_health_score = int(sum(health_scores) / len(health_scores))
         devices_at_risk = 0
         highest_risk_device = None
         highest_risk = -1
 
         for device in devices:
-
             risk_data = FailureRiskService.calculate(
                 db=db,
                 device=device,

@@ -65,8 +65,7 @@ def override_admin_user():
 def build_event(
     *,
     event_type: IncidentTimelineEventType = (
-        IncidentTimelineEventType
-        .INCIDENT_CREATED
+        IncidentTimelineEventType.INCIDENT_CREATED
     ),
 ):
     """Build a complete timeline event response double."""
@@ -75,9 +74,7 @@ def build_event(
         id=11,
         incident_id=7,
         event_type=event_type,
-        actor_type=(
-            IncidentTimelineActorType.USER
-        ),
+        actor_type=(IncidentTimelineActorType.USER),
         actor_id=3,
         actor_label="noc-operator",
         message="Incident timeline event",
@@ -96,9 +93,7 @@ def build_event(
 def authenticated_timeline_api():
     """Isolate FastAPI authentication overrides."""
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_admin_user
+    app.dependency_overrides[get_current_user] = override_admin_user
 
     yield
 
@@ -108,30 +103,21 @@ def authenticated_timeline_api():
     )
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.list_events"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.list_events")
 def test_list_incident_timeline(
     list_events_mock: Mock,
 ) -> None:
-    list_events_mock.return_value = (
-        IncidentTimelinePaginationResponse(
-            items=[
-                build_event(),
-            ],
-            total_count=1,
-            page=1,
-            page_size=50,
-            total_pages=1,
-        )
+    list_events_mock.return_value = IncidentTimelinePaginationResponse(
+        items=[
+            build_event(),
+        ],
+        total_count=1,
+        page=1,
+        page_size=50,
+        total_pages=1,
     )
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline"
-    )
+    response = client.get("/incidents/INC-2026-000007/timeline")
 
     assert response.status_code == 200
 
@@ -140,15 +126,10 @@ def test_list_incident_timeline(
     assert payload["total_count"] == 1
     assert len(payload["items"]) == 1
 
-    assert (
-        payload["items"][0]["event_type"]
-        == "INCIDENT_CREATED"
-    )
+    assert payload["items"][0]["event_type"] == "INCIDENT_CREATED"
 
     list_events_mock.assert_called_once_with(
-        db=list_events_mock.call_args.kwargs[
-            "db"
-        ],
+        db=list_events_mock.call_args.kwargs["db"],
         public_id="INC-2026-000007",
         event_type=None,
         actor_type=None,
@@ -158,21 +139,16 @@ def test_list_incident_timeline(
     )
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.list_events"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.list_events")
 def test_list_timeline_supports_filters(
     list_events_mock: Mock,
 ) -> None:
-    list_events_mock.return_value = (
-        IncidentTimelinePaginationResponse(
-            items=[],
-            total_count=0,
-            page=2,
-            page_size=25,
-            total_pages=0,
-        )
+    list_events_mock.return_value = IncidentTimelinePaginationResponse(
+        items=[],
+        total_count=0,
+        page=2,
+        page_size=25,
+        total_pages=0,
     )
 
     response = client.get(
@@ -190,48 +166,29 @@ def test_list_timeline_supports_filters(
 
     call = list_events_mock.call_args.kwargs
 
-    assert (
-        call["event_type"]
-        == IncidentTimelineEventType
-        .STATUS_CHANGED
-    )
+    assert call["event_type"] == IncidentTimelineEventType.STATUS_CHANGED
 
-    assert (
-        call["actor_type"]
-        == IncidentTimelineActorType.USER
-    )
+    assert call["actor_type"] == IncidentTimelineActorType.USER
 
     assert call["page"] == 2
     assert call["page_size"] == 25
     assert call["newest_first"] is True
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.get_summary"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.get_summary")
 def test_get_timeline_summary(
     get_summary_mock: Mock,
 ) -> None:
-    get_summary_mock.return_value = (
-        IncidentTimelineSummary(
-            incident_id=7,
-            public_id="INC-2026-000007",
-            event_count=4,
-            first_event_at=NOW,
-            latest_event_at=NOW,
-            last_event_type=(
-                IncidentTimelineEventType
-                .STATUS_CHANGED
-            ),
-        )
+    get_summary_mock.return_value = IncidentTimelineSummary(
+        incident_id=7,
+        public_id="INC-2026-000007",
+        event_count=4,
+        first_event_at=NOW,
+        latest_event_at=NOW,
+        last_event_type=(IncidentTimelineEventType.STATUS_CHANGED),
     )
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline/summary"
-    )
+    response = client.get("/incidents/INC-2026-000007/timeline/summary")
 
     assert response.status_code == 200
 
@@ -240,69 +197,38 @@ def test_get_timeline_summary(
     assert payload["incident_id"] == 7
     assert payload["event_count"] == 4
 
-    assert (
-        payload["last_event_type"]
-        == "STATUS_CHANGED"
-    )
+    assert payload["last_event_type"] == "STATUS_CHANGED"
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.get_latest_event"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.get_latest_event")
 def test_get_latest_timeline_event(
     get_latest_mock: Mock,
 ) -> None:
-    get_latest_mock.return_value = (
-        build_event(
-            event_type=(
-                IncidentTimelineEventType
-                .COMMENT_ADDED
-            )
-        )
+    get_latest_mock.return_value = build_event(
+        event_type=(IncidentTimelineEventType.COMMENT_ADDED)
     )
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline/latest"
-    )
+    response = client.get("/incidents/INC-2026-000007/timeline/latest")
 
     assert response.status_code == 200
 
-    assert (
-        response.json()["event_type"]
-        == "COMMENT_ADDED"
-    )
+    assert response.json()["event_type"] == "COMMENT_ADDED"
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.get_latest_event"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.get_latest_event")
 def test_latest_timeline_event_can_be_empty(
     get_latest_mock: Mock,
 ) -> None:
     get_latest_mock.return_value = None
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline/latest"
-    )
+    response = client.get("/incidents/INC-2026-000007/timeline/latest")
 
     assert response.status_code == 200
     assert response.json() is None
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.add_comment"
-)
-@patch(
-    "app.api.incident_timeline."
-    "IncidentService.get_required_by_public_id"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.add_comment")
+@patch("app.api.incident_timeline.IncidentService.get_required_by_public_id")
 def test_add_comment_uses_authenticated_actor(
     get_incident_mock: Mock,
     add_comment_mock: Mock,
@@ -314,27 +240,16 @@ def test_add_comment_uses_authenticated_actor(
 
     get_incident_mock.return_value = incident
 
-    event = build_event(
-        event_type=(
-            IncidentTimelineEventType
-            .COMMENT_ADDED
-        )
-    )
+    event = build_event(event_type=(IncidentTimelineEventType.COMMENT_ADDED))
 
-    event.message = (
-        "ISP escalation opened"
-    )
+    event.message = "ISP escalation opened"
 
     add_comment_mock.return_value = event
 
     response = client.post(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline/comments",
+        "/incidents/INC-2026-000007/timeline/comments",
         json={
-            "message": (
-                "ISP escalation opened"
-            ),
+            "message": ("ISP escalation opened"),
             "metadata": {
                 "ticket": "ISP-4821",
             },
@@ -345,30 +260,21 @@ def test_add_comment_uses_authenticated_actor(
 
     payload = response.json()
 
-    assert payload["event_type"] == (
-        "COMMENT_ADDED"
-    )
+    assert payload["event_type"] == ("COMMENT_ADDED")
 
     assert payload["actor_id"] == 3
-    assert payload["actor_label"] == (
-        "noc-operator"
-    )
+    assert payload["actor_label"] == ("noc-operator")
 
     call = add_comment_mock.call_args.kwargs
 
     assert call["incident"] is incident
     assert call["actor_id"] == 3
 
-    assert call["actor_label"] == (
-        "noc-operator"
-    )
+    assert call["actor_label"] == ("noc-operator")
 
-    assert (
-        call["comment_data"].metadata
-        == {
-            "ticket": "ISP-4821",
-        }
-    )
+    assert call["comment_data"].metadata == {
+        "ticket": "ISP-4821",
+    }
 
 
 def test_viewer_can_read_timeline() -> None:
@@ -379,29 +285,20 @@ def test_viewer_can_read_timeline() -> None:
             role=UserRole.VIEWER,
         )
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_viewer_user
+    app.dependency_overrides[get_current_user] = override_viewer_user
 
     with patch(
-        "app.api.incident_timeline."
-        "IncidentTimelineService.list_events"
+        "app.api.incident_timeline.IncidentTimelineService.list_events"
     ) as list_events_mock:
-        list_events_mock.return_value = (
-            IncidentTimelinePaginationResponse(
-                items=[],
-                total_count=0,
-                page=1,
-                page_size=50,
-                total_pages=0,
-            )
+        list_events_mock.return_value = IncidentTimelinePaginationResponse(
+            items=[],
+            total_count=0,
+            page=1,
+            page_size=50,
+            total_pages=0,
         )
 
-        response = client.get(
-            "/incidents/"
-            "INC-2026-000007/"
-            "timeline"
-        )
+        response = client.get("/incidents/INC-2026-000007/timeline")
 
     assert response.status_code == 200
 
@@ -414,18 +311,12 @@ def test_viewer_cannot_add_comment() -> None:
             role=UserRole.VIEWER,
         )
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_viewer_user
+    app.dependency_overrides[get_current_user] = override_viewer_user
 
     response = client.post(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline/comments",
+        "/incidents/INC-2026-000007/timeline/comments",
         json={
-            "message": (
-                "Unauthorized comment"
-            ),
+            "message": ("Unauthorized comment"),
         },
     )
 
@@ -440,11 +331,7 @@ def test_timeline_requires_authentication() -> None:
         None,
     )
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000007/"
-        "timeline"
-    )
+    response = client.get("/incidents/INC-2026-000007/timeline")
 
     assert response.status_code in {
         401,
@@ -452,23 +339,12 @@ def test_timeline_requires_authentication() -> None:
     }
 
 
-@patch(
-    "app.api.incident_timeline."
-    "IncidentTimelineService.get_summary"
-)
+@patch("app.api.incident_timeline.IncidentTimelineService.get_summary")
 def test_missing_incident_returns_404(
     get_summary_mock: Mock,
 ) -> None:
-    get_summary_mock.side_effect = (
-        IncidentNotFoundError(
-            "INC-2026-999999"
-        )
-    )
+    get_summary_mock.side_effect = IncidentNotFoundError("INC-2026-999999")
 
-    response = client.get(
-        "/incidents/"
-        "INC-2026-999999/"
-        "timeline/summary"
-    )
+    response = client.get("/incidents/INC-2026-999999/timeline/summary")
 
     assert response.status_code == 404

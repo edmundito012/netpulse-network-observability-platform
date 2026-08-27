@@ -90,14 +90,10 @@ def translate_timeline_error(
 )
 def list_incident_timeline(
     public_id: str,
-    event_type: (
-        IncidentTimelineEventType | None
-    ) = Query(
+    event_type: (IncidentTimelineEventType | None) = Query(
         default=None,
     ),
-    actor_type: (
-        IncidentTimelineActorType | None
-    ) = Query(
+    actor_type: (IncidentTimelineActorType | None) = Query(
         default=None,
     ),
     page: int = Query(
@@ -113,9 +109,7 @@ def list_incident_timeline(
         default=False,
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentTimelinePaginationResponse:
     """Return filtered timeline events for one incident."""
 
@@ -136,15 +130,11 @@ def list_incident_timeline(
         IncidentError,
         IncidentTimelineError,
     ) as exc:
-        raise translate_timeline_error(
-            exc
-        ) from exc
+        raise translate_timeline_error(exc) from exc
 
     except ValueError as exc:
         raise HTTPException(
-            status_code=(
-                status.HTTP_422_UNPROCESSABLE_CONTENT
-            ),
+            status_code=(status.HTTP_422_UNPROCESSABLE_CONTENT),
             detail=str(exc),
         ) from exc
 
@@ -157,73 +147,55 @@ def list_incident_timeline(
 def get_incident_timeline_summary(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentTimelineSummary:
     """Return aggregate timeline information."""
 
     del current_user
 
     try:
-        return (
-            IncidentTimelineService.get_summary(
-                db=db,
-                public_id=public_id,
-            )
+        return IncidentTimelineService.get_summary(
+            db=db,
+            public_id=public_id,
         )
 
     except (
         IncidentError,
         IncidentTimelineError,
     ) as exc:
-        raise translate_timeline_error(
-            exc
-        ) from exc
+        raise translate_timeline_error(exc) from exc
 
 
 @router.get(
     "/latest",
-    response_model=(
-        IncidentTimelineEventRead | None
-    ),
+    response_model=(IncidentTimelineEventRead | None),
     summary="Retrieve the latest timeline event",
 )
 def get_latest_incident_timeline_event(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentTimelineEventRead | None:
     """Return the most recently recorded event."""
 
     del current_user
 
     try:
-        event = (
-            IncidentTimelineService
-            .get_latest_event(
-                db=db,
-                public_id=public_id,
-            )
+        event = IncidentTimelineService.get_latest_event(
+            db=db,
+            public_id=public_id,
         )
 
     except (
         IncidentError,
         IncidentTimelineError,
     ) as exc:
-        raise translate_timeline_error(
-            exc
-        ) from exc
+        raise translate_timeline_error(exc) from exc
 
     if event is None:
         return None
 
-    return (
-        IncidentTimelineEventRead
-        .model_validate(event)
-    )
+    return IncidentTimelineEventRead.model_validate(event)
 
 
 @router.post(
@@ -236,40 +208,28 @@ def add_incident_timeline_comment(
     public_id: str,
     comment_data: IncidentTimelineCommentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentTimelineEventRead:
     """Append an attributed operator comment."""
 
     try:
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        event = (
-            IncidentTimelineService.add_comment(
-                db=db,
-                incident=incident,
-                comment_data=comment_data,
-                actor_id=current_user.id,
-                actor_label=current_user.username,
-            )
+        event = IncidentTimelineService.add_comment(
+            db=db,
+            incident=incident,
+            comment_data=comment_data,
+            actor_id=current_user.id,
+            actor_label=current_user.username,
         )
 
     except (
         IncidentError,
         IncidentTimelineError,
     ) as exc:
-        raise translate_timeline_error(
-            exc
-        ) from exc
+        raise translate_timeline_error(exc) from exc
 
-    return (
-        IncidentTimelineEventRead
-        .model_validate(event)
-    )
+    return IncidentTimelineEventRead.model_validate(event)

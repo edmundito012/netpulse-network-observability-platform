@@ -58,9 +58,7 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
@@ -69,9 +67,7 @@ class IncidentLifecycleService:
         return cls.transition(
             db=db,
             incident=incident,
-            target_status=(
-                IncidentStatus.ACKNOWLEDGED
-            ),
+            target_status=(IncidentStatus.ACKNOWLEDGED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
@@ -83,9 +79,7 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
@@ -94,9 +88,7 @@ class IncidentLifecycleService:
         return cls.transition(
             db=db,
             incident=incident,
-            target_status=(
-                IncidentStatus.INVESTIGATING
-            ),
+            target_status=(IncidentStatus.INVESTIGATING),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
@@ -108,9 +100,7 @@ class IncidentLifecycleService:
         db: Session,
         *,
         incident: Incident,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
@@ -132,9 +122,7 @@ class IncidentLifecycleService:
         *,
         incident: Incident,
         target_status: IncidentStatus,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
@@ -152,22 +140,17 @@ class IncidentLifecycleService:
 
         if target_status == IncidentStatus.RESOLVED:
             raise IncidentResolutionError(
-                "Incidents must be resolved through "
-                "the dedicated resolution operation"
+                "Incidents must be resolved through the dedicated resolution operation"
             )
 
-        updated = (
-            IncidentLifecycleRepository
-            .transition(
-                db=db,
-                incident=incident,
-                target_status=target_status,
-            )
+        updated = IncidentLifecycleRepository.transition(
+            db=db,
+            incident=incident,
+            target_status=target_status,
         )
 
         (
-            IncidentTimelineRecorderService
-            .record_status_changed(
+            IncidentTimelineRecorderService.record_status_changed(
                 db=db,
                 incident=updated,
                 previous_status=previous_status,
@@ -188,29 +171,20 @@ class IncidentLifecycleService:
         incident: Incident,
         resolution_summary: str,
         root_cause: str | None = None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
         """Resolve and record a monitored incident."""
 
-        normalized_summary = (
-            resolution_summary.strip()
-        )
+        normalized_summary = resolution_summary.strip()
 
         if len(normalized_summary) < 3:
             raise IncidentResolutionError(
-                "resolution_summary must contain "
-                "at least 3 characters"
+                "resolution_summary must contain at least 3 characters"
             )
 
-        normalized_root_cause = (
-            root_cause.strip()
-            if root_cause is not None
-            else None
-        )
+        normalized_root_cause = root_cause.strip() if root_cause is not None else None
 
         if normalized_root_cause == "":
             normalized_root_cause = None
@@ -222,30 +196,20 @@ class IncidentLifecycleService:
             target_status=IncidentStatus.RESOLVED,
         )
 
-        updated = (
-            IncidentLifecycleRepository
-            .resolve(
-                db=db,
-                incident=incident,
-                resolution_summary=(
-                    normalized_summary
-                ),
-                root_cause=normalized_root_cause,
-            )
+        updated = IncidentLifecycleRepository.resolve(
+            db=db,
+            incident=incident,
+            resolution_summary=(normalized_summary),
+            root_cause=normalized_root_cause,
         )
 
         (
-            IncidentTimelineRecorderService
-            .record_incident_resolved(
+            IncidentTimelineRecorderService.record_incident_resolved(
                 db=db,
                 incident=updated,
                 previous_status=previous_status,
-                resolution_summary=(
-                    normalized_summary
-                ),
-                root_cause=(
-                    normalized_root_cause
-                ),
+                resolution_summary=(normalized_summary),
+                root_cause=(normalized_root_cause),
                 actor_type=actor_type,
                 actor_id=actor_id,
                 actor_label=actor_label,
@@ -263,18 +227,10 @@ class IncidentLifecycleService:
     ) -> None:
         """Raise when a lifecycle transition is not allowed."""
 
-        allowed_targets = (
-            cls.ALLOWED_TRANSITIONS[
-                current_status
-            ]
-        )
+        allowed_targets = cls.ALLOWED_TRANSITIONS[current_status]
 
         if target_status not in allowed_targets:
             raise InvalidIncidentTransitionError(
-                current_status=(
-                    current_status.value
-                ),
-                target_status=(
-                    target_status.value
-                ),
+                current_status=(current_status.value),
+                target_status=(target_status.value),
             )

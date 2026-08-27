@@ -41,15 +41,9 @@ class IncidentRepository:
         *,
         title: str,
         description: str | None = None,
-        severity: IncidentSeverity = (
-            IncidentSeverity.WARNING
-        ),
-        priority: IncidentPriority = (
-            IncidentPriority.MEDIUM
-        ),
-        source: IncidentSource = (
-            IncidentSource.MANUAL
-        ),
+        severity: IncidentSeverity = (IncidentSeverity.WARNING),
+        priority: IncidentPriority = (IncidentPriority.MEDIUM),
+        source: IncidentSource = (IncidentSource.MANUAL),
         owner_id: int | None = None,
         business_impact: str | None = None,
         started_at: datetime | None = None,
@@ -72,9 +66,7 @@ class IncidentRepository:
             started_at=started_at or now,
             detected_at=now,
             tags=list(tags or []),
-            incident_metadata=dict(
-                incident_metadata or {}
-            ),
+            incident_metadata=dict(incident_metadata or {}),
         )
 
         db.add(incident)
@@ -93,14 +85,10 @@ class IncidentRepository:
     ) -> Incident | None:
         """Return an incident by its internal database ID."""
 
-        statement = select(Incident).where(
-            Incident.id == incident_id
-        )
+        statement = select(Incident).where(Incident.id == incident_id)
 
         if include_alerts:
-            statement = cls._with_alerts(
-                statement
-            )
+            statement = cls._with_alerts(statement)
 
         return db.scalar(statement)
 
@@ -114,14 +102,10 @@ class IncidentRepository:
     ) -> Incident | None:
         """Return an incident by its public identifier."""
 
-        statement = select(Incident).where(
-            Incident.public_id == public_id
-        )
+        statement = select(Incident).where(Incident.public_id == public_id)
 
         if include_alerts:
-            statement = cls._with_alerts(
-                statement
-            )
+            statement = cls._with_alerts(statement)
 
         return db.scalar(statement)
 
@@ -155,51 +139,26 @@ class IncidentRepository:
             active_only=active_only,
         )
 
-        count_statement = (
-            select(
-                func.count(Incident.id)
-            )
-            .where(*filters)
-        )
+        count_statement = select(func.count(Incident.id)).where(*filters)
 
-        total_count = (
-            db.scalar(count_statement)
-            or 0
-        )
+        total_count = db.scalar(count_statement) or 0
 
         statement = (
             select(Incident)
             .where(*filters)
-            .options(
-                selectinload(
-                    Incident.alert_links
-                )
-            )
+            .options(selectinload(Incident.alert_links))
             .order_by(
                 Incident.detected_at.desc(),
                 Incident.id.desc(),
             )
-            .offset(
-                (page - 1) * page_size
-            )
+            .offset((page - 1) * page_size)
             .limit(page_size)
         )
 
-        items = list(
-            db.scalars(statement)
-            .unique()
-            .all()
-        )
+        items = list(db.scalars(statement).unique().all())
 
         total_pages = (
-            (
-                total_count
-                + page_size
-                - 1
-            )
-            // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {
@@ -220,22 +179,12 @@ class IncidentRepository:
         """Return operational incidents that are not resolved."""
 
         if limit < 1 or limit > 10_000:
-            raise ValueError(
-                "limit must be between 1 and 10000"
-            )
+            raise ValueError("limit must be between 1 and 10000")
 
         statement = (
             select(Incident)
-            .where(
-                Incident.status.in_(
-                    cls.ACTIVE_STATUSES
-                )
-            )
-            .options(
-                selectinload(
-                    Incident.alert_links
-                )
-            )
+            .where(Incident.status.in_(cls.ACTIVE_STATUSES))
+            .options(selectinload(Incident.alert_links))
             .order_by(
                 Incident.severity.desc(),
                 Incident.detected_at.desc(),
@@ -244,11 +193,7 @@ class IncidentRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement)
-            .unique()
-            .all()
-        )
+        return list(db.scalars(statement).unique().all())
 
     @staticmethod
     def update_details(
@@ -292,9 +237,7 @@ class IncidentRepository:
             incident.tags = list(tags)
 
         if incident_metadata is not None:
-            incident.incident_metadata = dict(
-                incident_metadata
-            )
+            incident.incident_metadata = dict(incident_metadata)
 
         incident.updated_at = datetime.now(UTC)
 
@@ -330,16 +273,10 @@ class IncidentRepository:
 
         statement = (
             select(IncidentAlert)
-            .where(
-                IncidentAlert.alert_id == alert_id
-            )
+            .where(IncidentAlert.alert_id == alert_id)
             .options(
-                joinedload(
-                    IncidentAlert.incident
-                ),
-                joinedload(
-                    IncidentAlert.alert
-                ),
+                joinedload(IncidentAlert.incident),
+                joinedload(IncidentAlert.alert),
             )
         )
 
@@ -383,13 +320,9 @@ class IncidentRepository:
         Returns ``True`` when an association existed and was removed.
         """
 
-        statement = select(
-            IncidentAlert
-        ).where(
-            IncidentAlert.incident_id
-            == incident_id,
-            IncidentAlert.alert_id
-            == alert_id,
+        statement = select(IncidentAlert).where(
+            IncidentAlert.incident_id == incident_id,
+            IncidentAlert.alert_id == alert_id,
         )
 
         link = db.scalar(statement)
@@ -410,16 +343,8 @@ class IncidentRepository:
     ) -> int:
         """Return the number of alerts attached to an incident."""
 
-        statement = (
-            select(
-                func.count(
-                    IncidentAlert.id
-                )
-            )
-            .where(
-                IncidentAlert.incident_id
-                == incident_id
-            )
+        statement = select(func.count(IncidentAlert.id)).where(
+            IncidentAlert.incident_id == incident_id
         )
 
         return db.scalar(statement) or 0
@@ -435,23 +360,13 @@ class IncidentRepository:
         from app.models.alert import Alert
 
         statement = (
-            select(
-                func.count(
-                    func.distinct(
-                        Alert.device_id
-                    )
-                )
-            )
+            select(func.count(func.distinct(Alert.device_id)))
             .select_from(IncidentAlert)
             .join(
                 Alert,
-                Alert.id
-                == IncidentAlert.alert_id,
+                Alert.id == IncidentAlert.alert_id,
             )
-            .where(
-                IncidentAlert.incident_id
-                == incident_id
-            )
+            .where(IncidentAlert.incident_id == incident_id)
         )
 
         return db.scalar(statement) or 0
@@ -469,40 +384,21 @@ class IncidentRepository:
         filters: list[object] = []
 
         if active_only:
-            filters.append(
-                Incident.status.in_(
-                    IncidentRepository
-                    .ACTIVE_STATUSES
-                )
-            )
+            filters.append(Incident.status.in_(IncidentRepository.ACTIVE_STATUSES))
         elif status is not None:
-            filters.append(
-                Incident.status == status
-            )
+            filters.append(Incident.status == status)
 
         if severity is not None:
-            filters.append(
-                Incident.severity
-                == severity
-            )
+            filters.append(Incident.severity == severity)
 
         if priority is not None:
-            filters.append(
-                Incident.priority
-                == priority
-            )
+            filters.append(Incident.priority == priority)
 
         if source is not None:
-            filters.append(
-                Incident.source
-                == source
-            )
+            filters.append(Incident.source == source)
 
         if owner_id is not None:
-            filters.append(
-                Incident.owner_id
-                == owner_id
-            )
+            filters.append(Incident.owner_id == owner_id)
 
         return filters
 
@@ -513,23 +409,15 @@ class IncidentRepository:
         page_size: int,
     ) -> None:
         if page < 1:
-            raise ValueError(
-                "page must be greater than or equal to 1"
-            )
+            raise ValueError("page must be greater than or equal to 1")
 
         if page_size < 1 or page_size > 100:
-            raise ValueError(
-                "page_size must be between 1 and 100"
-            )
+            raise ValueError("page_size must be between 1 and 100")
 
     @staticmethod
     def _with_alerts(
         statement,
     ):
         return statement.options(
-            selectinload(
-                Incident.alert_links
-            ).joinedload(
-                IncidentAlert.alert
-            )
+            selectinload(Incident.alert_links).joinedload(IncidentAlert.alert)
         )

@@ -87,19 +87,14 @@ class IncidentService:
             priority=incident_data.priority,
             source=incident_data.source,
             owner_id=incident_data.owner_id,
-            business_impact=(
-                incident_data.business_impact
-            ),
+            business_impact=(incident_data.business_impact),
             started_at=incident_data.started_at,
             tags=incident_data.tags,
-            incident_metadata=(
-                incident_data.metadata
-            ),
+            incident_metadata=(incident_data.metadata),
         )
 
         (
-            IncidentTimelineRecorderService
-            .record_incident_created(
+            IncidentTimelineRecorderService.record_incident_created(
                 db=db,
                 incident=incident,
             )
@@ -110,23 +105,13 @@ class IncidentService:
                 db=db,
                 incident=incident,
                 alert_id=alert_id,
-                actor_type=(
-                    cls._actor_type_for_source(
-                        incident.source
-                    )
-                ),
-                actor_label=(
-                    cls._actor_label_for_source(
-                        incident.source
-                    )
-                ),
+                actor_type=(cls._actor_type_for_source(incident.source)),
+                actor_label=(cls._actor_label_for_source(incident.source)),
             )
 
-        refreshed_incident = (
-            IncidentRepository.get_by_id(
-                db=db,
-                incident_id=incident.id,
-            )
+        refreshed_incident = IncidentRepository.get_by_id(
+            db=db,
+            incident_id=incident.id,
         )
 
         return refreshed_incident or incident
@@ -145,9 +130,7 @@ class IncidentService:
         )
 
         if incident is None:
-            raise IncidentNotFoundError(
-                incident_id
-            )
+            raise IncidentNotFoundError(incident_id)
 
         return incident
 
@@ -159,18 +142,13 @@ class IncidentService:
     ) -> Incident:
         """Return an incident by public ID or raise."""
 
-        incident = (
-            IncidentRepository
-            .get_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentRepository.get_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
         if incident is None:
-            raise IncidentNotFoundError(
-                public_id
-            )
+            raise IncidentNotFoundError(public_id)
 
         return incident
 
@@ -181,27 +159,19 @@ class IncidentService:
         *,
         incident: Incident,
         incident_data: IncidentUpdate,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
         """Update editable incident information and record changes."""
 
-        update_data = (
-            incident_data.model_dump(
-                exclude_unset=True
-            )
-        )
+        update_data = incident_data.model_dump(exclude_unset=True)
 
         if not update_data:
             return incident
 
         if "owner_id" in update_data:
-            owner_id = update_data.pop(
-                "owner_id"
-            )
+            owner_id = update_data.pop("owner_id")
 
             cls.assign_owner(
                 db=db,
@@ -220,21 +190,13 @@ class IncidentService:
         if not update_data and metadata is None:
             return incident
 
-        previous_severity = (
-            incident.severity
-        )
+        previous_severity = incident.severity
 
-        previous_priority = (
-            incident.priority
-        )
+        previous_priority = incident.priority
 
-        previous_business_impact = (
-            incident.business_impact
-        )
+        previous_business_impact = incident.business_impact
 
-        previous_root_cause = (
-            incident.root_cause
-        )
+        previous_root_cause = incident.root_cause
 
         detail_fields = {
             "title",
@@ -254,82 +216,46 @@ class IncidentService:
                 field_name,
             )
 
-            new_details[field_name] = (
-                update_data[field_name]
-            )
+            new_details[field_name] = update_data[field_name]
 
         if metadata is not None:
-            previous_details["metadata"] = dict(
-                incident.incident_metadata or {}
-            )
+            previous_details["metadata"] = dict(incident.incident_metadata or {})
 
-            new_details["metadata"] = dict(
-                metadata
-            )
+            new_details["metadata"] = dict(metadata)
 
-        updated = (
-            IncidentRepository.update_details(
-                db=db,
-                incident=incident,
-                title=update_data.get("title"),
-                description=update_data.get(
-                    "description"
-                ),
-                severity=update_data.get(
-                    "severity"
-                ),
-                priority=update_data.get(
-                    "priority"
-                ),
-                business_impact=update_data.get(
-                    "business_impact"
-                ),
-                root_cause=update_data.get(
-                    "root_cause"
-                ),
-                tags=update_data.get("tags"),
-                incident_metadata=metadata,
-            )
+        updated = IncidentRepository.update_details(
+            db=db,
+            incident=incident,
+            title=update_data.get("title"),
+            description=update_data.get("description"),
+            severity=update_data.get("severity"),
+            priority=update_data.get("priority"),
+            business_impact=update_data.get("business_impact"),
+            root_cause=update_data.get("root_cause"),
+            tags=update_data.get("tags"),
+            incident_metadata=metadata,
         )
 
-        if (
-            "severity" in update_data
-            and updated.severity
-            != previous_severity
-        ):
+        if "severity" in update_data and updated.severity != previous_severity:
             (
-                IncidentTimelineRecorderService
-                .record_severity_changed(
+                IncidentTimelineRecorderService.record_severity_changed(
                     db=db,
                     incident=updated,
-                    previous_severity=(
-                        previous_severity.value
-                    ),
-                    new_severity=(
-                        updated.severity.value
-                    ),
+                    previous_severity=(previous_severity.value),
+                    new_severity=(updated.severity.value),
                     actor_type=actor_type,
                     actor_id=actor_id,
                     actor_label=actor_label,
                 )
             )
 
-        if (
-            "priority" in update_data
-            and updated.priority
-            != previous_priority
-        ):
+        if "priority" in update_data and updated.priority != previous_priority:
             (
-                IncidentTimelineRecorderService
-                .record_priority_changed(
+                IncidentTimelineRecorderService.record_priority_changed(
                     db=db,
                     incident=updated,
-                    previous_priority=(
-                        previous_priority.value
-                    ),
-                    new_priority=(
-                        updated.priority.value
-                    ),
+                    previous_priority=(previous_priority.value),
+                    new_priority=(updated.priority.value),
                     actor_type=actor_type,
                     actor_id=actor_id,
                     actor_label=actor_label,
@@ -338,39 +264,26 @@ class IncidentService:
 
         if (
             "business_impact" in update_data
-            and updated.business_impact
-            != previous_business_impact
+            and updated.business_impact != previous_business_impact
         ):
             (
-                IncidentTimelineRecorderService
-                .record_business_impact_updated(
+                IncidentTimelineRecorderService.record_business_impact_updated(
                     db=db,
                     incident=updated,
-                    previous_value=(
-                        previous_business_impact
-                    ),
-                    new_value=(
-                        updated.business_impact
-                    ),
+                    previous_value=(previous_business_impact),
+                    new_value=(updated.business_impact),
                     actor_type=actor_type,
                     actor_id=actor_id,
                     actor_label=actor_label,
                 )
             )
 
-        if (
-            "root_cause" in update_data
-            and updated.root_cause
-            != previous_root_cause
-        ):
+        if "root_cause" in update_data and updated.root_cause != previous_root_cause:
             (
-                IncidentTimelineRecorderService
-                .record_root_cause_updated(
+                IncidentTimelineRecorderService.record_root_cause_updated(
                     db=db,
                     incident=updated,
-                    previous_value=(
-                        previous_root_cause
-                    ),
+                    previous_value=(previous_root_cause),
                     new_value=updated.root_cause,
                     actor_type=actor_type,
                     actor_id=actor_id,
@@ -380,29 +293,21 @@ class IncidentService:
 
         changed_previous_details = {
             key: value
-            for key, value
-            in previous_details.items()
+            for key, value in previous_details.items()
             if value != new_details.get(key)
         }
 
         changed_new_details = {
-            key: new_details[key]
-            for key
-            in changed_previous_details
+            key: new_details[key] for key in changed_previous_details
         }
 
         if changed_new_details:
             (
-                IncidentTimelineRecorderService
-                .record_details_updated(
+                IncidentTimelineRecorderService.record_details_updated(
                     db=db,
                     incident=updated,
-                    previous_value=(
-                        changed_previous_details
-                    ),
-                    new_value=(
-                        changed_new_details
-                    ),
+                    previous_value=(changed_previous_details),
+                    new_value=(changed_new_details),
                     actor_type=actor_type,
                     actor_id=actor_id,
                     actor_label=actor_label,
@@ -418,9 +323,7 @@ class IncidentService:
         *,
         incident: Incident,
         owner_id: int | None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> Incident:
@@ -431,9 +334,7 @@ class IncidentService:
             owner_id=owner_id,
         )
 
-        previous_owner_id = (
-            incident.owner_id
-        )
+        previous_owner_id = incident.owner_id
 
         if previous_owner_id == owner_id:
             return incident
@@ -445,13 +346,10 @@ class IncidentService:
         )
 
         (
-            IncidentTimelineRecorderService
-            .record_owner_changed(
+            IncidentTimelineRecorderService.record_owner_changed(
                 db=db,
                 incident=updated,
-                previous_owner_id=(
-                    previous_owner_id
-                ),
+                previous_owner_id=(previous_owner_id),
                 new_owner_id=owner_id,
                 actor_type=actor_type,
                 actor_id=actor_id,
@@ -468,9 +366,7 @@ class IncidentService:
         *,
         incident: Incident,
         alert_id: int,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentAlert:
@@ -482,31 +378,20 @@ class IncidentService:
         )
 
         if alert is None:
-            raise IncidentAlertNotFoundError(
-                alert_id
-            )
+            raise IncidentAlertNotFoundError(alert_id)
 
-        existing_link = (
-            IncidentRepository.get_alert_link(
-                db=db,
-                alert_id=alert_id,
-            )
+        existing_link = IncidentRepository.get_alert_link(
+            db=db,
+            alert_id=alert_id,
         )
 
         if existing_link is not None:
-            if (
-                existing_link.incident_id
-                == incident.id
-            ):
+            if existing_link.incident_id == incident.id:
                 return existing_link
 
             raise IncidentAlertConflictError(
                 alert_id=alert_id,
-                public_id=(
-                    existing_link
-                    .incident
-                    .public_id
-                ),
+                public_id=(existing_link.incident.public_id),
             )
 
         try:
@@ -519,35 +404,24 @@ class IncidentService:
         except IntegrityError:
             db.rollback()
 
-            concurrent_link = (
-                IncidentRepository
-                .get_alert_link(
-                    db=db,
-                    alert_id=alert_id,
-                )
+            concurrent_link = IncidentRepository.get_alert_link(
+                db=db,
+                alert_id=alert_id,
             )
 
             if concurrent_link is None:
                 raise
 
-            if (
-                concurrent_link.incident_id
-                == incident.id
-            ):
+            if concurrent_link.incident_id == incident.id:
                 return concurrent_link
 
             raise IncidentAlertConflictError(
                 alert_id=alert_id,
-                public_id=(
-                    concurrent_link
-                    .incident
-                    .public_id
-                ),
+                public_id=(concurrent_link.incident.public_id),
             )
 
         (
-            IncidentTimelineRecorderService
-            .record_alert_attached(
+            IncidentTimelineRecorderService.record_alert_attached(
                 db=db,
                 incident=incident,
                 alert_id=alert_id,
@@ -565,20 +439,16 @@ class IncidentService:
         *,
         incident: Incident,
         alert_id: int,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> None:
         """Detach alert evidence from an incident."""
 
-        detached = (
-            IncidentRepository.detach_alert(
-                db=db,
-                incident_id=incident.id,
-                alert_id=alert_id,
-            )
+        detached = IncidentRepository.detach_alert(
+            db=db,
+            incident_id=incident.id,
+            alert_id=alert_id,
         )
 
         if not detached:
@@ -588,8 +458,7 @@ class IncidentService:
             )
 
         (
-            IncidentTimelineRecorderService
-            .record_alert_detached(
+            IncidentTimelineRecorderService.record_alert_detached(
                 db=db,
                 incident=incident,
                 alert_id=alert_id,
@@ -608,22 +477,13 @@ class IncidentService:
     ) -> IncidentStatistics:
         """Calculate current operational incident statistics."""
 
-        effective_now = (
-            now
-            or datetime.now(UTC)
-        )
+        effective_now = now or datetime.now(UTC)
 
-        end_at = (
-            incident.resolved_at
-            or effective_now
-        )
+        end_at = incident.resolved_at or effective_now
 
         duration_seconds = max(
             0.0,
-            (
-                end_at
-                - incident.started_at
-            ).total_seconds(),
+            (end_at - incident.started_at).total_seconds(),
         )
 
         return IncidentStatistics(
@@ -636,8 +496,7 @@ class IncidentService:
                 )
             ),
             affected_device_count=(
-                IncidentRepository
-                .get_affected_device_count(
+                IncidentRepository.get_affected_device_count(
                     db=db,
                     incident_id=incident.id,
                 )
@@ -646,10 +505,7 @@ class IncidentService:
                 duration_seconds,
                 2,
             ),
-            is_active=(
-                incident.status
-                != IncidentStatus.RESOLVED
-            ),
+            is_active=(incident.status != IncidentStatus.RESOLVED),
         )
 
     @staticmethod
@@ -694,9 +550,7 @@ class IncidentService:
         )
 
         if owner is None:
-            raise IncidentOwnerNotFoundError(
-                owner_id
-            )
+            raise IncidentOwnerNotFoundError(owner_id)
 
     @staticmethod
     def _validate_alerts_for_creation(
@@ -711,26 +565,17 @@ class IncidentService:
             )
 
             if alert is None:
-                raise IncidentAlertNotFoundError(
-                    alert_id
-                )
+                raise IncidentAlertNotFoundError(alert_id)
 
-            existing_link = (
-                IncidentRepository
-                .get_alert_link(
-                    db=db,
-                    alert_id=alert_id,
-                )
+            existing_link = IncidentRepository.get_alert_link(
+                db=db,
+                alert_id=alert_id,
             )
 
             if existing_link is not None:
                 raise IncidentAlertConflictError(
                     alert_id=alert_id,
-                    public_id=(
-                        existing_link
-                        .incident
-                        .public_id
-                    ),
+                    public_id=(existing_link.incident.public_id),
                 )
 
     @staticmethod
@@ -742,10 +587,7 @@ class IncidentService:
             IncidentSource.CORRELATION_ENGINE,
             IncidentSource.ROOT_CAUSE_ENGINE,
         }:
-            return (
-                IncidentTimelineActorType
-                .AUTOMATION
-            )
+            return IncidentTimelineActorType.AUTOMATION
 
         if source == IncidentSource.API:
             return IncidentTimelineActorType.API

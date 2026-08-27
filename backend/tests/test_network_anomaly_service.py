@@ -5,18 +5,16 @@ from app.services.network_anomaly_service import (
 
 def test_normal_metric_behavior():
 
-    result = (
-        NetworkAnomalyService.analyze(
-            values=[
-                20,
-                21,
-                19,
-                20,
-                21,
-                20,
-            ],
-            metric_name="latency",
-        )
+    result = NetworkAnomalyService.analyze(
+        values=[
+            20,
+            21,
+            19,
+            20,
+            21,
+            20,
+        ],
+        metric_name="latency",
     )
 
     assert result.severity == "NORMAL"
@@ -25,18 +23,16 @@ def test_normal_metric_behavior():
 
 def test_warning_anomaly_detection():
 
-    result = (
-        NetworkAnomalyService.analyze(
-            values=[
-                20,
-                21,
-                19,
-                20,
-                21,
-                27,
-            ],
-            metric_name="latency",
-        )
+    result = NetworkAnomalyService.analyze(
+        values=[
+            20,
+            21,
+            19,
+            20,
+            21,
+            27,
+        ],
+        metric_name="latency",
     )
 
     assert result.severity in [
@@ -49,18 +45,16 @@ def test_warning_anomaly_detection():
 
 def test_critical_anomaly_detection():
 
-    result = (
-        NetworkAnomalyService.analyze(
-            values=[
-                20,
-                21,
-                19,
-                20,
-                21,
-                45,
-            ],
-            metric_name="latency",
-        )
+    result = NetworkAnomalyService.analyze(
+        values=[
+            20,
+            21,
+            19,
+            20,
+            21,
+            45,
+        ],
+        metric_name="latency",
     )
 
     assert result.severity == "CRITICAL"

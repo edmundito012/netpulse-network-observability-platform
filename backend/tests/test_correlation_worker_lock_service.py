@@ -14,7 +14,6 @@ def test_lock_is_acquired():
     with CorrelationWorkerLockService.acquire(
         connection,
     ) as acquired:
-
         assert acquired is True
 
     assert connection.execute.call_count == 2
@@ -29,7 +28,6 @@ def test_lock_not_acquired():
     with CorrelationWorkerLockService.acquire(
         connection,
     ) as acquired:
-
         assert acquired is False
 
     assert connection.execute.call_count == 1

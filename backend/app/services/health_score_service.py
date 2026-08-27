@@ -5,7 +5,6 @@ from app.repositories.device_metric_repository import DeviceMetricRepository
 
 
 class HealthScoreService:
-
     @staticmethod
     def calculate(
         db: Session,
@@ -13,16 +12,13 @@ class HealthScoreService:
     ):
         score = 100
 
-        metrics = (
-            DeviceMetricRepository.get_latest_metrics(
-                db=db,
-                device_id=device.id,
-                limit=5,
-            )
+        metrics = DeviceMetricRepository.get_latest_metrics(
+            db=db,
+            device_id=device.id,
+            limit=5,
         )
 
         if metrics:
-
             latest = metrics[0]
 
             latency = latest.response_time_ms or 0
@@ -40,11 +36,9 @@ class HealthScoreService:
             elif packet_loss > 5:
                 score -= 10
 
-        active_alert = (
-            AlertRepository.get_active_alert_for_device(
-                db=db,
-                device_id=device.id,
-            )
+        active_alert = AlertRepository.get_active_alert_for_device(
+            db=db,
+            device_id=device.id,
         )
 
         if active_alert:

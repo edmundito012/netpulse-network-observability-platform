@@ -13,32 +13,16 @@ class CorrelationSignalService:
         AlertType,
         CorrelationSignalFamily,
     ] = {
-        AlertType.GENERIC: (
-            CorrelationSignalFamily.GENERIC
-        ),
-        AlertType.PACKET_LOSS: (
-            CorrelationSignalFamily.CONNECTIVITY
-        ),
-        AlertType.PACKET_LOSS_BURST: (
-            CorrelationSignalFamily.CONNECTIVITY
-        ),
-        AlertType.JITTER: (
-            CorrelationSignalFamily.PERFORMANCE
-        ),
-        AlertType.LATENCY_TREND: (
-            CorrelationSignalFamily.PERFORMANCE
-        ),
-        AlertType.FLAPPING: (
-            CorrelationSignalFamily.STABILITY
-        ),
-        AlertType.PREDICTIVE: (
-            CorrelationSignalFamily.PREDICTIVE
-        ),
+        AlertType.GENERIC: (CorrelationSignalFamily.GENERIC),
+        AlertType.PACKET_LOSS: (CorrelationSignalFamily.CONNECTIVITY),
+        AlertType.PACKET_LOSS_BURST: (CorrelationSignalFamily.CONNECTIVITY),
+        AlertType.JITTER: (CorrelationSignalFamily.PERFORMANCE),
+        AlertType.LATENCY_TREND: (CorrelationSignalFamily.PERFORMANCE),
+        AlertType.FLAPPING: (CorrelationSignalFamily.STABILITY),
+        AlertType.PREDICTIVE: (CorrelationSignalFamily.PREDICTIVE),
     }
 
-    _COMPATIBLE_FAMILIES: frozenset[
-        frozenset[CorrelationSignalFamily]
-    ] = frozenset(
+    _COMPATIBLE_FAMILIES: frozenset[frozenset[CorrelationSignalFamily]] = frozenset(
         {
             frozenset(
                 {
@@ -86,10 +70,7 @@ class CorrelationSignalService:
     ) -> frozenset[CorrelationSignalFamily]:
         """Return all distinct families represented by alert types."""
 
-        return frozenset(
-            cls.classify(alert_type)
-            for alert_type in alert_types
-        )
+        return frozenset(cls.classify(alert_type) for alert_type in alert_types)
 
     @classmethod
     def are_compatible(
@@ -101,8 +82,7 @@ class CorrelationSignalService:
 
         if (
             source == CorrelationSignalFamily.GENERIC
-            or candidate
-            == CorrelationSignalFamily.GENERIC
+            or candidate == CorrelationSignalFamily.GENERIC
         ):
             return False
 
@@ -123,9 +103,7 @@ class CorrelationSignalService:
     def has_compatible_family(
         cls,
         source: CorrelationSignalFamily,
-        candidates: frozenset[
-            CorrelationSignalFamily
-        ],
+        candidates: frozenset[CorrelationSignalFamily],
     ) -> bool:
         """Return whether any candidate family is compatible."""
 

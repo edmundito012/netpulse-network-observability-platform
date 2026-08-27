@@ -20,31 +20,17 @@ router = APIRouter(
 )
 def get_health_score():
 
-    latency = (
-        NetworkHealthScoreService
-        .latency_score(22)
+    latency = NetworkHealthScoreService.latency_score(22)
+
+    jitter = NetworkHealthScoreService.jitter_score(6)
+
+    loss = NetworkHealthScoreService.packet_loss_score(0)
+
+    result = NetworkHealthScoreService.analyze(
+        latency_score=latency,
+        jitter_score=jitter,
+        packet_loss_score=loss,
+        stability_score=95,
     )
 
-    jitter = (
-        NetworkHealthScoreService
-        .jitter_score(6)
-    )
-
-    loss = (
-        NetworkHealthScoreService
-        .packet_loss_score(0)
-    )
-
-    result = (
-        NetworkHealthScoreService
-        .analyze(
-            latency_score=latency,
-            jitter_score=jitter,
-            packet_loss_score=loss,
-            stability_score=95,
-        )
-    )
-
-    return NetworkHealthScoreResponse(
-        **result.__dict__
-    )
+    return NetworkHealthScoreResponse(**result.__dict__)

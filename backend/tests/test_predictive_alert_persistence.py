@@ -6,9 +6,6 @@ from app.services.predictive_alert_persistence_service import (
 
 def test_latency_alert_payload():
 
-    payload = (
-        PredictiveAlertPersistenceService
-        .__dict__
-    )
+    payload = PredictiveAlertPersistenceService.__dict__
 
     assert payload is not None

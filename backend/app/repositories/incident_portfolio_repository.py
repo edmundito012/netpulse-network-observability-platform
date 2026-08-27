@@ -27,14 +27,9 @@ class IncidentPortfolioRepository:
     ) -> int:
         """Return the total number of incidents."""
 
-        statement = select(
-            func.count(Incident.id)
-        )
+        statement = select(func.count(Incident.id))
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @staticmethod
     def count_by_status(
@@ -44,16 +39,9 @@ class IncidentPortfolioRepository:
     ) -> int:
         """Return incidents in one lifecycle state."""
 
-        statement = select(
-            func.count(Incident.id)
-        ).where(
-            Incident.status == status
-        )
+        statement = select(func.count(Incident.id)).where(Incident.status == status)
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @classmethod
     def count_active(
@@ -62,18 +50,11 @@ class IncidentPortfolioRepository:
     ) -> int:
         """Return incidents that are not resolved."""
 
-        statement = select(
-            func.count(Incident.id)
-        ).where(
-            Incident.status.in_(
-                cls.ACTIVE_STATUSES
-            )
+        statement = select(func.count(Incident.id)).where(
+            Incident.status.in_(cls.ACTIVE_STATUSES)
         )
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @classmethod
     def count_active_critical(
@@ -86,20 +67,12 @@ class IncidentPortfolioRepository:
             IncidentSeverity,
         )
 
-        statement = select(
-            func.count(Incident.id)
-        ).where(
-            Incident.status.in_(
-                cls.ACTIVE_STATUSES
-            ),
-            Incident.severity
-            == IncidentSeverity.CRITICAL,
+        statement = select(func.count(Incident.id)).where(
+            Incident.status.in_(cls.ACTIVE_STATUSES),
+            Incident.severity == IncidentSeverity.CRITICAL,
         )
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @classmethod
     def count_correlated_alerts(
@@ -109,28 +82,16 @@ class IncidentPortfolioRepository:
         """Return alerts attached to active incidents."""
 
         statement = (
-            select(
-                func.count(
-                    IncidentAlert.id
-                )
-            )
+            select(func.count(IncidentAlert.id))
             .select_from(IncidentAlert)
             .join(
                 Incident,
-                Incident.id
-                == IncidentAlert.incident_id,
+                Incident.id == IncidentAlert.incident_id,
             )
-            .where(
-                Incident.status.in_(
-                    cls.ACTIVE_STATUSES
-                )
-            )
+            .where(Incident.status.in_(cls.ACTIVE_STATUSES))
         )
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @classmethod
     def count_affected_devices(
@@ -140,35 +101,20 @@ class IncidentPortfolioRepository:
         """Return distinct devices represented by active incidents."""
 
         statement = (
-            select(
-                func.count(
-                    func.distinct(
-                        Alert.device_id
-                    )
-                )
-            )
+            select(func.count(func.distinct(Alert.device_id)))
             .select_from(IncidentAlert)
             .join(
                 Incident,
-                Incident.id
-                == IncidentAlert.incident_id,
+                Incident.id == IncidentAlert.incident_id,
             )
             .join(
                 Alert,
-                Alert.id
-                == IncidentAlert.alert_id,
+                Alert.id == IncidentAlert.alert_id,
             )
-            .where(
-                Incident.status.in_(
-                    cls.ACTIVE_STATUSES
-                )
-            )
+            .where(Incident.status.in_(cls.ACTIVE_STATUSES))
         )
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @staticmethod
     def get_mean_resolution_seconds(
@@ -180,13 +126,11 @@ class IncidentPortfolioRepository:
             func.avg(
                 func.extract(
                     "epoch",
-                    Incident.resolved_at
-                    - Incident.started_at,
+                    Incident.resolved_at - Incident.started_at,
                 )
             )
         ).where(
-            Incident.status
-            == IncidentStatus.RESOLVED,
+            Incident.status == IncidentStatus.RESOLVED,
             Incident.resolved_at.is_not(None),
         )
 
@@ -212,17 +156,11 @@ class IncidentPortfolioRepository:
         """Return the most recently detected incidents."""
 
         if limit < 1 or limit > 20:
-            raise ValueError(
-                "limit must be between 1 and 20"
-            )
+            raise ValueError("limit must be between 1 and 20")
 
         statement = (
             select(Incident)
-            .options(
-                selectinload(
-                    Incident.alert_links
-                )
-            )
+            .options(selectinload(Incident.alert_links))
             .order_by(
                 Incident.detected_at.desc(),
                 Incident.id.desc(),
@@ -230,8 +168,4 @@ class IncidentPortfolioRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement)
-            .unique()
-            .all()
-        )
+        return list(db.scalars(statement).unique().all())

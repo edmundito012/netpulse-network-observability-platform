@@ -59,15 +59,9 @@ class PacketLossBurstApplicationService:
         if resolved_device_id is None:
             analysis = PacketLossBurstService.detect(
                 samples=[],
-                warning_threshold_percent=(
-                    warning_threshold_percent
-                ),
-                critical_threshold_percent=(
-                    critical_threshold_percent
-                ),
-                minimum_consecutive_samples=(
-                    minimum_consecutive_samples
-                ),
+                warning_threshold_percent=(warning_threshold_percent),
+                critical_threshold_percent=(critical_threshold_percent),
+                minimum_consecutive_samples=(minimum_consecutive_samples),
                 maximum_gap_seconds=maximum_gap_seconds,
             )
 
@@ -85,22 +79,14 @@ class PacketLossBurstApplicationService:
             end_at=end_at,
             limit=limit,
             sort_direction=SortDirection.ASCENDING,
-            missing_value_policy=(
-                MissingValuePolicy.PRESERVE
-            ),
+            missing_value_policy=(MissingValuePolicy.PRESERVE),
         )
 
         analysis = PacketLossBurstService.detect(
             samples=series.samples,
-            warning_threshold_percent=(
-                warning_threshold_percent
-            ),
-            critical_threshold_percent=(
-                critical_threshold_percent
-            ),
-            minimum_consecutive_samples=(
-                minimum_consecutive_samples
-            ),
+            warning_threshold_percent=(warning_threshold_percent),
+            critical_threshold_percent=(critical_threshold_percent),
+            minimum_consecutive_samples=(minimum_consecutive_samples),
             maximum_gap_seconds=maximum_gap_seconds,
         )
 

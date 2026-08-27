@@ -16,12 +16,10 @@ from app.services.packet_loss_burst_application_service import (
 
 
 @patch(
-    "app.services.packet_loss_burst_application_service."
-    "PacketLossBurstService.detect"
+    "app.services.packet_loss_burst_application_service.PacketLossBurstService.detect"
 )
 @patch(
-    "app.services.packet_loss_burst_application_service."
-    "MetricSeriesService.get_series"
+    "app.services.packet_loss_burst_application_service.MetricSeriesService.get_series"
 )
 def test_application_service_uses_packet_loss_series(
     get_series_mock: Mock,
@@ -48,9 +46,7 @@ def test_application_service_uses_packet_loss_series(
         end_at=None,
         limit=50,
         sort_direction=SortDirection.ASCENDING,
-        missing_value_policy=(
-            MissingValuePolicy.PRESERVE
-        ),
+        missing_value_policy=(MissingValuePolicy.PRESERVE),
     )
 
     detect_mock.assert_called_once_with(
@@ -67,8 +63,7 @@ def test_application_service_uses_packet_loss_series(
 
 
 @patch(
-    "app.services.packet_loss_burst_application_service."
-    "PacketLossBurstService.detect"
+    "app.services.packet_loss_burst_application_service.PacketLossBurstService.detect"
 )
 @patch(
     "app.services.packet_loss_burst_application_service."

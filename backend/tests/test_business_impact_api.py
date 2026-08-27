@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_business_impact_endpoint():
 
-    response = client.get(
-        "/network/impact/business"
-    )
+    response = client.get("/network/impact/business")
 
     assert response.status_code == 200
 

@@ -5,17 +5,13 @@ from app.services.predictive_alert_service import (
 
 
 class PredictiveAlertGenerationService:
-
     @staticmethod
     def build_latency_alert():
 
         return {
             "severity": AlertSeverity.WARNING,
             "title": "Predictive degradation detected",
-            "message": (
-                "Latency trend indicates potential "
-                "network degradation."
-            ),
+            "message": ("Latency trend indicates potential network degradation."),
         }
 
     @staticmethod
@@ -24,10 +20,7 @@ class PredictiveAlertGenerationService:
         return {
             "severity": AlertSeverity.WARNING,
             "title": "Predictive degradation detected",
-            "message": (
-                "Packet loss trend indicates potential "
-                "network degradation."
-            ),
+            "message": ("Packet loss trend indicates potential network degradation."),
         }
 
     @staticmethod
@@ -36,8 +29,5 @@ class PredictiveAlertGenerationService:
         return {
             "severity": AlertSeverity.WARNING,
             "title": "Predictive degradation detected",
-            "message": (
-                "Jitter trend indicates potential "
-                "network degradation."
-            ),
+            "message": ("Jitter trend indicates potential network degradation."),
         }

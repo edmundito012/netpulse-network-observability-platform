@@ -6,7 +6,6 @@ from app.models.notification_log import (
 
 
 class NotificationLogService:
-
     @staticmethod
     def create(
         db: Session,
@@ -32,9 +31,7 @@ class NotificationLogService:
     ):
         return (
             db.query(NotificationLog)
-            .order_by(
-                NotificationLog.sent_at.desc()
-            )
+            .order_by(NotificationLog.sent_at.desc())
             .limit(100)
             .all()
         )

@@ -3,7 +3,6 @@ from abc import abstractmethod
 
 
 class BaseNotificationProvider(ABC):
-
     @abstractmethod
     def send(
         self,

@@ -72,7 +72,7 @@ def test_create_device():
         "/devices/",
         json={
             "name": f"pytest-device-{unique_id}",
-            "ip_address": f"10.20.{int(unique_id[:2],16)}.{int(unique_id[2:4],16)}",
+            "ip_address": f"10.20.{int(unique_id[:2], 16)}.{int(unique_id[2:4], 16)}",
             "hostname": f"host-{unique_id}",
             "device_type": "router",
             "location": "pytest-lab",
@@ -98,7 +98,7 @@ def test_get_device():
         "/devices/",
         json={
             "name": f"get-device-{unique_id}",
-            "ip_address": f"10.21.{int(unique_id[:2],16)}.{int(unique_id[2:4],16)}",
+            "ip_address": f"10.21.{int(unique_id[:2], 16)}.{int(unique_id[2:4], 16)}",
             "hostname": f"host-{unique_id}",
             "device_type": "switch",
             "location": "pytest-lab",
@@ -132,7 +132,7 @@ def test_update_device():
         "/devices/",
         json={
             "name": f"update-device-{unique_id}",
-            "ip_address": f"10.22.{int(unique_id[:2],16)}.{int(unique_id[2:4],16)}",
+            "ip_address": f"10.22.{int(unique_id[:2], 16)}.{int(unique_id[2:4], 16)}",
             "hostname": f"host-{unique_id}",
             "device_type": "router",
             "location": "pytest-lab",
@@ -148,9 +148,7 @@ def test_update_device():
 
     response = client.put(
         f"/devices/{device_id}",
-        json={
-            "name": f"updated-device-{unique_id}"
-        },
+        json={"name": f"updated-device-{unique_id}"},
         headers={
             "Authorization": f"Bearer {token}",
         },
@@ -169,7 +167,7 @@ def test_delete_device():
         "/devices/",
         json={
             "name": f"delete-device-{unique_id}",
-            "ip_address": f"10.23.{int(unique_id[:2],16)}.{int(unique_id[2:4],16)}",
+            "ip_address": f"10.23.{int(unique_id[:2], 16)}.{int(unique_id[2:4], 16)}",
             "hostname": f"host-{unique_id}",
             "device_type": "router",
             "location": "pytest-lab",

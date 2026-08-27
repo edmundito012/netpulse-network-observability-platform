@@ -33,26 +33,19 @@ def build_incident(
     )
 
 
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.transition"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.transition")
 def test_open_incident_can_be_acknowledged(
     transition_mock: Mock,
 ) -> None:
     db = Mock()
 
-    incident = build_incident(
-        IncidentStatus.OPEN
-    )
+    incident = build_incident(IncidentStatus.OPEN)
 
     transition_mock.return_value = incident
 
-    result = (
-        IncidentLifecycleService.acknowledge(
-            db=db,
-            incident=incident,
-        )
+    result = IncidentLifecycleService.acknowledge(
+        db=db,
+        incident=incident,
     )
 
     assert result is incident
@@ -60,24 +53,17 @@ def test_open_incident_can_be_acknowledged(
     transition_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        target_status=(
-            IncidentStatus.ACKNOWLEDGED
-        ),
+        target_status=(IncidentStatus.ACKNOWLEDGED),
     )
 
 
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.transition"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.transition")
 def test_open_incident_can_start_investigation(
     transition_mock: Mock,
 ) -> None:
     db = Mock()
 
-    incident = build_incident(
-        IncidentStatus.OPEN
-    )
+    incident = build_incident(IncidentStatus.OPEN)
 
     transition_mock.return_value = incident
 
@@ -89,24 +75,17 @@ def test_open_incident_can_start_investigation(
     transition_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        target_status=(
-            IncidentStatus.INVESTIGATING
-        ),
+        target_status=(IncidentStatus.INVESTIGATING),
     )
 
 
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.transition"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.transition")
 def test_investigating_incident_can_start_monitoring(
     transition_mock: Mock,
 ) -> None:
     db = Mock()
 
-    incident = build_incident(
-        IncidentStatus.INVESTIGATING
-    )
+    incident = build_incident(IncidentStatus.INVESTIGATING)
 
     transition_mock.return_value = incident
 
@@ -122,27 +101,20 @@ def test_investigating_incident_can_start_monitoring(
     )
 
 
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.resolve"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.resolve")
 def test_monitored_incident_can_be_resolved(
     resolve_mock: Mock,
 ) -> None:
     db = Mock()
 
-    incident = build_incident(
-        IncidentStatus.MONITORING
-    )
+    incident = build_incident(IncidentStatus.MONITORING)
 
     resolve_mock.return_value = incident
 
     result = IncidentLifecycleService.resolve(
         db=db,
         incident=incident,
-        resolution_summary=(
-            "WAN provider restored connectivity"
-        ),
+        resolution_summary=("WAN provider restored connectivity"),
         root_cause="Upstream provider outage",
     )
 
@@ -151,9 +123,7 @@ def test_monitored_incident_can_be_resolved(
     resolve_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        resolution_summary=(
-            "WAN provider restored connectivity"
-        ),
+        resolution_summary=("WAN provider restored connectivity"),
         root_cause="Upstream provider outage",
     )
 
@@ -183,13 +153,9 @@ def test_invalid_transitions_are_rejected(
     current_status: IncidentStatus,
     target_status: IncidentStatus,
 ) -> None:
-    incident = build_incident(
-        current_status
-    )
+    incident = build_incident(current_status)
 
-    with pytest.raises(
-        InvalidIncidentTransitionError
-    ):
+    with pytest.raises(InvalidIncidentTransitionError):
         IncidentLifecycleService.transition(
             db=Mock(),
             incident=incident,
@@ -198,13 +164,9 @@ def test_invalid_transitions_are_rejected(
 
 
 def test_resolution_requires_summary() -> None:
-    incident = build_incident(
-        IncidentStatus.MONITORING
-    )
+    incident = build_incident(IncidentStatus.MONITORING)
 
-    with pytest.raises(
-        IncidentResolutionError
-    ):
+    with pytest.raises(IncidentResolutionError):
         IncidentLifecycleService.resolve(
             db=Mock(),
             incident=incident,
@@ -213,18 +175,12 @@ def test_resolution_requires_summary() -> None:
 
 
 def test_transition_to_same_status_is_idempotent() -> None:
-    incident = build_incident(
-        IncidentStatus.INVESTIGATING
-    )
+    incident = build_incident(IncidentStatus.INVESTIGATING)
 
-    result = (
-        IncidentLifecycleService.transition(
-            db=Mock(),
-            incident=incident,
-            target_status=(
-                IncidentStatus.INVESTIGATING
-            ),
-        )
+    result = IncidentLifecycleService.transition(
+        db=Mock(),
+        incident=incident,
+        target_status=(IncidentStatus.INVESTIGATING),
     )
 
     assert result is incident

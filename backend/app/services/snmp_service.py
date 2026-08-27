@@ -13,7 +13,6 @@ from app.core.logging import logger
 
 
 class SNMPService:
-
     @staticmethod
     async def get_value(
         ip_address: str,

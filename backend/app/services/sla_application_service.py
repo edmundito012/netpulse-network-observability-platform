@@ -35,12 +35,8 @@ class SLAApplicationService:
         without mixing unrelated devices in the same SLA calculation.
         """
 
-        normalized_start_at = cls._normalize_datetime(
-            start_at
-        )
-        normalized_end_at = cls._normalize_datetime(
-            end_at
-        )
+        normalized_start_at = cls._normalize_datetime(start_at)
+        normalized_end_at = cls._normalize_datetime(end_at)
 
         cls._validate_window(
             start_at=normalized_start_at,
@@ -70,10 +66,7 @@ class SLAApplicationService:
             sort_direction=SortDirection.ASCENDING,
         )
 
-        statuses = [
-            cls.normalize_status(metric.status)
-            for metric in metrics
-        ]
+        statuses = [cls.normalize_status(metric.status) for metric in metrics]
 
         latencies = cls._measured_values(
             metrics=metrics,
@@ -179,15 +172,7 @@ class SLAApplicationService:
         limit: int,
     ) -> None:
         if limit < 1 or limit > 10_000:
-            raise ValueError(
-                "limit must be between 1 and 10000"
-            )
+            raise ValueError("limit must be between 1 and 10000")
 
-        if (
-            start_at is not None
-            and end_at is not None
-            and start_at > end_at
-        ):
-            raise ValueError(
-                "start_at must be earlier than or equal to end_at"
-            )
+        if start_at is not None and end_at is not None and start_at > end_at:
+            raise ValueError("start_at must be earlier than or equal to end_at")

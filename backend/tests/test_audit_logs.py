@@ -107,7 +107,8 @@ def test_create_user_generates_audit_log():
     assert len(logs) > 0
 
     matching_logs = [
-        log for log in logs
+        log
+        for log in logs
         if log["action"] == "CREATE_USER"
         and log["resource_type"] == "USER"
         and log["details"]["email"] == email

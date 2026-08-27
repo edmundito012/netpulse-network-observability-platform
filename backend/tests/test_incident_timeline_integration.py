@@ -44,19 +44,13 @@ def build_incident():
     )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.get_by_id")
 @patch(
     "app.services.incident_service."
     "IncidentTimelineRecorderService."
     "record_incident_created"
 )
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.create"
-)
+@patch("app.services.incident_service.IncidentRepository.create")
 def test_incident_creation_records_timeline_event(
     create_mock: Mock,
     record_mock: Mock,
@@ -88,18 +82,9 @@ def test_incident_creation_records_timeline_event(
     "IncidentTimelineRecorderService."
     "record_alert_attached"
 )
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.attach_alert"
-)
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_alert_link"
-)
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.attach_alert")
+@patch("app.services.incident_service.IncidentRepository.get_alert_link")
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_new_alert_attachment_records_event(
     get_alert_mock: Mock,
     get_link_mock: Mock,
@@ -109,9 +94,7 @@ def test_new_alert_attachment_records_event(
     db = Mock()
     incident = build_incident()
 
-    get_alert_mock.return_value = (
-        SimpleNamespace(id=42)
-    )
+    get_alert_mock.return_value = SimpleNamespace(id=42)
 
     get_link_mock.return_value = None
 
@@ -134,9 +117,7 @@ def test_new_alert_attachment_records_event(
         db=db,
         incident=incident,
         alert_id=42,
-        actor_type=record_mock.call_args.kwargs[
-            "actor_type"
-        ],
+        actor_type=record_mock.call_args.kwargs["actor_type"],
         actor_id=None,
         actor_label=None,
     )
@@ -147,14 +128,8 @@ def test_new_alert_attachment_records_event(
     "IncidentTimelineRecorderService."
     "record_alert_attached"
 )
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_alert_link"
-)
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.get_alert_link")
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_idempotent_attachment_does_not_duplicate_event(
     get_alert_mock: Mock,
     get_link_mock: Mock,
@@ -167,13 +142,9 @@ def test_idempotent_attachment_does_not_duplicate_event(
         alert_id=42,
     )
 
-    get_alert_mock.return_value = (
-        SimpleNamespace(id=42)
-    )
+    get_alert_mock.return_value = SimpleNamespace(id=42)
 
-    get_link_mock.return_value = (
-        existing_link
-    )
+    get_link_mock.return_value = existing_link
 
     result = IncidentService.attach_alert(
         db=Mock(),
@@ -190,10 +161,7 @@ def test_idempotent_attachment_does_not_duplicate_event(
     "IncidentTimelineRecorderService."
     "record_status_changed"
 )
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.transition"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.transition")
 def test_lifecycle_transition_records_status_change(
     transition_mock: Mock,
     record_mock: Mock,
@@ -202,18 +170,13 @@ def test_lifecycle_transition_records_status_change(
     incident = build_incident()
 
     updated = build_incident()
-    updated.status = (
-        IncidentStatus.ACKNOWLEDGED
-    )
+    updated.status = IncidentStatus.ACKNOWLEDGED
 
     transition_mock.return_value = updated
 
-    result = (
-        IncidentLifecycleService
-        .acknowledge(
-            db=db,
-            incident=incident,
-        )
+    result = IncidentLifecycleService.acknowledge(
+        db=db,
+        incident=incident,
     )
 
     assert result is updated
@@ -222,15 +185,9 @@ def test_lifecycle_transition_records_status_change(
 
     call = record_mock.call_args.kwargs
 
-    assert (
-        call["previous_status"]
-        == IncidentStatus.OPEN
-    )
+    assert call["previous_status"] == IncidentStatus.OPEN
 
-    assert (
-        call["new_status"]
-        == IncidentStatus.ACKNOWLEDGED
-    )
+    assert call["new_status"] == IncidentStatus.ACKNOWLEDGED
 
 
 @patch(
@@ -238,10 +195,7 @@ def test_lifecycle_transition_records_status_change(
     "IncidentTimelineRecorderService."
     "record_incident_resolved"
 )
-@patch(
-    "app.services.incident_lifecycle_service."
-    "IncidentLifecycleRepository.resolve"
-)
+@patch("app.services.incident_lifecycle_service.IncidentLifecycleRepository.resolve")
 def test_resolution_records_final_event(
     resolve_mock: Mock,
     record_mock: Mock,
@@ -256,17 +210,11 @@ def test_resolution_records_final_event(
 
     resolve_mock.return_value = updated
 
-    result = (
-        IncidentLifecycleService.resolve(
-            db=db,
-            incident=incident,
-            resolution_summary=(
-                "WAN connectivity restored"
-            ),
-            root_cause=(
-                "Upstream provider outage"
-            ),
-        )
+    result = IncidentLifecycleService.resolve(
+        db=db,
+        incident=incident,
+        resolution_summary=("WAN connectivity restored"),
+        root_cause=("Upstream provider outage"),
     )
 
     assert result is updated
@@ -275,14 +223,9 @@ def test_resolution_records_final_event(
 
     call = record_mock.call_args.kwargs
 
-    assert (
-        call["previous_status"]
-        == IncidentStatus.MONITORING
-    )
+    assert call["previous_status"] == IncidentStatus.MONITORING
 
-    assert call["resolution_summary"] == (
-        "WAN connectivity restored"
-    )
+    assert call["resolution_summary"] == ("WAN connectivity restored")
 
 
 @patch(
@@ -290,10 +233,7 @@ def test_resolution_records_final_event(
     "IncidentTimelineRecorderService."
     "record_severity_changed"
 )
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.update_details"
-)
+@patch("app.services.incident_service.IncidentRepository.update_details")
 def test_severity_update_records_event(
     update_mock: Mock,
     record_mock: Mock,
@@ -302,20 +242,14 @@ def test_severity_update_records_event(
     incident = build_incident()
 
     updated = build_incident()
-    updated.severity = (
-        IncidentSeverity.CRITICAL
-    )
+    updated.severity = IncidentSeverity.CRITICAL
 
     update_mock.return_value = updated
 
     result = IncidentService.update(
         db=db,
         incident=incident,
-        incident_data=IncidentUpdate(
-            severity=(
-                IncidentSeverity.CRITICAL
-            )
-        ),
+        incident_data=IncidentUpdate(severity=(IncidentSeverity.CRITICAL)),
     )
 
     assert result is updated
@@ -325,9 +259,7 @@ def test_severity_update_records_event(
         incident=updated,
         previous_severity="WARNING",
         new_severity="CRITICAL",
-        actor_type=record_mock.call_args.kwargs[
-            "actor_type"
-        ],
+        actor_type=record_mock.call_args.kwargs["actor_type"],
         actor_id=None,
         actor_label=None,
     )

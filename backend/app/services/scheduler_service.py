@@ -41,6 +41,7 @@ from app.core.correlation import (
 from app.services.correlation_worker_service import (
     CorrelationWorkerService,
 )
+
 scheduler = BackgroundScheduler()
 from app.db.session import SessionLocal
 
@@ -80,7 +81,11 @@ def update_device_status_metrics():
 
 
 async def ping_device_task(device):
-    status, response_time_ms, packet_loss_percent = await MonitoringService.ping_device_async(
+    (
+        status,
+        response_time_ms,
+        packet_loss_percent,
+    ) = await MonitoringService.ping_device_async(
         device.ip_address,
     )
 
@@ -157,10 +162,7 @@ async def monitor_devices_async():
                     device.id,
                 )
 
-            if (
-                status == DeviceStatus.ONLINE
-                and previous_status != DeviceStatus.ONLINE
-            ):
+            if status == DeviceStatus.ONLINE and previous_status != DeviceStatus.ONLINE:
                 DeviceEventRepository.create(
                     db=db,
                     device_id=device.id,
@@ -234,9 +236,7 @@ async def monitor_devices_async():
 
         update_device_status_metrics()
 
-        await device_state_manager.broadcast(
-            get_all_device_states()
-        )
+        await device_state_manager.broadcast(get_all_device_states())
 
         logger.info("Async device monitoring cycle completed")
 
@@ -319,10 +319,7 @@ async def collect_snmp_system_snapshots_async():
                 db=db,
                 device_id=device.id,
                 event_type=DeviceEventType.SNMP_SNAPSHOT_COLLECTED,
-                message=(
-                    "SNMP system snapshot collected for device "
-                    f"{device.name}"
-                ),
+                message=(f"SNMP system snapshot collected for device {device.name}"),
             )
 
             logger.info(
@@ -378,26 +375,20 @@ def warm_up_caches():
     finally:
         db.close()
 
+
 def run_correlation_worker():
     """Process alerts awaiting automatic correlation."""
 
     if not settings.CORRELATION_WORKER_ENABLED:
-        logger.debug(
-            "Correlation worker is disabled"
-        )
+        logger.debug("Correlation worker is disabled")
         return
 
     with engine.connect() as connection:
-
         with CorrelationWorkerLockService.acquire(
             connection,
         ) as acquired:
-
             if not acquired:
-                logger.info(
-                    "Correlation worker skipped "
-                    "(lock already acquired)"
-                )
+                logger.info("Correlation worker skipped (lock already acquired)")
                 return
 
             db: Session = SessionLocal(
@@ -406,30 +397,15 @@ def run_correlation_worker():
 
             try:
                 configuration = CorrelationConfiguration(
-                    window_seconds=(
-                        settings
-                        .CORRELATION_WINDOW_SECONDS
-                    ),
-                    threshold=(
-                        settings
-                        .CORRELATION_THRESHOLD
-                    ),
-                    max_candidates=(
-                        settings
-                        .CORRELATION_MAX_CANDIDATES
-                    ),
+                    window_seconds=(settings.CORRELATION_WINDOW_SECONDS),
+                    threshold=(settings.CORRELATION_THRESHOLD),
+                    max_candidates=(settings.CORRELATION_MAX_CANDIDATES),
                 )
 
-                result = (
-                    CorrelationWorkerService
-                    .run_batch(
-                        db=db,
-                        batch_size=(
-                            settings
-                            .CORRELATION_WORKER_BATCH_SIZE
-                        ),
-                        configuration=configuration,
-                    )
+                result = CorrelationWorkerService.run_batch(
+                    db=db,
+                    batch_size=(settings.CORRELATION_WORKER_BATCH_SIZE),
+                    configuration=configuration,
                 )
 
                 logger.info(
@@ -446,12 +422,11 @@ def run_correlation_worker():
             except Exception:
                 db.rollback()
 
-                logger.exception(
-                    "Correlation worker cycle failed"
-                )
+                logger.exception("Correlation worker cycle failed")
 
             finally:
                 db.close()
+
 
 def start_scheduler():
     if scheduler.running:
@@ -491,10 +466,7 @@ def start_scheduler():
         scheduler.add_job(
             run_correlation_worker,
             "interval",
-            seconds=(
-                settings
-                .CORRELATION_WORKER_INTERVAL_SECONDS
-            ),
+            seconds=(settings.CORRELATION_WORKER_INTERVAL_SECONDS),
             id="correlation_worker",
             replace_existing=True,
             max_instances=1,

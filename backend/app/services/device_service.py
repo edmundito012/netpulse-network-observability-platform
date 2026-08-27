@@ -53,9 +53,7 @@ class DeviceService:
         )
 
         if not device:
-            raise ValueError(
-                "Device not found"
-            )
+            raise ValueError("Device not found")
 
         return device
 
@@ -64,18 +62,13 @@ class DeviceService:
         db: Session,
         device_data: DeviceCreate,
     ):
-        existing_device = (
-            DeviceRepository.get_by_ip_address(
-                db,
-                device_data.ip_address,
-            )
+        existing_device = DeviceRepository.get_by_ip_address(
+            db,
+            device_data.ip_address,
         )
 
         if existing_device:
-            raise ValueError(
-                "Device with this IP address "
-                "already exists"
-            )
+            raise ValueError("Device with this IP address already exists")
 
         return DeviceRepository.create(
             db=db,
@@ -94,9 +87,7 @@ class DeviceService:
         )
 
         if not device:
-            raise ValueError(
-                "Device not found"
-            )
+            raise ValueError("Device not found")
 
         return DeviceRepository.update(
             db=db,
@@ -115,9 +106,7 @@ class DeviceService:
         )
 
         if not device:
-            raise ValueError(
-                "Device not found"
-            )
+            raise ValueError("Device not found")
 
         DeviceRepository.delete(
             db=db,
@@ -139,9 +128,7 @@ class DeviceService:
         )
 
         if not device:
-            raise ValueError(
-                "Device not found"
-            )
+            raise ValueError("Device not found")
 
         (
             device_status,

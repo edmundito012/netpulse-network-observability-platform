@@ -157,11 +157,7 @@ class MetricSeriesService:
     ) -> list[float]:
         """Return non-null numerical values from a metric result."""
 
-        return [
-            sample.value
-            for sample in result.samples
-            if sample.value is not None
-        ]
+        return [sample.value for sample in result.samples if sample.value is not None]
 
     @staticmethod
     def _to_float(
@@ -196,17 +192,11 @@ class MetricSeriesService:
             raise ValueError("limit must be greater than or equal to 1")
 
         if limit > cls.MAX_LIMIT:
-            raise ValueError(
-                f"limit must be lower than or equal to "
-                f"{cls.MAX_LIMIT}"
-            )
+            raise ValueError(f"limit must be lower than or equal to {cls.MAX_LIMIT}")
 
         if (
             start_at is not None
             and end_at is not None
-            and cls._normalize_datetime(start_at)
-            > cls._normalize_datetime(end_at)
+            and cls._normalize_datetime(start_at) > cls._normalize_datetime(end_at)
         ):
-            raise ValueError(
-                "start_at must be earlier than or equal to end_at"
-            )
+            raise ValueError("start_at must be earlier than or equal to end_at")

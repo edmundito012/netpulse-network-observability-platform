@@ -5,13 +5,10 @@ from app.services.notification_service import (
 
 def test_build_predictive_alert():
 
-    result = (
-        NotificationService
-        .build_predictive_alert_message(
-            device_name="Google DNS",
-            risk_score=85,
-            reason="Latency spike detected",
-        )
+    result = NotificationService.build_predictive_alert_message(
+        device_name="Google DNS",
+        risk_score=85,
+        reason="Latency spike detected",
     )
 
     assert result.title == "Predictive Alert"
@@ -21,16 +18,11 @@ def test_build_predictive_alert():
 
 def test_build_network_risk_alert():
 
-    result = (
-        NotificationService
-        .build_network_risk_message(
-            risk_score=80,
-            risk_level="HIGH",
-        )
+    result = NotificationService.build_network_risk_message(
+        risk_score=80,
+        risk_level="HIGH",
     )
 
-    assert result.title == (
-        "Network Risk Alert"
-    )
+    assert result.title == ("Network Risk Alert")
 
     assert "HIGH" in result.body

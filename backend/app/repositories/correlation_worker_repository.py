@@ -38,24 +38,16 @@ class CorrelationWorkerRepository:
         """
 
         if limit < 1 or limit > 500:
-            raise ValueError(
-                "limit must be between 1 and 500"
-            )
+            raise ValueError("limit must be between 1 and 500")
 
         correlation_exists = exists(
-            select(IncidentCorrelation.id)
-            .where(
-                IncidentCorrelation.source_alert_id
-                == Alert.id
+            select(IncidentCorrelation.id).where(
+                IncidentCorrelation.source_alert_id == Alert.id
             )
         )
 
         incident_link_exists = exists(
-            select(IncidentAlert.id)
-            .where(
-                IncidentAlert.alert_id
-                == Alert.id
-            )
+            select(IncidentAlert.id).where(IncidentAlert.alert_id == Alert.id)
         )
 
         statement = (
@@ -77,6 +69,4 @@ class CorrelationWorkerRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement).all()
-        )
+        return list(db.scalars(statement).all())

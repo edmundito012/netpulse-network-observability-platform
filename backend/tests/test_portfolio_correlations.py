@@ -45,36 +45,21 @@ def build_summary() -> CorrelationAnalyticsSummary:
     )
 
 
-def test_portfolio_correlation_dashboard_returns_html(
-) -> None:
+def test_portfolio_correlation_dashboard_returns_html() -> None:
     """Render the public correlation dashboard."""
 
-    response = client.get(
-        "/portfolio/correlations"
-    )
+    response = client.get("/portfolio/correlations")
 
     assert response.status_code == 200
 
-    assert (
-        "text/html"
-        in response.headers["content-type"]
-    )
+    assert "text/html" in response.headers["content-type"]
 
-    assert (
-        "Correlation Intelligence"
-        in response.text
-    )
+    assert "Correlation Intelligence" in response.text
 
-    assert (
-        "/portfolio/correlations/data"
-        in response.text
-    )
+    assert "/portfolio/correlations/data" in response.text
 
 
-@patch(
-    "app.api.portfolio_correlations."
-    "CorrelationAnalyticsService.get_summary"
-)
+@patch("app.api.portfolio_correlations.CorrelationAnalyticsService.get_summary")
 def test_portfolio_correlation_data(
     summary_mock,
 ) -> None:
@@ -96,10 +81,7 @@ def test_portfolio_correlation_data(
 
     assert payload["total_evaluations"] == 12
 
-    assert (
-        payload["estimated_incidents_avoided"]
-        == 6
-    )
+    assert payload["estimated_incidents_avoided"] == 6
 
     kwargs = summary_mock.call_args.kwargs
 
@@ -107,8 +89,7 @@ def test_portfolio_correlation_data(
     assert kwargs["recent_limit"] == 20
 
 
-def test_portfolio_correlation_data_validates_window(
-) -> None:
+def test_portfolio_correlation_data_validates_window() -> None:
     """Reject invalid dashboard windows."""
 
     response = client.get(
@@ -121,18 +102,11 @@ def test_portfolio_correlation_data_validates_window(
     assert response.status_code == 422
 
 
-def test_portfolio_correlation_routes_are_hidden_from_openapi(
-) -> None:
+def test_portfolio_correlation_routes_are_hidden_from_openapi() -> None:
     """Keep portfolio presentation routes out of API docs."""
 
     paths = app.openapi()["paths"]
 
-    assert (
-        "/portfolio/correlations"
-        not in paths
-    )
+    assert "/portfolio/correlations" not in paths
 
-    assert (
-        "/portfolio/correlations/data"
-        not in paths
-    )
+    assert "/portfolio/correlations/data" not in paths

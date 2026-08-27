@@ -27,38 +27,21 @@ def get_streaming_experience(
     db: Session = Depends(get_db),
 ):
 
-    metric = (
-        db.query(DeviceMetric)
-        .order_by(
-            DeviceMetric.checked_at.desc()
-        )
-        .first()
-    )
+    metric = db.query(DeviceMetric).order_by(DeviceMetric.checked_at.desc()).first()
 
     if metric is None:
-
-        result = (
-            StreamingExperienceService.analyze(
-                latency_ms=0,
-                jitter_ms=0,
-                packet_loss_percent=0,
-            )
+        result = StreamingExperienceService.analyze(
+            latency_ms=0,
+            jitter_ms=0,
+            packet_loss_percent=0,
         )
 
-        return StreamingExperienceResponse(
-            **result.__dict__
-        )
+        return StreamingExperienceResponse(**result.__dict__)
 
-    result = (
-        StreamingExperienceService.analyze(
-            latency_ms=metric.response_time_ms or 0,
-            jitter_ms=metric.jitter_ms or 0,
-            packet_loss_percent=(
-                metric.packet_loss_percent or 0
-            ),
-        )
+    result = StreamingExperienceService.analyze(
+        latency_ms=metric.response_time_ms or 0,
+        jitter_ms=metric.jitter_ms or 0,
+        packet_loss_percent=(metric.packet_loss_percent or 0),
     )
 
-    return StreamingExperienceResponse(
-        **result.__dict__
-    )
+    return StreamingExperienceResponse(**result.__dict__)

@@ -13,9 +13,7 @@ import sqlalchemy as sa
 
 revision: str = "e9b7c4a12d63"
 
-down_revision: str | Sequence[str] | None = (
-    "d8f31a72c640"
-)
+down_revision: str | Sequence[str] | None = "d8f31a72c640"
 
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -123,26 +121,12 @@ def upgrade() -> None:
             nullable=True,
         ),
         sa.CheckConstraint(
-            "outcome IN ("
-            "'MATCHED_EXISTING', "
-            "'CREATE_NEW', "
-            "'NO_ACTION'"
-            ")",
-            name=(
-                "ck_incident_correlations_"
-                "outcome"
-            ),
+            "outcome IN ('MATCHED_EXISTING', 'CREATE_NEW', 'NO_ACTION')",
+            name=("ck_incident_correlations_outcome"),
         ),
         sa.CheckConstraint(
-            "application_status IN ("
-            "'EVALUATED', "
-            "'APPLIED', "
-            "'FAILED'"
-            ")",
-            name=(
-                "ck_incident_correlations_"
-                "application_status"
-            ),
+            "application_status IN ('EVALUATED', 'APPLIED', 'FAILED')",
+            name=("ck_incident_correlations_application_status"),
         ),
         sa.CheckConstraint(
             "signal_family IN ("
@@ -153,55 +137,34 @@ def upgrade() -> None:
             "'PREDICTIVE', "
             "'GENERIC'"
             ")",
-            name=(
-                "ck_incident_correlations_"
-                "signal_family"
-            ),
+            name=("ck_incident_correlations_signal_family"),
         ),
         sa.CheckConstraint(
             "score >= 0 AND score <= 1",
-            name=(
-                "ck_incident_correlations_"
-                "score_range"
-            ),
+            name=("ck_incident_correlations_score_range"),
         ),
         sa.CheckConstraint(
             "threshold >= 0 AND threshold <= 1",
-            name=(
-                "ck_incident_correlations_"
-                "threshold_range"
-            ),
+            name=("ck_incident_correlations_threshold_range"),
         ),
         sa.CheckConstraint(
             "candidate_count >= 0",
-            name=(
-                "ck_incident_correlations_"
-                "candidate_count_non_negative"
-            ),
+            name=("ck_incident_correlations_candidate_count_non_negative"),
         ),
         sa.CheckConstraint(
             "window_seconds >= 60",
-            name=(
-                "ck_incident_correlations_"
-                "window_seconds_minimum"
-            ),
+            name=("ck_incident_correlations_window_seconds_minimum"),
         ),
         sa.ForeignKeyConstraint(
             ["source_alert_id"],
             ["alerts.id"],
-            name=(
-                "fk_incident_correlations_"
-                "source_alert_id_alerts"
-            ),
+            name=("fk_incident_correlations_source_alert_id_alerts"),
             ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["target_incident_id"],
             ["incidents.id"],
-            name=(
-                "fk_incident_correlations_"
-                "target_incident_id_incidents"
-            ),
+            name=("fk_incident_correlations_target_incident_id_incidents"),
             ondelete="SET NULL",
         ),
         sa.PrimaryKeyConstraint(
@@ -210,38 +173,26 @@ def upgrade() -> None:
         ),
         sa.UniqueConstraint(
             "correlation_key",
-            name=(
-                "uq_incident_correlations_"
-                "correlation_key"
-            ),
+            name=("uq_incident_correlations_correlation_key"),
         ),
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "correlation_key"
-        ),
+        ("ix_incident_correlations_correlation_key"),
         "incident_correlations",
         ["correlation_key"],
         unique=True,
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "source_alert"
-        ),
+        ("ix_incident_correlations_source_alert"),
         "incident_correlations",
         ["source_alert_id"],
         unique=False,
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "target_incident_evaluated"
-        ),
+        ("ix_incident_correlations_target_incident_evaluated"),
         "incident_correlations",
         [
             "target_incident_id",
@@ -251,10 +202,7 @@ def upgrade() -> None:
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "outcome_status"
-        ),
+        ("ix_incident_correlations_outcome_status"),
         "incident_correlations",
         [
             "outcome",
@@ -264,20 +212,14 @@ def upgrade() -> None:
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "signal_family"
-        ),
+        ("ix_incident_correlations_signal_family"),
         "incident_correlations",
         ["signal_family"],
         unique=False,
     )
 
     op.create_index(
-        (
-            "ix_incident_correlations_"
-            "evaluated_at"
-        ),
+        ("ix_incident_correlations_evaluated_at"),
         "incident_correlations",
         ["evaluated_at"],
         unique=False,
@@ -288,53 +230,33 @@ def downgrade() -> None:
     """Remove correlation persistence."""
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "evaluated_at"
-        ),
+        ("ix_incident_correlations_evaluated_at"),
         table_name="incident_correlations",
     )
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "signal_family"
-        ),
+        ("ix_incident_correlations_signal_family"),
         table_name="incident_correlations",
     )
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "outcome_status"
-        ),
+        ("ix_incident_correlations_outcome_status"),
         table_name="incident_correlations",
     )
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "target_incident_evaluated"
-        ),
+        ("ix_incident_correlations_target_incident_evaluated"),
         table_name="incident_correlations",
     )
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "source_alert"
-        ),
+        ("ix_incident_correlations_source_alert"),
         table_name="incident_correlations",
     )
 
     op.drop_index(
-        (
-            "ix_incident_correlations_"
-            "correlation_key"
-        ),
+        ("ix_incident_correlations_correlation_key"),
         table_name="incident_correlations",
     )
 
-    op.drop_table(
-        "incident_correlations"
-    )
+    op.drop_table("incident_correlations")

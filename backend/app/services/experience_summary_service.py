@@ -19,7 +19,6 @@ class ExperienceSummaryResult:
 
 
 class ExperienceSummaryService:
-
     @staticmethod
     def classify(score: int) -> str:
 
@@ -38,23 +37,15 @@ class ExperienceSummaryService:
     def recommendation(score: int):
 
         if score >= 90:
-            return (
-                "Network ready for gaming, streaming and remote work."
-            )
+            return "Network ready for gaming, streaming and remote work."
 
         if score >= 75:
-            return (
-                "Minor degradation detected."
-            )
+            return "Minor degradation detected."
 
         if score >= 60:
-            return (
-                "Network quality is unstable."
-            )
+            return "Network quality is unstable."
 
-        return (
-            "Poor user experience expected."
-        )
+        return "Poor user experience expected."
 
     @staticmethod
     def build(
@@ -62,42 +53,18 @@ class ExperienceSummaryService:
         streaming_score: int,
     ):
 
-        overall = round(
-            (
-                gaming_score +
-                streaming_score
-            ) / 2
-        )
+        overall = round((gaming_score + streaming_score) / 2)
 
         return ExperienceSummaryResult(
-
             overall_qoe_score=overall,
-
-            overall_status=(
-                ExperienceSummaryService
-                .classify(overall)
-            ),
-
+            overall_status=(ExperienceSummaryService.classify(overall)),
             gaming=ExperienceProfileResult(
                 score=gaming_score,
-                status=(
-                    ExperienceSummaryService
-                    .classify(gaming_score)
-                ),
+                status=(ExperienceSummaryService.classify(gaming_score)),
             ),
-
             streaming=ExperienceProfileResult(
                 score=streaming_score,
-                status=(
-                    ExperienceSummaryService
-                    .classify(streaming_score)
-                ),
+                status=(ExperienceSummaryService.classify(streaming_score)),
             ),
-
-            recommendation=(
-                ExperienceSummaryService
-                .recommendation(
-                    overall
-                )
-            ),
+            recommendation=(ExperienceSummaryService.recommendation(overall)),
         )

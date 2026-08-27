@@ -88,55 +88,35 @@ def test_evaluation_request_rejects_invalid_values(
     data[field_name] = field_value
 
     with pytest.raises(ValidationError):
-        CorrelationEvaluationRequest(
-            **data
-        )
+        CorrelationEvaluationRequest(**data)
 
 
 def test_create_normalizes_and_deduplicates() -> None:
     payload = IncidentCorrelationCreate(
-        correlation_key=(
-            "  alert:42:incident:7:window:900  "
-        ),
+        correlation_key=("  alert:42:incident:7:window:900  "),
         source_alert_id=42,
         target_incident_id=7,
-        outcome=(
-            CorrelationOutcome.MATCHED_EXISTING
-        ),
-        signal_family=(
-            CorrelationSignalFamily.CONNECTIVITY
-        ),
+        outcome=(CorrelationOutcome.MATCHED_EXISTING),
+        signal_family=(CorrelationSignalFamily.CONNECTIVITY),
         score=Decimal("0.8800"),
         threshold=Decimal("0.6500"),
         reasons=[
             CorrelationReason.SAME_DEVICE,
             CorrelationReason.SAME_DEVICE,
-            (
-                CorrelationReason
-                .WITHIN_TEMPORAL_WINDOW
-            ),
+            (CorrelationReason.WITHIN_TEMPORAL_WINDOW),
         ],
         candidate_count=3,
         window_seconds=900,
-        explanation=(
-            "  Strong candidate correlation  "
-        ),
+        explanation=("  Strong candidate correlation  "),
     )
 
-    assert payload.correlation_key == (
-        "alert:42:incident:7:window:900"
-    )
+    assert payload.correlation_key == ("alert:42:incident:7:window:900")
 
-    assert payload.explanation == (
-        "Strong candidate correlation"
-    )
+    assert payload.explanation == ("Strong candidate correlation")
 
     assert payload.reasons == [
         CorrelationReason.SAME_DEVICE,
-        (
-            CorrelationReason
-            .WITHIN_TEMPORAL_WINDOW
-        ),
+        (CorrelationReason.WITHIN_TEMPORAL_WINDOW),
     ]
 
 
@@ -148,14 +128,8 @@ def test_matched_existing_requires_target() -> None:
         IncidentCorrelationCreate(
             correlation_key="alert:42:matched",
             source_alert_id=42,
-            outcome=(
-                CorrelationOutcome
-                .MATCHED_EXISTING
-            ),
-            signal_family=(
-                CorrelationSignalFamily
-                .CONNECTIVITY
-            ),
+            outcome=(CorrelationOutcome.MATCHED_EXISTING),
+            signal_family=(CorrelationSignalFamily.CONNECTIVITY),
             score=Decimal("0.8000"),
             threshold=Decimal("0.6500"),
             window_seconds=900,
@@ -175,19 +149,14 @@ def test_non_matching_outcome_rejects_target(
 ) -> None:
     with pytest.raises(
         ValidationError,
-        match=(
-            "target_incident_id is only valid"
-        ),
+        match=("target_incident_id is only valid"),
     ):
         IncidentCorrelationCreate(
             correlation_key="alert:42:no-target",
             source_alert_id=42,
             target_incident_id=7,
             outcome=outcome,
-            signal_family=(
-                CorrelationSignalFamily
-                .CONNECTIVITY
-            ),
+            signal_family=(CorrelationSignalFamily.CONNECTIVITY),
             score=Decimal("0.4000"),
             threshold=Decimal("0.6500"),
             window_seconds=900,
@@ -204,12 +173,8 @@ def test_failed_decision_requires_reason() -> None:
             correlation_key="alert:42:failed",
             source_alert_id=42,
             outcome=CorrelationOutcome.NO_ACTION,
-            application_status=(
-                CorrelationApplicationStatus.FAILED
-            ),
-            signal_family=(
-                CorrelationSignalFamily.GENERIC
-            ),
+            application_status=(CorrelationApplicationStatus.FAILED),
+            signal_family=(CorrelationSignalFamily.GENERIC),
             score=Decimal("0.0000"),
             threshold=Decimal("0.6500"),
             window_seconds=900,
@@ -226,12 +191,8 @@ def test_applied_decision_requires_timestamp() -> None:
             correlation_key="alert:42:applied",
             source_alert_id=42,
             outcome=CorrelationOutcome.CREATE_NEW,
-            application_status=(
-                CorrelationApplicationStatus.APPLIED
-            ),
-            signal_family=(
-                CorrelationSignalFamily.GENERIC
-            ),
+            application_status=(CorrelationApplicationStatus.APPLIED),
+            signal_family=(CorrelationSignalFamily.GENERIC),
             score=Decimal("0.0000"),
             threshold=Decimal("0.6500"),
             window_seconds=900,
@@ -246,13 +207,8 @@ def test_correlated_result_requires_target() -> None:
     ):
         CorrelationEvaluationResult(
             source_alert_id=42,
-            outcome=(
-                CorrelationOutcome.MATCHED_EXISTING
-            ),
-            signal_family=(
-                CorrelationSignalFamily
-                .CONNECTIVITY
-            ),
+            outcome=(CorrelationOutcome.MATCHED_EXISTING),
+            signal_family=(CorrelationSignalFamily.CONNECTIVITY),
             score=0.88,
             threshold=0.65,
             correlated=True,
@@ -270,24 +226,16 @@ def test_correlated_result_requires_target() -> None:
 def test_read_schema_maps_orm_metadata() -> None:
     class CorrelationStub:
         id = 1
-        correlation_key = (
-            "alert:42:incident:7:window:900"
-        )
+        correlation_key = "alert:42:incident:7:window:900"
 
         source_alert_id = 42
         target_incident_id = 7
 
-        outcome = (
-            CorrelationOutcome.MATCHED_EXISTING
-        )
+        outcome = CorrelationOutcome.MATCHED_EXISTING
 
-        application_status = (
-            CorrelationApplicationStatus.APPLIED
-        )
+        application_status = CorrelationApplicationStatus.APPLIED
 
-        signal_family = (
-            CorrelationSignalFamily.CONNECTIVITY
-        )
+        signal_family = CorrelationSignalFamily.CONNECTIVITY
 
         score = Decimal("0.8800")
         threshold = Decimal("0.6500")
@@ -309,12 +257,7 @@ def test_read_schema_maps_orm_metadata() -> None:
         evaluated_at = NOW
         applied_at = NOW
 
-    result = (
-        IncidentCorrelationRead
-        .model_validate(
-            CorrelationStub()
-        )
-    )
+    result = IncidentCorrelationRead.model_validate(CorrelationStub())
 
     assert result.id == 1
 

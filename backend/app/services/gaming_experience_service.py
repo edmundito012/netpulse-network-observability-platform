@@ -14,7 +14,6 @@ class GamingExperienceResult:
 
 
 class GamingExperienceService:
-
     @staticmethod
     def classify_ping_stability(
         latency_spread_ms: float,
@@ -49,25 +48,13 @@ class GamingExperienceService:
         packet_loss_percent: float,
         latency_spread_ms: float,
     ) -> str:
-        if (
-            packet_loss_percent >= 10
-            or jitter_ms >= 50
-            or latency_spread_ms >= 120
-        ):
+        if packet_loss_percent >= 10 or jitter_ms >= 50 or latency_spread_ms >= 120:
             return "CRITICAL"
 
-        if (
-            packet_loss_percent >= 5
-            or jitter_ms >= 30
-            or latency_spread_ms >= 80
-        ):
+        if packet_loss_percent >= 5 or jitter_ms >= 30 or latency_spread_ms >= 80:
             return "HIGH"
 
-        if (
-            packet_loss_percent >= 1
-            or jitter_ms >= 15
-            or latency_spread_ms >= 40
-        ):
+        if packet_loss_percent >= 1 or jitter_ms >= 15 or latency_spread_ms >= 40:
             return "MEDIUM"
 
         return "LOW"
@@ -78,25 +65,13 @@ class GamingExperienceService:
         jitter_ms: float,
         packet_loss_percent: float,
     ) -> str:
-        if (
-            latency_ms <= 40
-            and jitter_ms <= 10
-            and packet_loss_percent < 1
-        ):
+        if latency_ms <= 40 and jitter_ms <= 10 and packet_loss_percent < 1:
             return "EXCELLENT"
 
-        if (
-            latency_ms <= 70
-            and jitter_ms <= 20
-            and packet_loss_percent < 3
-        ):
+        if latency_ms <= 70 and jitter_ms <= 20 and packet_loss_percent < 3:
             return "GOOD"
 
-        if (
-            latency_ms <= 100
-            and jitter_ms <= 30
-            and packet_loss_percent < 5
-        ):
+        if latency_ms <= 100 and jitter_ms <= 30 and packet_loss_percent < 5:
             return "FAIR"
 
         return "POOR"
@@ -158,7 +133,9 @@ class GamingExperienceService:
         if gaming_score >= 70:
             return "Good for casual gaming, but not ideal for competitive play."
 
-        return "Poor gaming experience expected. Check latency, jitter, and packet loss."
+        return (
+            "Poor gaming experience expected. Check latency, jitter, and packet loss."
+        )
 
     @staticmethod
     def recommend_games(
@@ -210,12 +187,10 @@ class GamingExperienceService:
             latency_spread_ms=latency_spread_ms,
         )
 
-        rubber_banding_risk = (
-            GamingExperienceService.classify_rubber_banding_risk(
-                jitter_ms=jitter_ms,
-                packet_loss_percent=packet_loss_percent,
-                latency_spread_ms=latency_spread_ms,
-            )
+        rubber_banding_risk = GamingExperienceService.classify_rubber_banding_risk(
+            jitter_ms=jitter_ms,
+            packet_loss_percent=packet_loss_percent,
+            latency_spread_ms=latency_spread_ms,
         )
 
         hit_registration = GamingExperienceService.classify_hit_registration(

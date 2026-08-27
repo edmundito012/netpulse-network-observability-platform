@@ -13,7 +13,6 @@ from app.core.request_context import set_request_id
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
-
     async def dispatch(
         self,
         request: Request,

@@ -17,6 +17,7 @@ def test_network_impact_endpoint():
     assert "status" in data
     assert "affected_services" in data
 
+
 def test_network_impact_contains_summary():
     response = client.get("/network/impact")
 

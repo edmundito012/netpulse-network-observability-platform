@@ -46,12 +46,9 @@ class IncidentCommandService:
     ) -> Incident:
         """Update editable incident information."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
         updated = IncidentService.update(
@@ -63,12 +60,9 @@ class IncidentCommandService:
             actor_label=actor.actor_label,
         )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=updated.public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=updated.public_id,
         )
 
     @staticmethod
@@ -80,31 +74,22 @@ class IncidentCommandService:
     ) -> Incident:
         """Acknowledge an incident."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        updated = (
-            IncidentLifecycleService
-            .acknowledge(
-                db=db,
-                incident=incident,
-                actor_type=actor.actor_type,
-                actor_id=actor.actor_id,
-                actor_label=actor.actor_label,
-            )
+        updated = IncidentLifecycleService.acknowledge(
+            db=db,
+            incident=incident,
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=updated.public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=updated.public_id,
         )
 
     @staticmethod
@@ -116,31 +101,22 @@ class IncidentCommandService:
     ) -> Incident:
         """Start incident investigation."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        updated = (
-            IncidentLifecycleService
-            .start_investigation(
-                db=db,
-                incident=incident,
-                actor_type=actor.actor_type,
-                actor_id=actor.actor_id,
-                actor_label=actor.actor_label,
-            )
+        updated = IncidentLifecycleService.start_investigation(
+            db=db,
+            incident=incident,
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=updated.public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=updated.public_id,
         )
 
     @staticmethod
@@ -152,31 +128,22 @@ class IncidentCommandService:
     ) -> Incident:
         """Move an incident into monitoring."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        updated = (
-            IncidentLifecycleService
-            .start_monitoring(
-                db=db,
-                incident=incident,
-                actor_type=actor.actor_type,
-                actor_id=actor.actor_id,
-                actor_label=actor.actor_label,
-            )
+        updated = IncidentLifecycleService.start_monitoring(
+            db=db,
+            incident=incident,
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=updated.public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=updated.public_id,
         )
 
     @staticmethod
@@ -189,37 +156,24 @@ class IncidentCommandService:
     ) -> Incident:
         """Resolve an incident with operational context."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        updated = (
-            IncidentLifecycleService.resolve(
-                db=db,
-                incident=incident,
-                resolution_summary=(
-                    resolution_data
-                    .resolution_summary
-                ),
-                root_cause=(
-                    resolution_data.root_cause
-                ),
-                actor_type=actor.actor_type,
-                actor_id=actor.actor_id,
-                actor_label=actor.actor_label,
-            )
+        updated = IncidentLifecycleService.resolve(
+            db=db,
+            incident=incident,
+            resolution_summary=(resolution_data.resolution_summary),
+            root_cause=(resolution_data.root_cause),
+            actor_type=actor.actor_type,
+            actor_id=actor.actor_id,
+            actor_label=actor.actor_label,
         )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=updated.public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=updated.public_id,
         )
 
     @staticmethod
@@ -227,19 +181,14 @@ class IncidentCommandService:
         db: Session,
         *,
         public_id: str,
-        attachment_data: (
-            IncidentAlertAttachRequest
-        ),
+        attachment_data: (IncidentAlertAttachRequest),
         actor: IncidentActorContext,
     ) -> Incident:
         """Attach multiple alerts to an incident."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
         for alert_id in attachment_data.alert_ids:
@@ -252,12 +201,9 @@ class IncidentCommandService:
                 actor_label=actor.actor_label,
             )
 
-        return (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        return IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
     @staticmethod
@@ -270,12 +216,9 @@ class IncidentCommandService:
     ) -> None:
         """Detach one alert from an incident."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
         IncidentService.detach_alert(

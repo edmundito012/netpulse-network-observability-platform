@@ -112,6 +112,4 @@ class CorrelationAnalyticsSummary(BaseModel):
     application_statuses: list[CorrelationAnalyticsCount]
     signal_families: list[CorrelationAnalyticsCount]
 
-    recent_correlations: list[
-        CorrelationAnalyticsRecentItem
-    ]
+    recent_correlations: list[CorrelationAnalyticsRecentItem]
