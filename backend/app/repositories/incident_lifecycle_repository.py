@@ -23,17 +23,13 @@ class IncidentLifecycleRepository:
     ) -> Incident:
         """Persist a validated incident status transition."""
 
-        effective_time = (
-            transitioned_at
-            or datetime.now(UTC)
-        )
+        effective_time = transitioned_at or datetime.now(UTC)
 
         incident.status = target_status
         incident.updated_at = effective_time
 
         if (
-            target_status
-            == IncidentStatus.ACKNOWLEDGED
+            target_status == IncidentStatus.ACKNOWLEDGED
             and incident.acknowledged_at is None
         ):
             incident.acknowledged_at = effective_time
@@ -54,10 +50,7 @@ class IncidentLifecycleRepository:
     ) -> Incident:
         """Persist the final resolution of an incident."""
 
-        effective_time = (
-            resolved_at
-            or datetime.now(UTC)
-        )
+        effective_time = resolved_at or datetime.now(UTC)
 
         incident.status = IncidentStatus.RESOLVED
         incident.resolution_summary = resolution_summary

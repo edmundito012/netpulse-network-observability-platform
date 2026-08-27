@@ -21,28 +21,21 @@ router = APIRouter(
 )
 def get_summary():
 
-    result = (
-        ExperienceSummaryService.build(
-            gaming_score=95,
-            streaming_score=92,
-        )
+    result = ExperienceSummaryService.build(
+        gaming_score=95,
+        streaming_score=92,
     )
 
     return ExperienceSummaryResponse(
-
         overall_qoe_score=result.overall_qoe_score,
-
         overall_status=result.overall_status,
-
         gaming=ExperienceProfile(
             score=result.gaming.score,
             status=result.gaming.status,
         ),
-
         streaming=ExperienceProfile(
             score=result.streaming.score,
             status=result.streaming.status,
         ),
-
         recommendation=result.recommendation,
     )

@@ -9,19 +9,11 @@ from playwright.sync_api import (
 )
 
 
-PROJECT_ROOT = (
-    Path(__file__)
-    .resolve()
-    .parents[2]
-)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 BASE_URL = "http://localhost:8000"
 
-OUTPUT_DIR = (
-    PROJECT_ROOT
-    / "docs"
-    / "screenshots"
-)
+OUTPUT_DIR = PROJECT_ROOT / "docs" / "screenshots"
 
 
 def capture(
@@ -29,14 +21,9 @@ def capture(
     name: str,
     url: str,
 ) -> None:
-    destination = (
-        OUTPUT_DIR
-        / f"{name}.png"
-    )
+    destination = OUTPUT_DIR / f"{name}.png"
 
-    print(
-        f"Capturing {BASE_URL}{url}"
-    )
+    print(f"Capturing {BASE_URL}{url}")
 
     response = page.goto(
         f"{BASE_URL}{url}",
@@ -45,31 +32,19 @@ def capture(
     )
 
     if response is None:
-        raise RuntimeError(
-            "No HTTP response received "
-            f"for {url}"
-        )
+        raise RuntimeError(f"No HTTP response received for {url}")
 
     if not response.ok:
-        raise RuntimeError(
-            "Screenshot page returned HTTP "
-            f"{response.status}: {url}"
-        )
+        raise RuntimeError(f"Screenshot page returned HTTP {response.status}: {url}")
 
     if url.startswith("/portfolio"):
         page.wait_for_selector(
-            (
-                'body['
-                'data-dashboard-ready="true"'
-                ']'
-            ),
+            ('body[data-dashboard-ready="true"]'),
             state="attached",
             timeout=30_000,
         )
 
-        page.wait_for_timeout(
-            1_000
-        )
+        page.wait_for_timeout(1_000)
 
     else:
         page.wait_for_load_state(
@@ -82,9 +57,7 @@ def capture(
         full_page=True,
     )
 
-    print(
-        f"Created {destination}"
-    )
+    print(f"Created {destination}")
 
 
 def main() -> None:
@@ -94,23 +67,15 @@ def main() -> None:
     )
 
     pages = {
-        "portfolio-dashboard": (
-            "/portfolio"
-        ),
-        "incident-operations-dashboard": (
-            "/portfolio/incidents"
-        ),
+        "portfolio-dashboard": ("/portfolio"),
+        "incident-operations-dashboard": ("/portfolio/incidents"),
         "swagger-api": "/docs",
         "redoc-api": "/redoc",
     }
 
     with sync_playwright() as playwright:
-        browser = (
-            playwright
-            .chromium
-            .launch(
-                headless=True,
-            )
+        browser = playwright.chromium.launch(
+            headless=True,
         )
 
         page = browser.new_page(
@@ -123,17 +88,12 @@ def main() -> None:
 
         page.on(
             "console",
-            lambda message: print(
-                f"[browser:{message.type}] "
-                f"{message.text}"
-            ),
+            lambda message: print(f"[browser:{message.type}] {message.text}"),
         )
 
         page.on(
             "pageerror",
-            lambda error: print(
-                f"[browser-error] {error}"
-            ),
+            lambda error: print(f"[browser-error] {error}"),
         )
 
         try:
@@ -145,24 +105,17 @@ def main() -> None:
                 )
 
         except PlaywrightTimeoutError as error:
-            debug_path = (
-                OUTPUT_DIR
-                / "portfolio-timeout-debug.png"
-            )
+            debug_path = OUTPUT_DIR / "portfolio-timeout-debug.png"
 
             page.screenshot(
                 path=str(debug_path),
                 full_page=True,
             )
 
-            print(
-                "Debug screenshot created: "
-                f"{debug_path}"
-            )
+            print(f"Debug screenshot created: {debug_path}")
 
             raise RuntimeError(
-                "NetPulse did not become ready "
-                "for screenshots."
+                "NetPulse did not become ready for screenshots."
             ) from error
 
         finally:

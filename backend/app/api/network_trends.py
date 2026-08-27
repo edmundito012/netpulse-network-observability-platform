@@ -29,17 +29,9 @@ def get_network_trends(
             DeviceMetric.device_id == device_id,
         )
 
-    metrics = (
-        query
-        .order_by(DeviceMetric.checked_at.desc())
-        .limit(limit)
-        .all()
-    )
+    metrics = query.order_by(DeviceMetric.checked_at.desc()).limit(limit).all()
 
-    latencies = [
-        metric.response_time_ms or 0
-        for metric in reversed(metrics)
-    ]
+    latencies = [metric.response_time_ms or 0 for metric in reversed(metrics)]
 
     result = NetworkTrendService.analyze(
         latencies,

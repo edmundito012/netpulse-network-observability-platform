@@ -4,7 +4,6 @@ from app.repositories.audit_log_repository import AuditLogRepository
 
 
 class AuditLogService:
-
     @staticmethod
     def log(
         db: Session,

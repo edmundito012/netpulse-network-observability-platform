@@ -10,7 +10,6 @@ from app.services.health_score_service import (
 
 
 class RiskService:
-
     @staticmethod
     def get_top_risk_devices(
         db: Session,
@@ -21,7 +20,6 @@ class RiskService:
         results = []
 
         for device in devices:
-
             health = HealthScoreService.calculate(
                 db=db,
                 device=device,

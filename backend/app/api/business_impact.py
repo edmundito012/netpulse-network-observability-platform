@@ -20,6 +20,7 @@ router = APIRouter(
     tags=["Business Impact"],
 )
 
+
 @router.get(
     "/impact/business",
     response_model=BusinessImpactResponse,
@@ -28,22 +29,16 @@ def get_business_impact(
     db: Session = Depends(get_db),
 ):
 
-    summary = (
-        NetworkImpactService.get_network_summary(db)
-    )
+    summary = NetworkImpactService.get_network_summary(db)
 
-    impact = (
-        NetworkImpactService.get_network_impact(db)
-    )
+    impact = NetworkImpactService.get_network_impact(db)
 
-    result = (
-        BusinessImpactService.calculate_business_impact(
-            impact_score=impact.impact_score,
-            status=impact.status,
-            latency=summary.average_latency_ms,
-            packet_loss=summary.average_packet_loss_percent,
-            jitter=summary.average_jitter_ms,
-        )
+    result = BusinessImpactService.calculate_business_impact(
+        impact_score=impact.impact_score,
+        status=impact.status,
+        latency=summary.average_latency_ms,
+        packet_loss=summary.average_packet_loss_percent,
+        jitter=summary.average_jitter_ms,
     )
 
     return result

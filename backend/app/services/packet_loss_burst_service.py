@@ -70,18 +70,10 @@ class PacketLossBurstService:
         cls,
         *,
         samples: list[MetricSeriesSampleResult],
-        warning_threshold_percent: float = (
-            DEFAULT_WARNING_THRESHOLD_PERCENT
-        ),
-        critical_threshold_percent: float = (
-            DEFAULT_CRITICAL_THRESHOLD_PERCENT
-        ),
-        minimum_consecutive_samples: int = (
-            DEFAULT_MINIMUM_CONSECUTIVE_SAMPLES
-        ),
-        maximum_gap_seconds: int = (
-            DEFAULT_MAXIMUM_GAP_SECONDS
-        ),
+        warning_threshold_percent: float = (DEFAULT_WARNING_THRESHOLD_PERCENT),
+        critical_threshold_percent: float = (DEFAULT_CRITICAL_THRESHOLD_PERCENT),
+        minimum_consecutive_samples: int = (DEFAULT_MINIMUM_CONSECUTIVE_SAMPLES),
+        maximum_gap_seconds: int = (DEFAULT_MAXIMUM_GAP_SECONDS),
     ) -> PacketLossBurstAnalysisResult:
         """Detect consecutive packet loss samples above a threshold.
 
@@ -91,15 +83,9 @@ class PacketLossBurstService:
         """
 
         cls._validate_configuration(
-            warning_threshold_percent=(
-                warning_threshold_percent
-            ),
-            critical_threshold_percent=(
-                critical_threshold_percent
-            ),
-            minimum_consecutive_samples=(
-                minimum_consecutive_samples
-            ),
+            warning_threshold_percent=(warning_threshold_percent),
+            critical_threshold_percent=(critical_threshold_percent),
+            minimum_consecutive_samples=(minimum_consecutive_samples),
             maximum_gap_seconds=maximum_gap_seconds,
         )
 
@@ -124,12 +110,8 @@ class PacketLossBurstService:
                 cls._complete_candidate(
                     candidate=candidate,
                     bursts=bursts,
-                    minimum_consecutive_samples=(
-                        minimum_consecutive_samples
-                    ),
-                    critical_threshold_percent=(
-                        critical_threshold_percent
-                    ),
+                    minimum_consecutive_samples=(minimum_consecutive_samples),
+                    critical_threshold_percent=(critical_threshold_percent),
                     active=False,
                 )
 
@@ -143,12 +125,8 @@ class PacketLossBurstService:
                 cls._complete_candidate(
                     candidate=candidate,
                     bursts=bursts,
-                    minimum_consecutive_samples=(
-                        minimum_consecutive_samples
-                    ),
-                    critical_threshold_percent=(
-                        critical_threshold_percent
-                    ),
+                    minimum_consecutive_samples=(minimum_consecutive_samples),
+                    critical_threshold_percent=(critical_threshold_percent),
                     active=False,
                 )
 
@@ -159,20 +137,15 @@ class PacketLossBurstService:
                 previous_sample = candidate[-1]
 
                 gap_seconds = (
-                    sample.checked_at
-                    - previous_sample.checked_at
+                    sample.checked_at - previous_sample.checked_at
                 ).total_seconds()
 
                 if gap_seconds > maximum_gap_seconds:
                     cls._complete_candidate(
                         candidate=candidate,
                         bursts=bursts,
-                        minimum_consecutive_samples=(
-                            minimum_consecutive_samples
-                        ),
-                        critical_threshold_percent=(
-                            critical_threshold_percent
-                        ),
+                        minimum_consecutive_samples=(minimum_consecutive_samples),
+                        critical_threshold_percent=(critical_threshold_percent),
                         active=False,
                     )
 
@@ -183,12 +156,8 @@ class PacketLossBurstService:
         cls._complete_candidate(
             candidate=candidate,
             bursts=bursts,
-            minimum_consecutive_samples=(
-                minimum_consecutive_samples
-            ),
-            critical_threshold_percent=(
-                critical_threshold_percent
-            ),
+            minimum_consecutive_samples=(minimum_consecutive_samples),
+            critical_threshold_percent=(critical_threshold_percent),
             active=True,
         )
 
@@ -199,8 +168,7 @@ class PacketLossBurstService:
         return PacketLossBurstAnalysisResult(
             burst_detected=bool(bursts),
             current_burst_active=any(
-                burst.status == BurstStatus.ACTIVE
-                for burst in bursts
+                burst.status == BurstStatus.ACTIVE for burst in bursts
             ),
             severity=overall_severity,
             samples_analyzed=len(ordered_samples),
@@ -208,31 +176,18 @@ class PacketLossBurstService:
             missing_samples=missing_samples,
             burst_count=len(bursts),
             longest_burst_samples=max(
-                (
-                    burst.sample_count
-                    for burst in bursts
-                ),
+                (burst.sample_count for burst in bursts),
                 default=0,
             ),
             peak_packet_loss_percent=cls._optional_round(
-                max(measured_values)
-                if measured_values
-                else None
+                max(measured_values) if measured_values else None
             ),
             average_packet_loss_percent=cls._optional_round(
-                mean(measured_values)
-                if measured_values
-                else None
+                mean(measured_values) if measured_values else None
             ),
-            warning_threshold_percent=(
-                warning_threshold_percent
-            ),
-            critical_threshold_percent=(
-                critical_threshold_percent
-            ),
-            minimum_consecutive_samples=(
-                minimum_consecutive_samples
-            ),
+            warning_threshold_percent=(warning_threshold_percent),
+            critical_threshold_percent=(critical_threshold_percent),
+            minimum_consecutive_samples=(minimum_consecutive_samples),
             maximum_gap_seconds=maximum_gap_seconds,
             bursts=bursts,
         )
@@ -251,9 +206,7 @@ class PacketLossBurstService:
             return
 
         values = [
-            float(sample.value)
-            for sample in candidate
-            if sample.value is not None
+            float(sample.value) for sample in candidate if sample.value is not None
         ]
 
         if not values:
@@ -277,10 +230,7 @@ class PacketLossBurstService:
                 duration_seconds=round(
                     max(
                         0.0,
-                        (
-                            end_at
-                            - start_at
-                        ).total_seconds(),
+                        (end_at - start_at).total_seconds(),
                     ),
                     2,
                 ),
@@ -294,11 +244,7 @@ class PacketLossBurstService:
                     2,
                 ),
                 severity=severity,
-                status=(
-                    BurstStatus.ACTIVE
-                    if active
-                    else BurstStatus.COMPLETED
-                ),
+                status=(BurstStatus.ACTIVE if active else BurstStatus.COMPLETED),
             )
         )
 
@@ -306,11 +252,7 @@ class PacketLossBurstService:
     def _overall_severity(
         bursts: list[PacketLossBurstResult],
     ) -> AnalyticsSeverity:
-        if any(
-            burst.severity
-            == AnalyticsSeverity.CRITICAL
-            for burst in bursts
-        ):
+        if any(burst.severity == AnalyticsSeverity.CRITICAL for burst in bursts):
             return AnalyticsSeverity.CRITICAL
 
         if bursts:
@@ -339,21 +281,12 @@ class PacketLossBurstService:
         maximum_gap_seconds: int,
     ) -> None:
         if not 0 <= warning_threshold_percent <= 100:
-            raise ValueError(
-                "warning_threshold_percent must be "
-                "between 0 and 100"
-            )
+            raise ValueError("warning_threshold_percent must be between 0 and 100")
 
         if not 0 <= critical_threshold_percent <= 100:
-            raise ValueError(
-                "critical_threshold_percent must be "
-                "between 0 and 100"
-            )
+            raise ValueError("critical_threshold_percent must be between 0 and 100")
 
-        if (
-            critical_threshold_percent
-            <= warning_threshold_percent
-        ):
+        if critical_threshold_percent <= warning_threshold_percent:
             raise ValueError(
                 "critical_threshold_percent must be greater "
                 "than warning_threshold_percent"
@@ -361,12 +294,8 @@ class PacketLossBurstService:
 
         if minimum_consecutive_samples < 2:
             raise ValueError(
-                "minimum_consecutive_samples must be "
-                "greater than or equal to 2"
+                "minimum_consecutive_samples must be greater than or equal to 2"
             )
 
         if maximum_gap_seconds < 1:
-            raise ValueError(
-                "maximum_gap_seconds must be greater "
-                "than or equal to 1"
-            )
+            raise ValueError("maximum_gap_seconds must be greater than or equal to 1")

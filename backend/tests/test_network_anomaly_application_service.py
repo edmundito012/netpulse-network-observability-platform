@@ -11,13 +11,9 @@ from app.services.network_anomaly_application_service import (
 )
 
 
+@patch("app.services.network_anomaly_application_service.NetworkAnomalyService.analyze")
 @patch(
-    "app.services.network_anomaly_application_service."
-    "NetworkAnomalyService.analyze"
-)
-@patch(
-    "app.services.network_anomaly_application_service."
-    "MetricSeriesService.get_series"
+    "app.services.network_anomaly_application_service.MetricSeriesService.get_series"
 )
 def test_anomaly_application_uses_only_measured_values(
     get_series_mock: Mock,
@@ -35,14 +31,11 @@ def test_anomaly_application_uses_only_measured_values(
         expected_analysis = Mock()
         analyze_mock.return_value = expected_analysis
 
-        result = (
-            NetworkAnomalyApplicationService
-            .analyze_device_metric(
-                db=Mock(),
-                device_id=15,
-                metric_name=MetricName.LATENCY,
-                limit=20,
-            )
+        result = NetworkAnomalyApplicationService.analyze_device_metric(
+            db=Mock(),
+            device_id=15,
+            metric_name=MetricName.LATENCY,
+            limit=20,
         )
 
     values_mock.assert_called_once_with(series)
@@ -57,10 +50,7 @@ def test_anomaly_application_uses_only_measured_values(
     assert result.resolved_device_id == 15
 
 
-@patch(
-    "app.services.network_anomaly_application_service."
-    "NetworkAnomalyService.analyze"
-)
+@patch("app.services.network_anomaly_application_service.NetworkAnomalyService.analyze")
 @patch(
     "app.services.network_anomaly_application_service."
     "DeviceMetricRepository.get_latest_device_id"
@@ -74,13 +64,10 @@ def test_anomaly_application_returns_empty_analysis_without_metrics(
     expected_analysis = Mock()
     analyze_mock.return_value = expected_analysis
 
-    result = (
-        NetworkAnomalyApplicationService
-        .analyze_device_metric(
-            db=Mock(),
-            device_id=None,
-            metric_name=MetricName.LATENCY,
-        )
+    result = NetworkAnomalyApplicationService.analyze_device_metric(
+        db=Mock(),
+        device_id=None,
+        metric_name=MetricName.LATENCY,
     )
 
     analyze_mock.assert_called_once_with(
@@ -104,12 +91,9 @@ def test_resolve_device_id_uses_latest_metric_device(
 
     get_latest_device_id_mock.return_value = 25
 
-    result = (
-        NetworkAnomalyApplicationService
-        .resolve_device_id(
-            db=db,
-            device_id=None,
-        )
+    result = NetworkAnomalyApplicationService.resolve_device_id(
+        db=db,
+        device_id=None,
     )
 
     assert result == 25

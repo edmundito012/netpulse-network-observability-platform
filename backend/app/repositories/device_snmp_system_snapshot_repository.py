@@ -6,7 +6,6 @@ from app.models.device_snmp_system_snapshot import (
 
 
 class DeviceSNMPSystemSnapshotRepository:
-
     @staticmethod
     def create(
         db: Session,
@@ -72,17 +71,14 @@ class DeviceSNMPSystemSnapshotRepository:
         total_count = query.count()
 
         items = (
-            query
-            .order_by(DeviceSNMPSystemSnapshot.collected_at.desc())
+            query.order_by(DeviceSNMPSystemSnapshot.collected_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
             .all()
         )
 
         total_pages = (
-            (total_count + page_size - 1) // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {

@@ -44,10 +44,7 @@ def create_device(db) -> Device:
         name=f"worker-device-{suffix}",
         hostname=f"worker-device-{suffix}",
         ip_address=(
-            f"10."
-            f"{int(suffix[:2], 16)}."
-            f"{int(suffix[2:4], 16)}."
-            f"{int(suffix[4:6], 16)}"
+            f"10.{int(suffix[:2], 16)}.{int(suffix[2:4], 16)}.{int(suffix[4:6], 16)}"
         ),
         device_type="router",
         location="correlation-worker-test",
@@ -71,19 +68,12 @@ def create_alert(
 ) -> Alert:
     """Persist one correlation worker test alert."""
 
-    timestamp = (
-        created_at
-        or datetime.now(UTC)
-    )
+    timestamp = created_at or datetime.now(UTC)
 
     alert = Alert(
         device_id=device_id,
         alert_type=alert_type,
-        deduplication_key=(
-            f"worker:"
-            f"{device_id}:"
-            f"{uuid4().hex}"
-        ),
+        deduplication_key=(f"worker:{device_id}:{uuid4().hex}"),
         severity=AlertSeverity.WARNING,
         status=status,
         message="Correlation worker test alert",
@@ -110,18 +100,12 @@ def test_get_pending_alert_ids_returns_open_alert() -> None:
         alert = create_alert(
             db,
             device_id=device.id,
-            created_at=(
-                datetime.now(UTC)
-                - timedelta(days=3650)
-            ),
+            created_at=(datetime.now(UTC) - timedelta(days=3650)),
         )
 
-        result = (
-            CorrelationWorkerRepository
-            .get_pending_alert_ids(
-                db=db,
-                limit=500,
-            )
+        result = CorrelationWorkerRepository.get_pending_alert_ids(
+            db=db,
+            limit=500,
         )
 
         assert alert.id in result
@@ -142,18 +126,12 @@ def test_get_pending_alert_ids_returns_acknowledged_alert() -> None:
             db,
             device_id=device.id,
             status=AlertStatus.ACKNOWLEDGED,
-            created_at=(
-                datetime.now(UTC)
-                - timedelta(days=3650)
-            ),
+            created_at=(datetime.now(UTC) - timedelta(days=3650)),
         )
 
-        result = (
-            CorrelationWorkerRepository
-            .get_pending_alert_ids(
-                db=db,
-                limit=500,
-            )
+        result = CorrelationWorkerRepository.get_pending_alert_ids(
+            db=db,
+            limit=500,
         )
 
         assert alert.id in result
@@ -176,12 +154,9 @@ def test_get_pending_alert_ids_excludes_resolved_alert() -> None:
             status=AlertStatus.RESOLVED,
         )
 
-        result = (
-            CorrelationWorkerRepository
-            .get_pending_alert_ids(
-                db=db,
-                limit=500,
-            )
+        result = CorrelationWorkerRepository.get_pending_alert_ids(
+            db=db,
+            limit=500,
         )
 
         assert alert.id not in result
@@ -204,19 +179,15 @@ def test_get_pending_alert_ids_excludes_evaluated_alert() -> None:
         )
 
         (
-            IncidentCorrelationService
-            .evaluate_and_persist(
+            IncidentCorrelationService.evaluate_and_persist(
                 db=db,
                 source_alert_id=alert.id,
             )
         )
 
-        result = (
-            CorrelationWorkerRepository
-            .get_pending_alert_ids(
-                db=db,
-                limit=500,
-            )
+        result = CorrelationWorkerRepository.get_pending_alert_ids(
+            db=db,
+            limit=500,
         )
 
         assert alert.id not in result
@@ -225,8 +196,7 @@ def test_get_pending_alert_ids_excludes_evaluated_alert() -> None:
         db.close()
 
 
-def test_pending_alerts_exclude_alert_already_attached_to_incident(
-) -> None:
+def test_pending_alerts_exclude_alert_already_attached_to_incident() -> None:
     """Do not process an alert already owned by an incident."""
 
     db = SessionLocal()
@@ -237,10 +207,7 @@ def test_pending_alerts_exclude_alert_already_attached_to_incident(
         alert = create_alert(
             db,
             device_id=device.id,
-            created_at=(
-                datetime.now(UTC)
-                - timedelta(days=3650)
-            ),
+            created_at=(datetime.now(UTC) - timedelta(days=3650)),
         )
 
         incident = IncidentRepository.create(
@@ -256,12 +223,9 @@ def test_pending_alerts_exclude_alert_already_attached_to_incident(
             alert_id=alert.id,
         )
 
-        result = (
-            CorrelationWorkerRepository
-            .get_pending_alert_ids(
-                db=db,
-                limit=500,
-            )
+        result = CorrelationWorkerRepository.get_pending_alert_ids(
+            db=db,
+            limit=500,
         )
 
         assert alert.id not in result
@@ -291,8 +255,7 @@ def test_get_pending_alert_ids_validates_limit(
             match="between 1 and 500",
         ):
             (
-                CorrelationWorkerRepository
-                .get_pending_alert_ids(
+                CorrelationWorkerRepository.get_pending_alert_ids(
                     db=db,
                     limit=limit,
                 )

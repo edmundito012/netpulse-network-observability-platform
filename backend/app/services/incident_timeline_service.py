@@ -61,9 +61,7 @@ class IncidentTimelineService:
             actor_id=event_data.actor_id,
             actor_label=event_data.actor_label,
             message=event_data.message,
-            previous_value=(
-                event_data.previous_value
-            ),
+            previous_value=(event_data.previous_value),
             new_value=event_data.new_value,
             event_metadata=event_data.metadata,
             occurred_at=event_data.occurred_at,
@@ -83,9 +81,7 @@ class IncidentTimelineService:
 
         cls._validate_actor(
             db=db,
-            actor_type=(
-                IncidentTimelineActorType.USER
-            ),
+            actor_type=(IncidentTimelineActorType.USER),
             actor_id=actor_id,
         )
 
@@ -94,14 +90,8 @@ class IncidentTimelineService:
             event_data=(
                 IncidentTimelineEventCreate(
                     incident_id=incident.id,
-                    event_type=(
-                        IncidentTimelineEventType
-                        .COMMENT_ADDED
-                    ),
-                    actor_type=(
-                        IncidentTimelineActorType
-                        .USER
-                    ),
+                    event_type=(IncidentTimelineEventType.COMMENT_ADDED),
+                    actor_type=(IncidentTimelineActorType.USER),
                     actor_id=actor_id,
                     actor_label=actor_label,
                     message=comment_data.message,
@@ -115,43 +105,30 @@ class IncidentTimelineService:
         db: Session,
         *,
         public_id: str,
-        event_type: (
-            IncidentTimelineEventType | None
-        ) = None,
-        actor_type: (
-            IncidentTimelineActorType | None
-        ) = None,
+        event_type: (IncidentTimelineEventType | None) = None,
+        actor_type: (IncidentTimelineActorType | None) = None,
         page: int = 1,
         page_size: int = 50,
         newest_first: bool = False,
     ) -> IncidentTimelinePaginationResponse:
         """Return an incident timeline with optional filters."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        result = (
-            IncidentTimelineRepository
-            .get_paginated(
-                db=db,
-                incident_id=incident.id,
-                event_type=event_type,
-                actor_type=actor_type,
-                page=page,
-                page_size=page_size,
-                newest_first=newest_first,
-            )
+        result = IncidentTimelineRepository.get_paginated(
+            db=db,
+            incident_id=incident.id,
+            event_type=event_type,
+            actor_type=actor_type,
+            page=page,
+            page_size=page_size,
+            newest_first=newest_first,
         )
 
-        return (
-            IncidentTimelinePaginationResponse
-            .model_validate(result)
-        )
+        return IncidentTimelinePaginationResponse.model_validate(result)
 
     @staticmethod
     def get_latest_event(
@@ -161,20 +138,14 @@ class IncidentTimelineService:
     ) -> IncidentTimelineEvent | None:
         """Return the most recent event for an incident."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        return (
-            IncidentTimelineRepository
-            .get_latest(
-                db=db,
-                incident_id=incident.id,
-            )
+        return IncidentTimelineRepository.get_latest(
+            db=db,
+            incident_id=incident.id,
         )
 
     @staticmethod
@@ -185,50 +156,39 @@ class IncidentTimelineService:
     ) -> IncidentTimelineSummary:
         """Return high-level timeline statistics."""
 
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        latest_event = (
-            IncidentTimelineRepository
-            .get_latest(
-                db=db,
-                incident_id=incident.id,
-            )
+        latest_event = IncidentTimelineRepository.get_latest(
+            db=db,
+            incident_id=incident.id,
         )
 
         return IncidentTimelineSummary(
             incident_id=incident.id,
             public_id=incident.public_id,
             event_count=(
-                IncidentTimelineRepository
-                .count_events(
+                IncidentTimelineRepository.count_events(
                     db=db,
                     incident_id=incident.id,
                 )
             ),
             first_event_at=(
-                IncidentTimelineRepository
-                .get_first_occurred_at(
+                IncidentTimelineRepository.get_first_occurred_at(
                     db=db,
                     incident_id=incident.id,
                 )
             ),
             latest_event_at=(
-                IncidentTimelineRepository
-                .get_latest_occurred_at(
+                IncidentTimelineRepository.get_latest_occurred_at(
                     db=db,
                     incident_id=incident.id,
                 )
             ),
             last_event_type=(
-                latest_event.event_type
-                if latest_event is not None
-                else None
+                latest_event.event_type if latest_event is not None else None
             ),
         )
 
@@ -241,14 +201,8 @@ class IncidentTimelineService:
     ) -> None:
         """Validate actor consistency and user existence."""
 
-        if (
-            actor_type
-            == IncidentTimelineActorType.USER
-            and actor_id is None
-        ):
-            raise IncidentTimelineActorError(
-                "USER timeline events require actor_id"
-            )
+        if actor_type == IncidentTimelineActorType.USER and actor_id is None:
+            raise IncidentTimelineActorError("USER timeline events require actor_id")
 
         if actor_id is None:
             return
@@ -260,6 +214,5 @@ class IncidentTimelineService:
 
         if actor is None:
             raise IncidentTimelineActorError(
-                f"Timeline actor user {actor_id} "
-                "was not found"
+                f"Timeline actor user {actor_id} was not found"
             )

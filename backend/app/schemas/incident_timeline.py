@@ -25,9 +25,7 @@ class IncidentTimelineEventCreate(BaseModel):
 
     event_type: IncidentTimelineEventType
 
-    actor_type: IncidentTimelineActorType = (
-        IncidentTimelineActorType.SYSTEM
-    )
+    actor_type: IncidentTimelineActorType = IncidentTimelineActorType.SYSTEM
 
     actor_id: int | None = Field(
         default=None,
@@ -159,6 +157,4 @@ class IncidentTimelineSummary(BaseModel):
     first_event_at: datetime | None
     latest_event_at: datetime | None
 
-    last_event_type: (
-        IncidentTimelineEventType | None
-    )
+    last_event_type: IncidentTimelineEventType | None

@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_network_anomalies_api():
 
-    response = client.get(
-        "/analytics/network-anomalies"
-    )
+    response = client.get("/analytics/network-anomalies")
 
     assert response.status_code == 200
 

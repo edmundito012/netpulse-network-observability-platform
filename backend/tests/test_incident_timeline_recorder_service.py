@@ -20,9 +20,7 @@ from app.services.incident_timeline_recorder_service import (
 
 def build_incident(
     *,
-    source: IncidentSource = (
-        IncidentSource.ALERT_ENGINE
-    ),
+    source: IncidentSource = (IncidentSource.ALERT_ENGINE),
 ):
     """Build an incident used by recorder tests."""
 
@@ -39,8 +37,7 @@ def build_incident(
 
 
 @patch(
-    "app.services.incident_timeline_recorder_service."
-    "IncidentTimelineRepository.append"
+    "app.services.incident_timeline_recorder_service.IncidentTimelineRepository.append"
 )
 def test_created_event_maps_automation_source(
     append_mock: Mock,
@@ -48,13 +45,10 @@ def test_created_event_maps_automation_source(
     db = Mock()
     incident = build_incident()
 
-    append_mock.return_value = (
-        SimpleNamespace(id=1)
-    )
+    append_mock.return_value = SimpleNamespace(id=1)
 
     (
-        IncidentTimelineRecorderService
-        .record_incident_created(
+        IncidentTimelineRecorderService.record_incident_created(
             db=db,
             incident=incident,
         )
@@ -63,21 +57,11 @@ def test_created_event_maps_automation_source(
     append_mock.assert_called_once_with(
         db=db,
         incident_id=7,
-        event_type=(
-            IncidentTimelineEventType
-            .INCIDENT_CREATED
-        ),
-        actor_type=(
-            IncidentTimelineActorType
-            .AUTOMATION
-        ),
+        event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
+        actor_type=(IncidentTimelineActorType.AUTOMATION),
         actor_id=None,
-        actor_label=(
-            "NetPulse ALERT_ENGINE"
-        ),
-        message=(
-            "Incident INC-2026-000007 created"
-        ),
+        actor_label=("NetPulse ALERT_ENGINE"),
+        message=("Incident INC-2026-000007 created"),
         previous_value=None,
         new_value={
             "public_id": "INC-2026-000007",
@@ -95,8 +79,7 @@ def test_created_event_maps_automation_source(
 
 
 @patch(
-    "app.services.incident_timeline_recorder_service."
-    "IncidentTimelineRepository.append"
+    "app.services.incident_timeline_recorder_service.IncidentTimelineRepository.append"
 )
 def test_status_change_records_previous_and_new_values(
     append_mock: Mock,
@@ -104,26 +87,17 @@ def test_status_change_records_previous_and_new_values(
     incident = build_incident()
 
     (
-        IncidentTimelineRecorderService
-        .record_status_changed(
+        IncidentTimelineRecorderService.record_status_changed(
             db=Mock(),
             incident=incident,
-            previous_status=(
-                IncidentStatus.OPEN
-            ),
-            new_status=(
-                IncidentStatus.ACKNOWLEDGED
-            ),
+            previous_status=(IncidentStatus.OPEN),
+            new_status=(IncidentStatus.ACKNOWLEDGED),
         )
     )
 
     call = append_mock.call_args.kwargs
 
-    assert (
-        call["event_type"]
-        == IncidentTimelineEventType
-        .STATUS_CHANGED
-    )
+    assert call["event_type"] == IncidentTimelineEventType.STATUS_CHANGED
 
     assert call["previous_value"] == {
         "status": "OPEN",
@@ -135,8 +109,7 @@ def test_status_change_records_previous_and_new_values(
 
 
 @patch(
-    "app.services.incident_timeline_recorder_service."
-    "IncidentTimelineRepository.append"
+    "app.services.incident_timeline_recorder_service.IncidentTimelineRepository.append"
 )
 def test_alert_attachment_records_alert_id(
     append_mock: Mock,
@@ -144,8 +117,7 @@ def test_alert_attachment_records_alert_id(
     incident = build_incident()
 
     (
-        IncidentTimelineRecorderService
-        .record_alert_attached(
+        IncidentTimelineRecorderService.record_alert_attached(
             db=Mock(),
             incident=incident,
             alert_id=42,
@@ -154,11 +126,7 @@ def test_alert_attachment_records_alert_id(
 
     call = append_mock.call_args.kwargs
 
-    assert (
-        call["event_type"]
-        == IncidentTimelineEventType
-        .ALERT_ATTACHED
-    )
+    assert call["event_type"] == IncidentTimelineEventType.ALERT_ATTACHED
 
     assert call["new_value"] == {
         "alert_id": 42,

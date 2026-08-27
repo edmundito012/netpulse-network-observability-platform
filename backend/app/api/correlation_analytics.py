@@ -53,29 +53,21 @@ def get_correlation_analytics(
         le=100,
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> CorrelationAnalyticsSummary:
     """Return operational Correlation Engine analytics."""
 
     del current_user
 
     try:
-        return (
-            CorrelationAnalyticsService
-            .get_summary(
-                db=db,
-                window_hours=window_hours,
-                recent_limit=recent_limit,
-            )
+        return CorrelationAnalyticsService.get_summary(
+            db=db,
+            window_hours=window_hours,
+            recent_limit=recent_limit,
         )
 
     except ValueError as exc:
         raise HTTPException(
-            status_code=(
-                status
-                .HTTP_422_UNPROCESSABLE_CONTENT
-            ),
+            status_code=(status.HTTP_422_UNPROCESSABLE_CONTENT),
             detail=str(exc),
         ) from exc

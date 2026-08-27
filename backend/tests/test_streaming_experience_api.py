@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_streaming_endpoint():
 
-    response = client.get(
-        "/streaming/experience"
-    )
+    response = client.get("/streaming/experience")
 
     assert response.status_code == 200
 

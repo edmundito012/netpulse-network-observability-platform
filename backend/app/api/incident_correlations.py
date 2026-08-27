@@ -124,19 +124,13 @@ def translate_correlation_error(
         ValueError,
     ):
         return HTTPException(
-            status_code=(
-                status.HTTP_422_UNPROCESSABLE_CONTENT
-            ),
+            status_code=(status.HTTP_422_UNPROCESSABLE_CONTENT),
             detail=str(exc),
         )
 
     return HTTPException(
-        status_code=(
-            status.HTTP_500_INTERNAL_SERVER_ERROR
-        ),
-        detail=(
-            "Correlation Engine operation failed"
-        ),
+        status_code=(status.HTTP_500_INTERNAL_SERVER_ERROR),
+        detail=("Correlation Engine operation failed"),
     )
 
 
@@ -152,9 +146,7 @@ def evaluate_alert_correlation(
         default={},
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> CorrelationEvaluationResponse:
     """Evaluate and persist a decision without applying it."""
 
@@ -165,30 +157,19 @@ def evaluate_alert_correlation(
             evaluation,
             correlation,
             persistence_created,
-        ) = (
-            IncidentCorrelationService
-            .evaluate_and_persist(
-                db=db,
-                source_alert_id=alert_id,
-                configuration=(
-                    build_configuration(
-                        options
-                    )
-                ),
-            )
+        ) = IncidentCorrelationService.evaluate_and_persist(
+            db=db,
+            source_alert_id=alert_id,
+            configuration=(build_configuration(options)),
         )
 
     except Exception as exc:
-        raise translate_correlation_error(
-            exc
-        ) from exc
+        raise translate_correlation_error(exc) from exc
 
     return CorrelationEvaluationResponse(
         **evaluation.model_dump(),
         correlation_id=correlation.id,
-        persistence_created=(
-            persistence_created
-        ),
+        persistence_created=(persistence_created),
     )
 
 
@@ -204,39 +185,26 @@ def apply_alert_correlation(
         default={},
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> CorrelationApplicationResult:
     """Evaluate, persist and apply a correlation decision."""
 
     del current_user
 
     try:
-        return (
-            IncidentCorrelationApplicationService
-            .evaluate_and_apply(
-                db=db,
-                source_alert_id=alert_id,
-                configuration=(
-                    build_configuration(
-                        options
-                    )
-                ),
-            )
+        return IncidentCorrelationApplicationService.evaluate_and_apply(
+            db=db,
+            source_alert_id=alert_id,
+            configuration=(build_configuration(options)),
         )
 
     except Exception as exc:
-        raise translate_correlation_error(
-            exc
-        ) from exc
+        raise translate_correlation_error(exc) from exc
 
 
 @router.get(
     "",
-    response_model=(
-        IncidentCorrelationPaginationResponse
-    ),
+    response_model=(IncidentCorrelationPaginationResponse),
     summary="List persisted correlation decisions",
 )
 def list_incident_correlations(
@@ -251,14 +219,10 @@ def list_incident_correlations(
     outcome: CorrelationOutcome | None = Query(
         default=None,
     ),
-    application_status: (
-        CorrelationApplicationStatus | None
-    ) = Query(
+    application_status: (CorrelationApplicationStatus | None) = Query(
         default=None,
     ),
-    signal_family: (
-        CorrelationSignalFamily | None
-    ) = Query(
+    signal_family: (CorrelationSignalFamily | None) = Query(
         default=None,
     ),
     page: int = Query(
@@ -271,44 +235,28 @@ def list_incident_correlations(
         le=100,
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentCorrelationPaginationResponse:
     """Return filtered correlation history."""
 
     del current_user
 
     try:
-        result = (
-            IncidentCorrelationQueryService
-            .list_correlations(
-                db=db,
-                source_alert_id=source_alert_id,
-                target_incident_id=(
-                    target_incident_id
-                ),
-                outcome=outcome,
-                application_status=(
-                    application_status
-                ),
-                signal_family=signal_family,
-                page=page,
-                page_size=page_size,
-            )
+        result = IncidentCorrelationQueryService.list_correlations(
+            db=db,
+            source_alert_id=source_alert_id,
+            target_incident_id=(target_incident_id),
+            outcome=outcome,
+            application_status=(application_status),
+            signal_family=signal_family,
+            page=page,
+            page_size=page_size,
         )
 
     except Exception as exc:
-        raise translate_correlation_error(
-            exc
-        ) from exc
+        raise translate_correlation_error(exc) from exc
 
-    return (
-        IncidentCorrelationPaginationResponse
-        .model_validate(
-            result
-        )
-    )
+    return IncidentCorrelationPaginationResponse.model_validate(result)
 
 
 @router.get(
@@ -319,28 +267,19 @@ def list_incident_correlations(
 def get_incident_correlation(
     correlation_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentCorrelationRead:
     """Return one persisted correlation decision."""
 
     del current_user
 
     try:
-        correlation = (
-            IncidentCorrelationQueryService
-            .get_required(
-                db=db,
-                correlation_id=correlation_id,
-            )
+        correlation = IncidentCorrelationQueryService.get_required(
+            db=db,
+            correlation_id=correlation_id,
         )
 
     except Exception as exc:
-        raise translate_correlation_error(
-            exc
-        ) from exc
+        raise translate_correlation_error(exc) from exc
 
-    return IncidentCorrelationRead.model_validate(
-        correlation
-    )
+    return IncidentCorrelationRead.model_validate(correlation)

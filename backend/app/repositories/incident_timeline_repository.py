@@ -33,15 +33,9 @@ class IncidentTimelineRepository:
         message: str,
         actor_id: int | None = None,
         actor_label: str | None = None,
-        previous_value: (
-            dict[str, object] | None
-        ) = None,
-        new_value: (
-            dict[str, object] | None
-        ) = None,
-        event_metadata: (
-            dict[str, object] | None
-        ) = None,
+        previous_value: (dict[str, object] | None) = None,
+        new_value: (dict[str, object] | None) = None,
+        event_metadata: (dict[str, object] | None) = None,
         occurred_at: datetime | None = None,
     ) -> IncidentTimelineEvent:
         """Append one immutable event to an incident timeline."""
@@ -54,18 +48,10 @@ class IncidentTimelineRepository:
             actor_label=actor_label,
             message=message,
             previous_value=(
-                dict(previous_value)
-                if previous_value is not None
-                else None
+                dict(previous_value) if previous_value is not None else None
             ),
-            new_value=(
-                dict(new_value)
-                if new_value is not None
-                else None
-            ),
-            event_metadata=dict(
-                event_metadata or {}
-            ),
+            new_value=(dict(new_value) if new_value is not None else None),
+            event_metadata=dict(event_metadata or {}),
         )
 
         if occurred_at is not None:
@@ -87,15 +73,8 @@ class IncidentTimelineRepository:
 
         statement = (
             select(IncidentTimelineEvent)
-            .where(
-                IncidentTimelineEvent.id
-                == event_id
-            )
-            .options(
-                joinedload(
-                    IncidentTimelineEvent.actor
-                )
-            )
+            .where(IncidentTimelineEvent.id == event_id)
+            .options(joinedload(IncidentTimelineEvent.actor))
         )
 
         return db.scalar(statement)
@@ -110,19 +89,10 @@ class IncidentTimelineRepository:
 
         statement = (
             select(IncidentTimelineEvent)
-            .where(
-                IncidentTimelineEvent.incident_id
-                == incident_id
-            )
-            .options(
-                joinedload(
-                    IncidentTimelineEvent.actor
-                )
-            )
+            .where(IncidentTimelineEvent.incident_id == incident_id)
+            .options(joinedload(IncidentTimelineEvent.actor))
             .order_by(
-                IncidentTimelineEvent
-                .occurred_at
-                .desc(),
+                IncidentTimelineEvent.occurred_at.desc(),
                 IncidentTimelineEvent.id.desc(),
             )
             .limit(1)
@@ -135,12 +105,8 @@ class IncidentTimelineRepository:
         db: Session,
         *,
         incident_id: int,
-        event_type: (
-            IncidentTimelineEventType | None
-        ) = None,
-        actor_type: (
-            IncidentTimelineActorType | None
-        ) = None,
+        event_type: (IncidentTimelineEventType | None) = None,
+        actor_type: (IncidentTimelineActorType | None) = None,
         page: int = 1,
         page_size: int = 50,
         newest_first: bool = False,
@@ -152,82 +118,42 @@ class IncidentTimelineRepository:
             page_size=page_size,
         )
 
-        filters: list[object] = [
-            IncidentTimelineEvent.incident_id
-            == incident_id
-        ]
+        filters: list[object] = [IncidentTimelineEvent.incident_id == incident_id]
 
         if event_type is not None:
-            filters.append(
-                IncidentTimelineEvent.event_type
-                == event_type
-            )
+            filters.append(IncidentTimelineEvent.event_type == event_type)
 
         if actor_type is not None:
-            filters.append(
-                IncidentTimelineEvent.actor_type
-                == actor_type
-            )
+            filters.append(IncidentTimelineEvent.actor_type == actor_type)
 
-        count_statement = (
-            select(
-                func.count(
-                    IncidentTimelineEvent.id
-                )
-            )
-            .where(*filters)
-        )
+        count_statement = select(func.count(IncidentTimelineEvent.id)).where(*filters)
 
-        total_count = int(
-            db.scalar(count_statement)
-            or 0
-        )
+        total_count = int(db.scalar(count_statement) or 0)
 
         if newest_first:
             ordering = (
-                IncidentTimelineEvent
-                .occurred_at
-                .desc(),
+                IncidentTimelineEvent.occurred_at.desc(),
                 IncidentTimelineEvent.id.desc(),
             )
         else:
             ordering = (
-                IncidentTimelineEvent
-                .occurred_at
-                .asc(),
+                IncidentTimelineEvent.occurred_at.asc(),
                 IncidentTimelineEvent.id.asc(),
             )
 
         statement = (
             select(IncidentTimelineEvent)
             .where(*filters)
-            .options(
-                joinedload(
-                    IncidentTimelineEvent.actor
-                )
-            )
+            .options(joinedload(IncidentTimelineEvent.actor))
             .order_by(*ordering)
-            .offset(
-                (page - 1) * page_size
-            )
+            .offset((page - 1) * page_size)
             .limit(page_size)
         )
 
-        items = list(
-            db.scalars(statement)
-            .unique()
-            .all()
-        )
+        items = list(db.scalars(statement).unique().all())
 
         total_pages = (
-            (
-                total_count
-                + page_size
-                - 1
-            )
-            // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {
@@ -246,22 +172,11 @@ class IncidentTimelineRepository:
     ) -> int:
         """Return the number of events recorded for an incident."""
 
-        statement = (
-            select(
-                func.count(
-                    IncidentTimelineEvent.id
-                )
-            )
-            .where(
-                IncidentTimelineEvent.incident_id
-                == incident_id
-            )
+        statement = select(func.count(IncidentTimelineEvent.id)).where(
+            IncidentTimelineEvent.incident_id == incident_id
         )
 
-        return int(
-            db.scalar(statement)
-            or 0
-        )
+        return int(db.scalar(statement) or 0)
 
     @staticmethod
     def get_first_occurred_at(
@@ -271,17 +186,8 @@ class IncidentTimelineRepository:
     ) -> datetime | None:
         """Return the timestamp of the first timeline event."""
 
-        statement = (
-            select(
-                func.min(
-                    IncidentTimelineEvent
-                    .occurred_at
-                )
-            )
-            .where(
-                IncidentTimelineEvent.incident_id
-                == incident_id
-            )
+        statement = select(func.min(IncidentTimelineEvent.occurred_at)).where(
+            IncidentTimelineEvent.incident_id == incident_id
         )
 
         return db.scalar(statement)
@@ -294,17 +200,8 @@ class IncidentTimelineRepository:
     ) -> datetime | None:
         """Return the timestamp of the latest timeline event."""
 
-        statement = (
-            select(
-                func.max(
-                    IncidentTimelineEvent
-                    .occurred_at
-                )
-            )
-            .where(
-                IncidentTimelineEvent.incident_id
-                == incident_id
-            )
+        statement = select(func.max(IncidentTimelineEvent.occurred_at)).where(
+            IncidentTimelineEvent.incident_id == incident_id
         )
 
         return db.scalar(statement)
@@ -316,11 +213,7 @@ class IncidentTimelineRepository:
         page_size: int,
     ) -> None:
         if page < 1:
-            raise ValueError(
-                "page must be greater than or equal to 1"
-            )
+            raise ValueError("page must be greater than or equal to 1")
 
         if page_size < 1 or page_size > 200:
-            raise ValueError(
-                "page_size must be between 1 and 200"
-            )
+            raise ValueError("page_size must be between 1 and 200")

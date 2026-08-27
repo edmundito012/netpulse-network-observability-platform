@@ -40,24 +40,15 @@ class IncidentTimelineRecorderService:
     ) -> IncidentTimelineEvent:
         """Record the creation of an operational incident."""
 
-        actor_type, actor_label = (
-            cls._actor_from_source(
-                incident.source
-            )
-        )
+        actor_type, actor_label = cls._actor_from_source(incident.source)
 
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .INCIDENT_CREATED
-            ),
+            event_type=(IncidentTimelineEventType.INCIDENT_CREATED),
             actor_type=actor_type,
             actor_label=actor_label,
-            message=(
-                f"Incident {incident.public_id} created"
-            ),
+            message=(f"Incident {incident.public_id} created"),
             new_value={
                 "public_id": incident.public_id,
                 "title": incident.title,
@@ -80,9 +71,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_status: IncidentStatus,
         new_status: IncidentStatus,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -91,10 +80,7 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .STATUS_CHANGED
-            ),
+            event_type=(IncidentTimelineEventType.STATUS_CHANGED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
@@ -120,9 +106,7 @@ class IncidentTimelineRecorderService:
         previous_status: IncidentStatus,
         resolution_summary: str,
         root_cause: str | None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -131,16 +115,11 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .INCIDENT_RESOLVED
-            ),
+            event_type=(IncidentTimelineEventType.INCIDENT_RESOLVED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
-            message=(
-                f"Incident {incident.public_id} resolved"
-            ),
+            message=(f"Incident {incident.public_id} resolved"),
             previous_value={
                 "status": previous_status.value,
             },
@@ -158,9 +137,7 @@ class IncidentTimelineRecorderService:
         *,
         incident: Incident,
         alert_id: int,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -169,17 +146,11 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .ALERT_ATTACHED
-            ),
+            event_type=(IncidentTimelineEventType.ALERT_ATTACHED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
-            message=(
-                f"Alert {alert_id} attached to "
-                f"incident {incident.public_id}"
-            ),
+            message=(f"Alert {alert_id} attached to incident {incident.public_id}"),
             new_value={
                 "alert_id": alert_id,
             },
@@ -192,9 +163,7 @@ class IncidentTimelineRecorderService:
         *,
         incident: Incident,
         alert_id: int,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -203,17 +172,11 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .ALERT_DETACHED
-            ),
+            event_type=(IncidentTimelineEventType.ALERT_DETACHED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
-            message=(
-                f"Alert {alert_id} detached from "
-                f"incident {incident.public_id}"
-            ),
+            message=(f"Alert {alert_id} detached from incident {incident.public_id}"),
             previous_value={
                 "alert_id": alert_id,
             },
@@ -227,35 +190,21 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_owner_id: int | None,
         new_owner_id: int | None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
         """Record incident assignment or unassignment."""
 
         if new_owner_id is None:
-            event_type = (
-                IncidentTimelineEventType
-                .OWNER_UNASSIGNED
-            )
+            event_type = IncidentTimelineEventType.OWNER_UNASSIGNED
 
-            message = (
-                f"Owner removed from incident "
-                f"{incident.public_id}"
-            )
+            message = f"Owner removed from incident {incident.public_id}"
 
         else:
-            event_type = (
-                IncidentTimelineEventType
-                .OWNER_ASSIGNED
-            )
+            event_type = IncidentTimelineEventType.OWNER_ASSIGNED
 
-            message = (
-                f"User {new_owner_id} assigned to "
-                f"incident {incident.public_id}"
-            )
+            message = f"User {new_owner_id} assigned to incident {incident.public_id}"
 
         return cls._append(
             db=db,
@@ -281,9 +230,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_severity: str,
         new_severity: str,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -292,16 +239,12 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .SEVERITY_CHANGED
-            ),
+            event_type=(IncidentTimelineEventType.SEVERITY_CHANGED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
             message=(
-                "Incident severity changed from "
-                f"{previous_severity} to {new_severity}"
+                f"Incident severity changed from {previous_severity} to {new_severity}"
             ),
             previous_value={
                 "severity": previous_severity,
@@ -319,9 +262,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_priority: str,
         new_priority: str,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -330,16 +271,12 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .PRIORITY_CHANGED
-            ),
+            event_type=(IncidentTimelineEventType.PRIORITY_CHANGED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
             message=(
-                "Incident priority changed from "
-                f"{previous_priority} to {new_priority}"
+                f"Incident priority changed from {previous_priority} to {new_priority}"
             ),
             previous_value={
                 "priority": previous_priority,
@@ -357,9 +294,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_value: str | None,
         new_value: str | None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -368,16 +303,11 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .BUSINESS_IMPACT_UPDATED
-            ),
+            event_type=(IncidentTimelineEventType.BUSINESS_IMPACT_UPDATED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
-            message=(
-                "Incident business impact updated"
-            ),
+            message=("Incident business impact updated"),
             previous_value={
                 "business_impact": previous_value,
             },
@@ -394,9 +324,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_value: str | None,
         new_value: str | None,
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -405,10 +333,7 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .ROOT_CAUSE_UPDATED
-            ),
+            event_type=(IncidentTimelineEventType.ROOT_CAUSE_UPDATED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
@@ -429,9 +354,7 @@ class IncidentTimelineRecorderService:
         incident: Incident,
         previous_value: dict[str, Any],
         new_value: dict[str, Any],
-        actor_type: IncidentTimelineActorType = (
-            IncidentTimelineActorType.SYSTEM
-        ),
+        actor_type: IncidentTimelineActorType = (IncidentTimelineActorType.SYSTEM),
         actor_id: int | None = None,
         actor_label: str | None = None,
     ) -> IncidentTimelineEvent:
@@ -440,10 +363,7 @@ class IncidentTimelineRecorderService:
         return cls._append(
             db=db,
             incident=incident,
-            event_type=(
-                IncidentTimelineEventType
-                .DETAILS_UPDATED
-            ),
+            event_type=(IncidentTimelineEventType.DETAILS_UPDATED),
             actor_type=actor_type,
             actor_id=actor_id,
             actor_label=actor_label,
@@ -463,15 +383,9 @@ class IncidentTimelineRecorderService:
         message: str,
         actor_id: int | None = None,
         actor_label: str | None = None,
-        previous_value: (
-            dict[str, Any] | None
-        ) = None,
-        new_value: (
-            dict[str, Any] | None
-        ) = None,
-        metadata: (
-            dict[str, Any] | None
-        ) = None,
+        previous_value: (dict[str, Any] | None) = None,
+        new_value: (dict[str, Any] | None) = None,
+        metadata: (dict[str, Any] | None) = None,
     ) -> IncidentTimelineEvent:
         """Append a normalized internal timeline event."""
 
@@ -481,10 +395,7 @@ class IncidentTimelineRecorderService:
             event_type=event_type,
             actor_type=actor_type,
             actor_id=actor_id,
-            actor_label=(
-                actor_label
-                or cls.DEFAULT_SYSTEM_LABEL
-            ),
+            actor_label=(actor_label or cls.DEFAULT_SYSTEM_LABEL),
             message=message,
             previous_value=previous_value,
             new_value=new_value,
@@ -518,6 +429,5 @@ class IncidentTimelineRecorderService:
 
         return (
             IncidentTimelineActorType.SYSTEM,
-            IncidentTimelineRecorderService
-            .DEFAULT_SYSTEM_LABEL,
+            IncidentTimelineRecorderService.DEFAULT_SYSTEM_LABEL,
         )

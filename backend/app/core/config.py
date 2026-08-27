@@ -1,4 +1,4 @@
-﻿"""Application configuration loaded from environment variables."""
+"""Application configuration loaded from environment variables."""
 
 from typing import Literal
 
@@ -92,9 +92,7 @@ class Settings(BaseSettings):
                 "postgresql+psycopg2://",
             )
         ):
-            raise ValueError(
-                "DATABASE_URL must use PostgreSQL in production"
-            )
+            raise ValueError("DATABASE_URL must use PostgreSQL in production")
 
         return self
 

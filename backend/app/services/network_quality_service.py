@@ -24,7 +24,6 @@ class NetworkQualityResult:
 
 
 class NetworkQualityService:
-
     @staticmethod
     def percentile(
         values: list[float],
@@ -41,10 +40,7 @@ class NetworkQualityService:
 
         sorted_values = sorted(values)
 
-        position = (
-            (len(sorted_values) - 1)
-            * percentile
-        )
+        position = (len(sorted_values) - 1) * percentile
 
         lower_index = floor(position)
         upper_index = min(
@@ -57,10 +53,7 @@ class NetworkQualityService:
 
         weight = position - lower_index
 
-        interpolated_value = (
-            lower_value
-            + (upper_value - lower_value) * weight
-        )
+        interpolated_value = lower_value + (upper_value - lower_value) * weight
 
         return round(interpolated_value, 2)
 
@@ -117,10 +110,7 @@ class NetworkQualityService:
 
         std = pstdev(latencies)
 
-        stability = (
-            NetworkQualityService
-            .stability_score(std)
-        )
+        stability = NetworkQualityService.stability_score(std)
 
         return NetworkQualityResult(
             average_latency=round(
@@ -134,15 +124,13 @@ class NetworkQualityService:
             minimum_latency=min(latencies),
             maximum_latency=max(latencies),
             p95_latency=(
-                NetworkQualityService
-                .percentile(
+                NetworkQualityService.percentile(
                     latencies,
                     0.95,
                 )
             ),
             p99_latency=(
-                NetworkQualityService
-                .percentile(
+                NetworkQualityService.percentile(
                     latencies,
                     0.99,
                 )
@@ -152,8 +140,5 @@ class NetworkQualityService:
                 2,
             ),
             stability_score=stability,
-            quality_grade=(
-                NetworkQualityService
-                .grade(stability)
-            ),
+            quality_grade=(NetworkQualityService.grade(stability)),
         )

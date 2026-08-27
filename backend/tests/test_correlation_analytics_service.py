@@ -62,29 +62,20 @@ def test_get_summary_calculates_rates(
 
     recent_mock.return_value = []
 
-    result = (
-        CorrelationAnalyticsService
-        .get_summary(
-            db=SimpleNamespace(),
-            window_hours=24,
-            recent_limit=20,
-        )
+    result = CorrelationAnalyticsService.get_summary(
+        db=SimpleNamespace(),
+        window_hours=24,
+        recent_limit=20,
     )
 
     assert result.total_evaluations == 10
     assert result.successful_decisions == 8
 
-    assert (
-        result.application_success_rate
-        == 80.0
-    )
+    assert result.application_success_rate == 80.0
 
     assert result.incident_reuse_rate == 62.5
 
-    assert (
-        result.estimated_incidents_avoided
-        == 5
-    )
+    assert result.estimated_incidents_avoided == 5
 
     assert result.average_score == 0.8123
 
@@ -122,20 +113,14 @@ def test_get_summary_handles_empty_database(
     counts_mock.return_value = []
     recent_mock.return_value = []
 
-    result = (
-        CorrelationAnalyticsService
-        .get_summary(
-            db=SimpleNamespace(),
-        )
+    result = CorrelationAnalyticsService.get_summary(
+        db=SimpleNamespace(),
     )
 
     assert result.total_evaluations == 0
     assert result.average_score is None
 
-    assert (
-        result.application_success_rate
-        == 0.0
-    )
+    assert result.application_success_rate == 0.0
 
     assert result.incident_reuse_rate == 0.0
 
@@ -183,28 +168,16 @@ def test_get_summary_maps_recent_correlations(
             id=91,
             source_alert_id=301,
             target_incident_id=21,
-            outcome=(
-                CorrelationOutcome
-                .MATCHED_EXISTING
-            ),
-            application_status=(
-                CorrelationApplicationStatus
-                .APPLIED
-            ),
-            signal_family=(
-                CorrelationSignalFamily
-                .CONNECTIVITY
-            ),
+            outcome=(CorrelationOutcome.MATCHED_EXISTING),
+            application_status=(CorrelationApplicationStatus.APPLIED),
+            signal_family=(CorrelationSignalFamily.CONNECTIVITY),
             score=Decimal("0.9000"),
             evaluated_at=NOW,
         )
     ]
 
-    result = (
-        CorrelationAnalyticsService
-        .get_summary(
-            db=SimpleNamespace(),
-        )
+    result = CorrelationAnalyticsService.get_summary(
+        db=SimpleNamespace(),
     )
 
     item = result.recent_correlations[0]

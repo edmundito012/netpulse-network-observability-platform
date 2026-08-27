@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_gaming_impact_endpoint():
 
-    response = client.get(
-        "/network/impact/gaming"
-    )
+    response = client.get("/network/impact/gaming")
 
     assert response.status_code == 200
 

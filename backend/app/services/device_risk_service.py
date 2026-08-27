@@ -18,7 +18,6 @@ class DeviceRiskResult:
 
 
 class DeviceRiskService:
-
     @staticmethod
     def classify_risk_level(
         risk_score: int,
@@ -38,27 +37,18 @@ class DeviceRiskService:
         device,
     ) -> DeviceRiskResult:
 
-        risk_data = (
-            FailureRiskService.calculate(
-                db=db,
-                device=device,
-            )
+        risk_data = FailureRiskService.calculate(
+            db=db,
+            device=device,
         )
 
-        risk_score = risk_data[
-            "failure_risk"
-        ]
+        risk_score = risk_data["failure_risk"]
 
         return DeviceRiskResult(
             device_id=device.id,
             device_name=device.name,
             risk_score=risk_score,
-            risk_level=(
-                DeviceRiskService
-                .classify_risk_level(
-                    risk_score
-                )
-            ),
+            risk_level=(DeviceRiskService.classify_risk_level(risk_score)),
         )
 
     @staticmethod
@@ -66,18 +56,13 @@ class DeviceRiskService:
         db: Session,
     ) -> list[DeviceRiskResult]:
 
-        devices = (
-            db.query(Device)
-            .all()
-        )
+        devices = db.query(Device).all()
 
         ranking = []
 
         for device in devices:
-
             ranking.append(
-                DeviceRiskService
-                .calculate_device_risk(
+                DeviceRiskService.calculate_device_risk(
                     db=db,
                     device=device,
                 )
@@ -95,10 +80,8 @@ class DeviceRiskService:
         db,
         limit: int = 5,
     ):
-        ranking = (
-            DeviceRiskService.get_risk_ranking(
-                db=db,
-            )
+        ranking = DeviceRiskService.get_risk_ranking(
+            db=db,
         )
 
         return ranking[:limit]

@@ -10,7 +10,6 @@ class NetworkRiskResult:
 
 
 class NetworkRiskService:
-
     @staticmethod
     def classify_risk_level(score: int) -> str:
         if score >= 75:
@@ -54,9 +53,7 @@ class NetworkRiskService:
 
         return NetworkRiskResult(
             risk_score=risk_score,
-            risk_level=NetworkRiskService.classify_risk_level(
-                risk_score
-            ),
+            risk_level=NetworkRiskService.classify_risk_level(risk_score),
             failure_probability=failure_risk,
             contributing_factors=contributing_factors,
         )

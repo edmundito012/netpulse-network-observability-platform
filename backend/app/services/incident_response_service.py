@@ -31,15 +31,9 @@ class IncidentResponseService:
                 severity=link.alert.severity,
                 status=link.alert.status,
                 message=link.alert.message,
-                occurrence_count=(
-                    link.alert.occurrence_count
-                ),
-                first_seen_at=(
-                    link.alert.first_seen_at
-                ),
-                last_seen_at=(
-                    link.alert.last_seen_at
-                ),
+                occurrence_count=(link.alert.occurrence_count),
+                first_seen_at=(link.alert.first_seen_at),
+                last_seen_at=(link.alert.last_seen_at),
                 created_at=link.alert.created_at,
                 resolved_at=link.alert.resolved_at,
                 attached_at=link.attached_at,
@@ -57,24 +51,14 @@ class IncidentResponseService:
             priority=incident.priority,
             source=incident.source,
             owner_id=incident.owner_id,
-            business_impact=(
-                incident.business_impact
-            ),
+            business_impact=(incident.business_impact),
             root_cause=incident.root_cause,
-            resolution_summary=(
-                incident.resolution_summary
-            ),
-            tags=list(
-                incident.tags or []
-            ),
-            metadata=dict(
-                incident.incident_metadata or {}
-            ),
+            resolution_summary=(incident.resolution_summary),
+            tags=list(incident.tags or []),
+            metadata=dict(incident.incident_metadata or {}),
             started_at=incident.started_at,
             detected_at=incident.detected_at,
-            acknowledged_at=(
-                incident.acknowledged_at
-            ),
+            acknowledged_at=(incident.acknowledged_at),
             resolved_at=incident.resolved_at,
             created_at=incident.created_at,
             updated_at=incident.updated_at,
@@ -96,14 +80,10 @@ class IncidentResponseService:
             priority=incident.priority,
             source=incident.source,
             owner_id=incident.owner_id,
-            alert_count=len(
-                incident.alert_links
-            ),
+            alert_count=len(incident.alert_links),
             started_at=incident.started_at,
             detected_at=incident.detected_at,
-            acknowledged_at=(
-                incident.acknowledged_at
-            ),
+            acknowledged_at=(incident.acknowledged_at),
             resolved_at=incident.resolved_at,
             created_at=incident.created_at,
             updated_at=incident.updated_at,
@@ -119,20 +99,11 @@ class IncidentResponseService:
         incidents = result["items"]
 
         return IncidentPaginationResponse(
-            items=[
-                cls.to_summary(incident)
-                for incident in incidents
-            ],
-            total_count=int(
-                result["total_count"]
-            ),
+            items=[cls.to_summary(incident) for incident in incidents],
+            total_count=int(result["total_count"]),
             page=int(result["page"]),
-            page_size=int(
-                result["page_size"]
-            ),
-            total_pages=int(
-                result["total_pages"]
-            ),
+            page_size=int(result["page_size"]),
+            total_pages=int(result["total_pages"]),
         )
 
     @staticmethod
@@ -145,11 +116,7 @@ class IncidentResponseService:
             incident_id=statistics.incident_id,
             public_id=statistics.public_id,
             alert_count=statistics.alert_count,
-            affected_device_count=(
-                statistics.affected_device_count
-            ),
-            duration_seconds=(
-                statistics.duration_seconds
-            ),
+            affected_device_count=(statistics.affected_device_count),
+            duration_seconds=(statistics.duration_seconds),
             is_active=statistics.is_active,
         )

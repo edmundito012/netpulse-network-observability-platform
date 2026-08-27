@@ -52,13 +52,8 @@ class CorrelationAlertSnapshot(BaseModel):
     ) -> datetime:
         """Require timezone-aware timestamps."""
 
-        if (
-            value.tzinfo is None
-            or value.utcoffset() is None
-        ):
-            raise ValueError(
-                "observed_at must be timezone-aware"
-            )
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("observed_at must be timezone-aware")
 
         return value
 
@@ -106,14 +101,8 @@ class CorrelationIncidentSnapshot(BaseModel):
     ) -> datetime:
         """Require timezone-aware timestamps."""
 
-        if (
-            value.tzinfo is None
-            or value.utcoffset() is None
-        ):
-            raise ValueError(
-                "incident timestamps must be "
-                "timezone-aware"
-            )
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("incident timestamps must be timezone-aware")
 
         return value
 
@@ -125,14 +114,8 @@ class CorrelationIncidentSnapshot(BaseModel):
     ) -> frozenset[int]:
         """Reject invalid device identifiers."""
 
-        if any(
-            device_id < 1
-            for device_id in value
-        ):
-            raise ValueError(
-                "device_ids must contain positive "
-                "identifiers"
-            )
+        if any(device_id < 1 for device_id in value):
+            raise ValueError("device_ids must contain positive identifiers")
 
         return value
 
@@ -190,9 +173,7 @@ class CorrelationScoreBreakdown(BaseModel):
 
     alert_family: CorrelationSignalFamily
 
-    candidate_families: frozenset[
-        CorrelationSignalFamily
-    ] = Field(
+    candidate_families: frozenset[CorrelationSignalFamily] = Field(
         default_factory=frozenset,
     )
 

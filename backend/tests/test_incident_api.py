@@ -91,9 +91,7 @@ def authenticated_incident_api():
     authentication in unrelated test modules.
     """
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_admin_user
+    app.dependency_overrides[get_current_user] = override_admin_user
 
     yield
 
@@ -103,10 +101,7 @@ def authenticated_incident_api():
     )
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentCommandService.create"
-)
+@patch("app.api.incidents.IncidentCommandService.create")
 def test_create_incident_endpoint(
     create_mock,
 ) -> None:
@@ -126,17 +121,12 @@ def test_create_incident_endpoint(
 
     payload = response.json()
 
-    assert payload["public_id"] == (
-        "INC-2026-000001"
-    )
+    assert payload["public_id"] == ("INC-2026-000001")
     assert payload["status"] == "OPEN"
     assert payload["severity"] == "CRITICAL"
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentService.list_incidents"
-)
+@patch("app.api.incidents.IncidentService.list_incidents")
 def test_list_incidents_endpoint(
     list_mock,
 ) -> None:
@@ -162,10 +152,7 @@ def test_list_incidents_endpoint(
     assert len(payload["items"]) == 1
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentService.get_required_by_public_id"
-)
+@patch("app.api.incidents.IncidentService.get_required_by_public_id")
 def test_get_incident_endpoint(
     get_mock,
 ) -> None:
@@ -176,23 +163,14 @@ def test_get_incident_endpoint(
     )
 
     assert response.status_code == 200
-    assert response.json()["public_id"] == (
-        "INC-2026-000001"
-    )
+    assert response.json()["public_id"] == ("INC-2026-000001")
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentService.get_required_by_public_id"
-)
+@patch("app.api.incidents.IncidentService.get_required_by_public_id")
 def test_get_incident_returns_404(
     get_mock,
 ) -> None:
-    get_mock.side_effect = (
-        IncidentNotFoundError(
-            "INC-2026-999999"
-        )
-    )
+    get_mock.side_effect = IncidentNotFoundError("INC-2026-999999")
 
     response = client.get(
         "/incidents/INC-2026-999999",
@@ -201,87 +179,47 @@ def test_get_incident_returns_404(
     assert response.status_code == 404
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentCommandService.acknowledge"
-)
+@patch("app.api.incidents.IncidentCommandService.acknowledge")
 def test_acknowledge_incident_endpoint(
     acknowledge_mock,
 ) -> None:
-    acknowledge_mock.return_value = (
-        build_incident(
-            status=(
-                IncidentStatus.ACKNOWLEDGED
-            )
-        )
-    )
+    acknowledge_mock.return_value = build_incident(status=(IncidentStatus.ACKNOWLEDGED))
 
-    response = client.post(
-        "/incidents/"
-        "INC-2026-000001/"
-        "acknowledge"
-    )
+    response = client.post("/incidents/INC-2026-000001/acknowledge")
 
     assert response.status_code == 200
-    assert (
-        response.json()["status"]
-        == "ACKNOWLEDGED"
-    )
+    assert response.json()["status"] == "ACKNOWLEDGED"
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentCommandService.resolve"
-)
+@patch("app.api.incidents.IncidentCommandService.resolve")
 def test_resolve_incident_endpoint(
     resolve_mock,
 ) -> None:
-    incident = build_incident(
-        status=IncidentStatus.RESOLVED
-    )
+    incident = build_incident(status=IncidentStatus.RESOLVED)
 
-    incident.resolution_summary = (
-        "Connectivity restored"
-    )
-    incident.root_cause = (
-        "Upstream provider outage"
-    )
+    incident.resolution_summary = "Connectivity restored"
+    incident.root_cause = "Upstream provider outage"
     incident.resolved_at = NOW
 
     resolve_mock.return_value = incident
 
     response = client.post(
-        "/incidents/"
-        "INC-2026-000001/"
-        "resolve",
+        "/incidents/INC-2026-000001/resolve",
         json={
-            "resolution_summary": (
-                "Connectivity restored"
-            ),
-            "root_cause": (
-                "Upstream provider outage"
-            ),
+            "resolution_summary": ("Connectivity restored"),
+            "root_cause": ("Upstream provider outage"),
         },
     )
 
     assert response.status_code == 200
-    assert response.json()["status"] == (
-        "RESOLVED"
-    )
+    assert response.json()["status"] == ("RESOLVED")
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentCommandService.detach_alert"
-)
+@patch("app.api.incidents.IncidentCommandService.detach_alert")
 def test_detach_alert_endpoint(
     detach_mock,
 ) -> None:
-    response = client.delete(
-        "/incidents/"
-        "INC-2026-000001/"
-        "alerts/7"
-    )
+    response = client.delete("/incidents/INC-2026-000001/alerts/7")
 
     assert response.status_code == 200
     assert response.json() == {
@@ -293,50 +231,31 @@ def test_detach_alert_endpoint(
     detach_mock.assert_called_once()
 
 
-@patch(
-    "app.api.incidents."
-    "IncidentService.get_statistics"
-)
-@patch(
-    "app.api.incidents."
-    "IncidentService.get_required_by_public_id"
-)
+@patch("app.api.incidents.IncidentService.get_statistics")
+@patch("app.api.incidents.IncidentService.get_required_by_public_id")
 def test_incident_statistics_endpoint(
     get_incident_mock,
     statistics_mock,
 ) -> None:
-    get_incident_mock.return_value = (
-        build_incident()
+    get_incident_mock.return_value = build_incident()
+
+    statistics_mock.return_value = IncidentStatistics(
+        incident_id=1,
+        public_id=("INC-2026-000001"),
+        alert_count=5,
+        affected_device_count=2,
+        duration_seconds=900.0,
+        is_active=True,
     )
 
-    statistics_mock.return_value = (
-        IncidentStatistics(
-            incident_id=1,
-            public_id=(
-                "INC-2026-000001"
-            ),
-            alert_count=5,
-            affected_device_count=2,
-            duration_seconds=900.0,
-            is_active=True,
-        )
-    )
-
-    response = client.get(
-        "/incidents/"
-        "INC-2026-000001/"
-        "statistics"
-    )
+    response = client.get("/incidents/INC-2026-000001/statistics")
 
     assert response.status_code == 200
 
     payload = response.json()
 
     assert payload["alert_count"] == 5
-    assert (
-        payload["affected_device_count"]
-        == 2
-    )
+    assert payload["affected_device_count"] == 2
     assert payload["duration_seconds"] == 900.0
 
 
@@ -370,9 +289,7 @@ def test_viewer_cannot_create_incident() -> None:
             is_active=True,
         )
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_viewer_user
+    app.dependency_overrides[get_current_user] = override_viewer_user
 
     response = client.post(
         "/incidents",

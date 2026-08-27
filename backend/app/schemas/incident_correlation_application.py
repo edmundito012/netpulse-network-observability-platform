@@ -25,9 +25,7 @@ class CorrelationApplicationResult(BaseModel):
 
     outcome: CorrelationOutcome
 
-    application_status: (
-        CorrelationApplicationStatus
-    )
+    application_status: CorrelationApplicationStatus
 
     incident_id: int | None = Field(
         default=None,

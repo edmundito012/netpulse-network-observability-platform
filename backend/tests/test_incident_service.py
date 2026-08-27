@@ -27,6 +27,7 @@ from app.models.incident_timeline_event import (
     IncidentTimelineActorType,
 )
 
+
 def build_incident():
     return SimpleNamespace(
         id=21,
@@ -63,22 +64,10 @@ def build_incident():
     )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_by_id"
-)
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.create"
-)
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_alert_link"
-)
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.get_by_id")
+@patch("app.services.incident_service.IncidentRepository.create")
+@patch("app.services.incident_service.IncidentRepository.get_alert_link")
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_create_incident_validates_and_attaches_alerts(
     get_alert_mock: Mock,
     get_alert_link_mock: Mock,
@@ -134,43 +123,31 @@ def test_create_incident_validates_and_attaches_alerts(
         db=db,
         incident=incident,
         alert_id=7,
-        actor_type=(
-            IncidentTimelineActorType.AUTOMATION
-        ),
+        actor_type=(IncidentTimelineActorType.AUTOMATION),
         actor_label="NetPulse ALERT_ENGINE",
     )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.get_by_id")
 def test_get_required_incident_raises_when_missing(
     get_by_id_mock: Mock,
 ) -> None:
     get_by_id_mock.return_value = None
 
-    with pytest.raises(
-        IncidentNotFoundError
-    ):
+    with pytest.raises(IncidentNotFoundError):
         IncidentService.get_required_by_id(
             db=Mock(),
             incident_id=404,
         )
 
 
-@patch(
-    "app.services.incident_service."
-    "UserRepository.get_by_id"
-)
+@patch("app.services.incident_service.UserRepository.get_by_id")
 def test_assign_owner_rejects_unknown_user(
     get_user_mock: Mock,
 ) -> None:
     get_user_mock.return_value = None
 
-    with pytest.raises(
-        IncidentOwnerNotFoundError
-    ):
+    with pytest.raises(IncidentOwnerNotFoundError):
         IncidentService.assign_owner(
             db=Mock(),
             incident=build_incident(),
@@ -178,18 +155,9 @@ def test_assign_owner_rejects_unknown_user(
         )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.attach_alert"
-)
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_alert_link"
-)
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.attach_alert")
+@patch("app.services.incident_service.IncidentRepository.get_alert_link")
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_attach_alert_is_idempotent(
     get_alert_mock: Mock,
     get_alert_link_mock: Mock,
@@ -207,9 +175,7 @@ def test_attach_alert_is_idempotent(
         incident=incident,
     )
 
-    get_alert_link_mock.return_value = (
-        existing_link
-    )
+    get_alert_link_mock.return_value = existing_link
 
     result = IncidentService.attach_alert(
         db=Mock(),
@@ -221,14 +187,8 @@ def test_attach_alert_is_idempotent(
     attach_alert_mock.assert_not_called()
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_alert_link"
-)
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.IncidentRepository.get_alert_link")
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_attach_alert_rejects_other_incident(
     get_alert_mock: Mock,
     get_alert_link_mock: Mock,
@@ -237,18 +197,12 @@ def test_attach_alert_rejects_other_incident(
         id=7,
     )
 
-    get_alert_link_mock.return_value = (
-        SimpleNamespace(
-            incident_id=100,
-            incident=SimpleNamespace(
-                public_id="INC-2026-000100"
-            ),
-        )
+    get_alert_link_mock.return_value = SimpleNamespace(
+        incident_id=100,
+        incident=SimpleNamespace(public_id="INC-2026-000100"),
     )
 
-    with pytest.raises(
-        IncidentAlertConflictError
-    ):
+    with pytest.raises(IncidentAlertConflictError):
         IncidentService.attach_alert(
             db=Mock(),
             incident=build_incident(),
@@ -256,18 +210,13 @@ def test_attach_alert_rejects_other_incident(
         )
 
 
-@patch(
-    "app.services.incident_service."
-    "AlertRepository.get_by_id"
-)
+@patch("app.services.incident_service.AlertRepository.get_by_id")
 def test_attach_alert_rejects_missing_alert(
     get_alert_mock: Mock,
 ) -> None:
     get_alert_mock.return_value = None
 
-    with pytest.raises(
-        IncidentAlertNotFoundError
-    ):
+    with pytest.raises(IncidentAlertNotFoundError):
         IncidentService.attach_alert(
             db=Mock(),
             incident=build_incident(),
@@ -275,18 +224,13 @@ def test_attach_alert_rejects_missing_alert(
         )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.detach_alert"
-)
+@patch("app.services.incident_service.IncidentRepository.detach_alert")
 def test_detach_alert_rejects_missing_association(
     detach_mock: Mock,
 ) -> None:
     detach_mock.return_value = False
 
-    with pytest.raises(
-        IncidentAlertNotAttachedError
-    ):
+    with pytest.raises(IncidentAlertNotAttachedError):
         IncidentService.detach_alert(
             db=Mock(),
             incident=build_incident(),
@@ -294,14 +238,8 @@ def test_detach_alert_rejects_missing_association(
         )
 
 
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.get_affected_device_count"
-)
-@patch(
-    "app.services.incident_service."
-    "IncidentRepository.count_alerts"
-)
+@patch("app.services.incident_service.IncidentRepository.get_affected_device_count")
+@patch("app.services.incident_service.IncidentRepository.count_alerts")
 def test_statistics_calculate_duration(
     count_alerts_mock: Mock,
     device_count_mock: Mock,
@@ -311,10 +249,7 @@ def test_statistics_calculate_duration(
     count_alerts_mock.return_value = 6
     device_count_mock.return_value = 3
 
-    now = (
-        incident.started_at
-        + timedelta(minutes=15)
-    )
+    now = incident.started_at + timedelta(minutes=15)
 
     result = IncidentService.get_statistics(
         db=Mock(),

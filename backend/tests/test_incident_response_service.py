@@ -87,36 +87,22 @@ def build_incident():
 
 
 def test_to_read_includes_attached_alerts() -> None:
-    result = IncidentResponseService.to_read(
-        build_incident()
-    )
+    result = IncidentResponseService.to_read(build_incident())
 
-    assert result.public_id == (
-        "INC-2026-000001"
-    )
+    assert result.public_id == ("INC-2026-000001")
     assert result.metadata == {
         "confidence": 0.91,
     }
     assert len(result.alerts) == 1
     assert result.alerts[0].id == 7
-    assert (
-        result.alerts[0].alert_type
-        == AlertType.PACKET_LOSS
-    )
+    assert result.alerts[0].alert_type == AlertType.PACKET_LOSS
 
 
 def test_to_summary_calculates_alert_count() -> None:
-    result = (
-        IncidentResponseService.to_summary(
-            build_incident()
-        )
-    )
+    result = IncidentResponseService.to_summary(build_incident())
 
     assert result.alert_count == 1
-    assert (
-        result.severity
-        == IncidentSeverity.CRITICAL
-    )
+    assert result.severity == IncidentSeverity.CRITICAL
 
 
 def test_to_statistics_maps_domain_result() -> None:
@@ -129,10 +115,7 @@ def test_to_statistics_maps_domain_result() -> None:
         is_active=True,
     )
 
-    result = (
-        IncidentResponseService
-        .to_statistics(statistics)
-    )
+    result = IncidentResponseService.to_statistics(statistics)
 
     assert result.alert_count == 4
     assert result.affected_device_count == 2

@@ -13,7 +13,6 @@ class GamingImpactResult:
 
 
 class GamingImpactService:
-
     @staticmethod
     def classify_lag_risk(latency: float) -> str:
         if latency > 100:
@@ -54,18 +53,10 @@ class GamingImpactService:
         packet_loss: float,
         jitter: float,
     ) -> str:
-        if (
-            latency > 100
-            or packet_loss > 5
-            or jitter > 30
-        ):
+        if latency > 100 or packet_loss > 5 or jitter > 30:
             return "POOR"
 
-        if (
-            latency >= 50
-            or packet_loss >= 1
-            or jitter >= 10
-        ):
+        if latency >= 50 or packet_loss >= 1 or jitter >= 10:
             return "FAIR"
 
         return "GOOD"

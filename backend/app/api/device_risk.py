@@ -20,6 +20,7 @@ def get_device_risk_ranking(
 ):
     return DeviceRiskService.get_risk_ranking(db)
 
+
 @router.get(
     "/top-risk",
     response_model=list[DeviceRiskRead],
@@ -28,10 +29,7 @@ def get_top_risk_devices(
     limit: int = 5,
     db: Session = Depends(get_db),
 ):
-    return (
-        DeviceRiskService
-        .get_top_risk_devices(
-            db=db,
-            limit=limit,
-        )
+    return DeviceRiskService.get_top_risk_devices(
+        db=db,
+        limit=limit,
     )

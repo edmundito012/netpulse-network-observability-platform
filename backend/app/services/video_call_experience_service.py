@@ -18,7 +18,6 @@ class VideoCallExperienceResult:
 
 
 class VideoCallExperienceService:
-
     @staticmethod
     def calculate_score(
         latency_ms: float,
@@ -96,55 +95,38 @@ class VideoCallExperienceService:
         packet_loss_percent,
     ):
 
-        score = (
-            VideoCallExperienceService
-            .calculate_score(
-                latency_ms,
-                jitter_ms,
-                packet_loss_percent,
-            )
+        score = VideoCallExperienceService.calculate_score(
+            latency_ms,
+            jitter_ms,
+            packet_loss_percent,
         )
 
-        quality = (
-            VideoCallExperienceService
-            .quality(score)
-        )
+        quality = VideoCallExperienceService.quality(score)
 
         ready = score >= 80
 
         return VideoCallExperienceResult(
             video_call_score=score,
-
             quality=quality,
-
             zoom_ready=ready,
-
             teams_ready=ready,
-
             meet_ready=ready,
-
             discord_ready=ready,
-
             audio_drop_risk=(
-                VideoCallExperienceService
-                .audio_drop_risk(
+                VideoCallExperienceService.audio_drop_risk(
                     jitter_ms,
                     packet_loss_percent,
                 )
             ),
-
             video_freeze_risk=(
-                VideoCallExperienceService
-                .video_freeze_risk(
+                VideoCallExperienceService.video_freeze_risk(
                     latency_ms,
                     packet_loss_percent,
                 )
             ),
-
             recommendation=(
                 "Excellent for HD video conferencing."
                 if ready
-                else
-                "Network quality may affect video meetings."
+                else "Network quality may affect video meetings."
             ),
         )

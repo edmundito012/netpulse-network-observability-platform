@@ -44,9 +44,7 @@ class CorrelationApplicationError(RuntimeError):
     """Base error raised while applying a correlation decision."""
 
 
-class CorrelationTargetIncidentMissingError(
-    CorrelationApplicationError
-):
+class CorrelationTargetIncidentMissingError(CorrelationApplicationError):
     """Raised when a matched correlation has no usable target."""
 
 
@@ -61,9 +59,7 @@ class IncidentCorrelationApplicationService:
         db: Session,
         *,
         source_alert_id: int,
-        configuration: (
-            CorrelationConfiguration | None
-        ) = None,
+        configuration: (CorrelationConfiguration | None) = None,
     ) -> CorrelationApplicationResult:
         """Evaluate an alert and apply its persisted decision."""
 
@@ -71,38 +67,26 @@ class IncidentCorrelationApplicationService:
             evaluation,
             correlation,
             _,
-        ) = (
-            IncidentCorrelationService
-            .evaluate_and_persist(
-                db=db,
-                source_alert_id=source_alert_id,
-                configuration=configuration,
-            )
+        ) = IncidentCorrelationService.evaluate_and_persist(
+            db=db,
+            source_alert_id=source_alert_id,
+            configuration=configuration,
         )
 
-        if (
-            correlation.application_status
-            == CorrelationApplicationStatus.APPLIED
-        ):
+        if correlation.application_status == CorrelationApplicationStatus.APPLIED:
             return cls._build_replayed_result(
                 correlation=correlation,
             )
 
         try:
-            if (
-                evaluation.outcome
-                == CorrelationOutcome.MATCHED_EXISTING
-            ):
+            if evaluation.outcome == CorrelationOutcome.MATCHED_EXISTING:
                 return cls._apply_existing_match(
                     db=db,
                     source_alert_id=source_alert_id,
                     correlation=correlation,
                 )
 
-            if (
-                evaluation.outcome
-                == CorrelationOutcome.CREATE_NEW
-            ):
+            if evaluation.outcome == CorrelationOutcome.CREATE_NEW:
                 return cls._apply_new_incident(
                     db=db,
                     source_alert_id=source_alert_id,
@@ -134,75 +118,56 @@ class IncidentCorrelationApplicationService:
     ) -> CorrelationApplicationResult:
         """Attach the source alert to the selected incident."""
 
-        target_incident_id = (
-            correlation.target_incident_id
-        )
+        target_incident_id = correlation.target_incident_id
 
         if target_incident_id is None:
             raise CorrelationTargetIncidentMissingError(
-                "MATCHED_EXISTING correlation "
-                "does not contain a target incident"
+                "MATCHED_EXISTING correlation does not contain a target incident"
             )
 
-        incident = (
-            IncidentRepository.get_by_id(
-                db=db,
-                incident_id=target_incident_id,
-            )
+        incident = IncidentRepository.get_by_id(
+            db=db,
+            incident_id=target_incident_id,
         )
 
         if incident is None:
             raise CorrelationTargetIncidentMissingError(
-                "correlation target incident "
-                f"{target_incident_id} was not found"
+                f"correlation target incident {target_incident_id} was not found"
             )
 
-        existing_link = (
-            IncidentRepository.get_alert_link(
-                db=db,
-                alert_id=source_alert_id,
-            )
+        existing_link = IncidentRepository.get_alert_link(
+            db=db,
+            alert_id=source_alert_id,
         )
 
         already_attached = (
-            existing_link is not None
-            and existing_link.incident_id
-            == incident.id
+            existing_link is not None and existing_link.incident_id == incident.id
         )
 
         IncidentService.attach_alert(
             db=db,
             incident=incident,
             alert_id=source_alert_id,
-            actor_type=(
-                IncidentTimelineActorType.SYSTEM
-            ),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
             actor_label=cls.ACTOR_LABEL,
         )
 
         attached_now = not already_attached
 
-        applied = (
-            IncidentCorrelationRepository
-            .mark_applied(
-                db=db,
-                correlation=correlation,
-                applied_incident_id=incident.id,
-                applied_incident_public_id=(
-                    incident.public_id
-                ),
-                incident_created=False,
-                alert_attached=attached_now,
-            )
+        applied = IncidentCorrelationRepository.mark_applied(
+            db=db,
+            correlation=correlation,
+            applied_incident_id=incident.id,
+            applied_incident_public_id=(incident.public_id),
+            incident_created=False,
+            alert_attached=attached_now,
         )
 
         return CorrelationApplicationResult(
             correlation_id=applied.id,
             source_alert_id=source_alert_id,
             outcome=applied.outcome,
-            application_status=(
-                applied.application_status
-            ),
+            application_status=(applied.application_status),
             incident_id=incident.id,
             incident_public_id=incident.public_id,
             incident_created=False,
@@ -225,9 +190,7 @@ class IncidentCorrelationApplicationService:
         )
 
         incident_data = IncidentCreate(
-            title=cls._build_incident_title(
-                source_alert
-            ),
+            title=cls._build_incident_title(source_alert),
             description=(
                 "Incident created automatically by the "
                 "Correlation Engine after no existing "
@@ -235,40 +198,21 @@ class IncidentCorrelationApplicationService:
                 f"Source alert: {source_alert.id}. "
                 f"{correlation.explanation}"
             ),
-            severity=cls._map_severity(
-                source_alert.severity
-            ),
-            priority=cls._map_priority(
-                source_alert.severity
-            ),
-            source=(
-                IncidentSource.CORRELATION_ENGINE
-            ),
-            started_at=(
-                source_alert.first_seen_at
-                or source_alert.created_at
-            ),
+            severity=cls._map_severity(source_alert.severity),
+            priority=cls._map_priority(source_alert.severity),
+            source=(IncidentSource.CORRELATION_ENGINE),
+            started_at=(source_alert.first_seen_at or source_alert.created_at),
             tags=[
                 "correlation-engine",
-                cls._normalize_tag(
-                    source_alert.alert_type.value
-                ),
+                cls._normalize_tag(source_alert.alert_type.value),
             ],
             metadata={
                 "correlation_id": correlation.id,
-                "correlation_key": (
-                    correlation.correlation_key
-                ),
+                "correlation_key": (correlation.correlation_key),
                 "source_alert_id": source_alert.id,
-                "correlation_score": str(
-                    correlation.score
-                ),
-                "correlation_threshold": str(
-                    correlation.threshold
-                ),
-                "signal_family": (
-                    correlation.signal_family.value
-                ),
+                "correlation_score": str(correlation.score),
+                "correlation_threshold": str(correlation.threshold),
+                "signal_family": (correlation.signal_family.value),
             },
             alert_ids=[
                 source_alert.id,
@@ -280,27 +224,20 @@ class IncidentCorrelationApplicationService:
             incident_data=incident_data,
         )
 
-        applied = (
-            IncidentCorrelationRepository
-            .mark_applied(
-                db=db,
-                correlation=correlation,
-                applied_incident_id=incident.id,
-                applied_incident_public_id=(
-                    incident.public_id
-                ),
-                incident_created=True,
-                alert_attached=True,
-            )
+        applied = IncidentCorrelationRepository.mark_applied(
+            db=db,
+            correlation=correlation,
+            applied_incident_id=incident.id,
+            applied_incident_public_id=(incident.public_id),
+            incident_created=True,
+            alert_attached=True,
         )
 
         return CorrelationApplicationResult(
             correlation_id=applied.id,
             source_alert_id=source_alert_id,
             outcome=applied.outcome,
-            application_status=(
-                applied.application_status
-            ),
+            application_status=(applied.application_status),
             incident_id=incident.id,
             incident_public_id=incident.public_id,
             incident_created=True,
@@ -317,25 +254,20 @@ class IncidentCorrelationApplicationService:
     ) -> CorrelationApplicationResult:
         """Mark a NO_ACTION decision as applied."""
 
-        applied = (
-            IncidentCorrelationRepository
-            .mark_applied(
-                db=db,
-                correlation=correlation,
-                applied_incident_id=None,
-                applied_incident_public_id=None,
-                incident_created=False,
-                alert_attached=False,
-            )
+        applied = IncidentCorrelationRepository.mark_applied(
+            db=db,
+            correlation=correlation,
+            applied_incident_id=None,
+            applied_incident_public_id=None,
+            incident_created=False,
+            alert_attached=False,
         )
 
         return CorrelationApplicationResult(
             correlation_id=applied.id,
             source_alert_id=source_alert_id,
             outcome=applied.outcome,
-            application_status=(
-                applied.application_status
-            ),
+            application_status=(applied.application_status),
             incident_id=None,
             incident_public_id=None,
             incident_created=False,
@@ -350,27 +282,17 @@ class IncidentCorrelationApplicationService:
     ) -> CorrelationApplicationResult:
         """Return the result stored by an earlier application."""
 
-        metadata = dict(
-            correlation.correlation_metadata or {}
-        )
+        metadata = dict(correlation.correlation_metadata or {})
 
-        incident_id = metadata.get(
-            "applied_incident_id"
-        )
+        incident_id = metadata.get("applied_incident_id")
 
-        incident_public_id = metadata.get(
-            "applied_incident_public_id"
-        )
+        incident_public_id = metadata.get("applied_incident_public_id")
 
         return CorrelationApplicationResult(
             correlation_id=correlation.id,
-            source_alert_id=(
-                correlation.source_alert_id
-            ),
+            source_alert_id=(correlation.source_alert_id),
             outcome=correlation.outcome,
-            application_status=(
-                correlation.application_status
-            ),
+            application_status=(correlation.application_status),
             incident_id=incident_id,
             incident_public_id=incident_public_id,
             incident_created=bool(
@@ -407,16 +329,9 @@ class IncidentCorrelationApplicationService:
     ) -> str:
         """Build a stable operator-friendly incident title."""
 
-        readable_type = (
-            alert.alert_type.value
-            .replace("_", " ")
-            .lower()
-        )
+        readable_type = alert.alert_type.value.replace("_", " ").lower()
 
-        return (
-            f"{readable_type.capitalize()} "
-            f"detected on device {alert.device_id}"
-        )
+        return f"{readable_type.capitalize()} detected on device {alert.device_id}"
 
     @staticmethod
     def _map_severity(
@@ -425,15 +340,9 @@ class IncidentCorrelationApplicationService:
         """Map alert severity to incident severity."""
 
         mapping = {
-            AlertSeverity.CRITICAL: (
-                IncidentSeverity.CRITICAL
-            ),
-            AlertSeverity.WARNING: (
-                IncidentSeverity.WARNING
-            ),
-            AlertSeverity.INFO: (
-                IncidentSeverity.INFO
-            ),
+            AlertSeverity.CRITICAL: (IncidentSeverity.CRITICAL),
+            AlertSeverity.WARNING: (IncidentSeverity.WARNING),
+            AlertSeverity.INFO: (IncidentSeverity.INFO),
         }
 
         return mapping[alert_severity]
@@ -445,15 +354,9 @@ class IncidentCorrelationApplicationService:
         """Map alert severity to operational priority."""
 
         mapping = {
-            AlertSeverity.CRITICAL: (
-                IncidentPriority.CRITICAL
-            ),
-            AlertSeverity.WARNING: (
-                IncidentPriority.HIGH
-            ),
-            AlertSeverity.INFO: (
-                IncidentPriority.LOW
-            ),
+            AlertSeverity.CRITICAL: (IncidentPriority.CRITICAL),
+            AlertSeverity.WARNING: (IncidentPriority.HIGH),
+            AlertSeverity.INFO: (IncidentPriority.LOW),
         }
 
         return mapping[alert_severity]
@@ -464,11 +367,7 @@ class IncidentCorrelationApplicationService:
     ) -> str:
         """Normalize an enum value for incident tags."""
 
-        return (
-            value.strip()
-            .lower()
-            .replace("_", "-")
-        )
+        return value.strip().lower().replace("_", "-")
 
     @staticmethod
     def _record_failure(
@@ -479,9 +378,7 @@ class IncidentCorrelationApplicationService:
     ) -> None:
         """Persist a bounded application failure description."""
 
-        failure_reason = (
-            f"{type(exc).__name__}: {exc}"
-        )
+        failure_reason = f"{type(exc).__name__}: {exc}"
 
         IncidentCorrelationRepository.mark_failed(
             db=db,

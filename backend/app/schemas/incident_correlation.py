@@ -67,9 +67,9 @@ class IncidentCorrelationCreate(BaseModel):
 
     outcome: CorrelationOutcome
 
-    application_status: (
-        CorrelationApplicationStatus
-    ) = CorrelationApplicationStatus.EVALUATED
+    application_status: CorrelationApplicationStatus = (
+        CorrelationApplicationStatus.EVALUATED
+    )
 
     signal_family: CorrelationSignalFamily
 
@@ -146,9 +146,7 @@ class IncidentCorrelationCreate(BaseModel):
     ) -> list[CorrelationReason]:
         """Preserve reason order while removing duplicates."""
 
-        return list(
-            dict.fromkeys(value)
-        )
+        return list(dict.fromkeys(value))
 
     @model_validator(mode="after")
     def validate_outcome_target(
@@ -157,44 +155,28 @@ class IncidentCorrelationCreate(BaseModel):
         """Ensure the outcome and target incident agree."""
 
         if (
-            self.outcome
-            == CorrelationOutcome.MATCHED_EXISTING
+            self.outcome == CorrelationOutcome.MATCHED_EXISTING
             and self.target_incident_id is None
         ):
-            raise ValueError(
-                "MATCHED_EXISTING requires "
-                "target_incident_id"
-            )
+            raise ValueError("MATCHED_EXISTING requires target_incident_id")
 
         if (
-            self.outcome
-            != CorrelationOutcome.MATCHED_EXISTING
+            self.outcome != CorrelationOutcome.MATCHED_EXISTING
             and self.target_incident_id is not None
         ):
-            raise ValueError(
-                "target_incident_id is only valid for "
-                "MATCHED_EXISTING"
-            )
+            raise ValueError("target_incident_id is only valid for MATCHED_EXISTING")
 
         if (
-            self.application_status
-            == CorrelationApplicationStatus.FAILED
+            self.application_status == CorrelationApplicationStatus.FAILED
             and self.failure_reason is None
         ):
-            raise ValueError(
-                "FAILED correlation decisions require "
-                "failure_reason"
-            )
+            raise ValueError("FAILED correlation decisions require failure_reason")
 
         if (
-            self.application_status
-            == CorrelationApplicationStatus.APPLIED
+            self.application_status == CorrelationApplicationStatus.APPLIED
             and self.applied_at is None
         ):
-            raise ValueError(
-                "APPLIED correlation decisions require "
-                "applied_at"
-            )
+            raise ValueError("APPLIED correlation decisions require applied_at")
 
         return self
 
@@ -254,9 +236,7 @@ class CorrelationEvaluationResult(BaseModel):
 
     explanation: str
 
-    candidates: list[
-        CorrelationCandidateRead
-    ] = Field(
+    candidates: list[CorrelationCandidateRead] = Field(
         default_factory=list,
     )
 
@@ -267,24 +247,14 @@ class CorrelationEvaluationResult(BaseModel):
         """Ensure correlated results contain a target."""
 
         if self.correlated:
-            if (
-                self.outcome
-                != CorrelationOutcome
-                .MATCHED_EXISTING
-            ):
-                raise ValueError(
-                    "correlated results must use "
-                    "MATCHED_EXISTING"
-                )
+            if self.outcome != CorrelationOutcome.MATCHED_EXISTING:
+                raise ValueError("correlated results must use MATCHED_EXISTING")
 
             if (
                 self.target_incident_id is None
                 or self.target_incident_public_id is None
             ):
-                raise ValueError(
-                    "correlated results require a "
-                    "target incident"
-                )
+                raise ValueError("correlated results require a target incident")
 
         return self
 
@@ -300,9 +270,7 @@ class IncidentCorrelationRead(BaseModel):
 
     outcome: CorrelationOutcome
 
-    application_status: (
-        CorrelationApplicationStatus
-    )
+    application_status: CorrelationApplicationStatus
 
     signal_family: CorrelationSignalFamily
 
@@ -317,9 +285,7 @@ class IncidentCorrelationRead(BaseModel):
     explanation: str
 
     metadata: dict[str, Any] = Field(
-        validation_alias=(
-            "correlation_metadata"
-        ),
+        validation_alias=("correlation_metadata"),
     )
 
     failure_reason: str | None
@@ -333,9 +299,7 @@ class IncidentCorrelationRead(BaseModel):
     )
 
 
-class IncidentCorrelationPaginationResponse(
-    BaseModel
-):
+class IncidentCorrelationPaginationResponse(BaseModel):
     """Paginated correlation history."""
 
     items: list[IncidentCorrelationRead]

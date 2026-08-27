@@ -79,25 +79,16 @@ def get_packet_loss_bursts(
     """Analyze sustained packet loss using real historical samples."""
 
     try:
-        result = (
-            PacketLossBurstApplicationService
-            .analyze(
-                db=db,
-                device_id=device_id,
-                start_at=start_at,
-                end_at=end_at,
-                limit=limit,
-                warning_threshold_percent=(
-                    warning_threshold_percent
-                ),
-                critical_threshold_percent=(
-                    critical_threshold_percent
-                ),
-                minimum_consecutive_samples=(
-                    minimum_consecutive_samples
-                ),
-                maximum_gap_seconds=maximum_gap_seconds,
-            )
+        result = PacketLossBurstApplicationService.analyze(
+            db=db,
+            device_id=device_id,
+            start_at=start_at,
+            end_at=end_at,
+            limit=limit,
+            warning_threshold_percent=(warning_threshold_percent),
+            critical_threshold_percent=(critical_threshold_percent),
+            minimum_consecutive_samples=(minimum_consecutive_samples),
+            maximum_gap_seconds=maximum_gap_seconds,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -109,60 +100,30 @@ def get_packet_loss_bursts(
 
     return PacketLossBurstResponse(
         device_id=result.device_id,
-        start_at=(
-            result.series.start_at
-            if result.series is not None
-            else start_at
-        ),
-        end_at=(
-            result.series.end_at
-            if result.series is not None
-            else end_at
-        ),
+        start_at=(result.series.start_at if result.series is not None else start_at),
+        end_at=(result.series.end_at if result.series is not None else end_at),
         burst_detected=analysis.burst_detected,
-        current_burst_active=(
-            analysis.current_burst_active
-        ),
+        current_burst_active=(analysis.current_burst_active),
         severity=analysis.severity,
         samples_analyzed=analysis.samples_analyzed,
         measured_samples=analysis.measured_samples,
         missing_samples=analysis.missing_samples,
         burst_count=analysis.burst_count,
-        longest_burst_samples=(
-            analysis.longest_burst_samples
-        ),
-        peak_packet_loss_percent=(
-            analysis.peak_packet_loss_percent
-        ),
-        average_packet_loss_percent=(
-            analysis.average_packet_loss_percent
-        ),
-        warning_threshold_percent=(
-            analysis.warning_threshold_percent
-        ),
-        critical_threshold_percent=(
-            analysis.critical_threshold_percent
-        ),
-        minimum_consecutive_samples=(
-            analysis.minimum_consecutive_samples
-        ),
-        maximum_gap_seconds=(
-            analysis.maximum_gap_seconds
-        ),
+        longest_burst_samples=(analysis.longest_burst_samples),
+        peak_packet_loss_percent=(analysis.peak_packet_loss_percent),
+        average_packet_loss_percent=(analysis.average_packet_loss_percent),
+        warning_threshold_percent=(analysis.warning_threshold_percent),
+        critical_threshold_percent=(analysis.critical_threshold_percent),
+        minimum_consecutive_samples=(analysis.minimum_consecutive_samples),
+        maximum_gap_seconds=(analysis.maximum_gap_seconds),
         bursts=[
             PacketLossBurstRead(
                 start_at=burst.start_at,
                 end_at=burst.end_at,
-                duration_seconds=(
-                    burst.duration_seconds
-                ),
+                duration_seconds=(burst.duration_seconds),
                 sample_count=burst.sample_count,
-                average_packet_loss_percent=(
-                    burst.average_packet_loss_percent
-                ),
-                peak_packet_loss_percent=(
-                    burst.peak_packet_loss_percent
-                ),
+                average_packet_loss_percent=(burst.average_packet_loss_percent),
+                peak_packet_loss_percent=(burst.peak_packet_loss_percent),
                 severity=burst.severity,
                 status=burst.status,
             )

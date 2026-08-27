@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_video_call_endpoint():
 
-    response = client.get(
-        "/video-calls/experience"
-    )
+    response = client.get("/video-calls/experience")
 
     assert response.status_code == 200
 

@@ -24,9 +24,7 @@ class IncidentActorContext:
         """Build a system actor context."""
 
         return cls(
-            actor_type=(
-                IncidentTimelineActorType.SYSTEM
-            ),
+            actor_type=(IncidentTimelineActorType.SYSTEM),
             actor_label=label,
         )
 
@@ -40,9 +38,7 @@ class IncidentActorContext:
         """Build an authenticated user actor context."""
 
         return cls(
-            actor_type=(
-                IncidentTimelineActorType.USER
-            ),
+            actor_type=(IncidentTimelineActorType.USER),
             actor_id=user_id,
             actor_label=username,
         )
@@ -56,8 +52,6 @@ class IncidentActorContext:
         """Build an automated engine actor context."""
 
         return cls(
-            actor_type=(
-                IncidentTimelineActorType.AUTOMATION
-            ),
+            actor_type=(IncidentTimelineActorType.AUTOMATION),
             actor_label=label,
         )

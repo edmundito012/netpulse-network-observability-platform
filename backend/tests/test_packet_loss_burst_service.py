@@ -35,10 +35,7 @@ def build_sample(
     return MetricSeriesSampleResult(
         metric_id=metric_id,
         device_id=1,
-        checked_at=(
-            BASE_TIME
-            + timedelta(minutes=minute)
-        ),
+        checked_at=(BASE_TIME + timedelta(minutes=minute)),
         value=value,
     )
 
@@ -242,14 +239,8 @@ def test_invalid_configuration_is_rejected(
     with pytest.raises(ValueError):
         PacketLossBurstService.detect(
             samples=[],
-            warning_threshold_percent=(
-                warning_threshold
-            ),
-            critical_threshold_percent=(
-                critical_threshold
-            ),
-            minimum_consecutive_samples=(
-                minimum_samples
-            ),
+            warning_threshold_percent=(warning_threshold),
+            critical_threshold_percent=(critical_threshold),
+            minimum_consecutive_samples=(minimum_samples),
             maximum_gap_seconds=maximum_gap,
         )

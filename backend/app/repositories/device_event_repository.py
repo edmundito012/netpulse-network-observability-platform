@@ -4,7 +4,6 @@ from app.models.device_event import DeviceEvent, DeviceEventType
 
 
 class DeviceEventRepository:
-
     @staticmethod
     def create(
         db: Session,
@@ -36,21 +35,12 @@ class DeviceEventRepository:
         query = db.query(DeviceEvent)
 
         if device_id is not None:
-            query = query.filter(
-                DeviceEvent.device_id == device_id
-            )
+            query = query.filter(DeviceEvent.device_id == device_id)
 
         if event_type is not None:
-            query = query.filter(
-                DeviceEvent.event_type == event_type
-            )
+            query = query.filter(DeviceEvent.event_type == event_type)
 
-        return (
-            query
-            .order_by(DeviceEvent.created_at.desc())
-            .limit(limit)
-            .all()
-        )
+        return query.order_by(DeviceEvent.created_at.desc()).limit(limit).all()
 
     @staticmethod
     def get_by_device(
@@ -87,17 +77,14 @@ class DeviceEventRepository:
         total_count = query.count()
 
         items = (
-            query
-            .order_by(DeviceEvent.created_at.desc())
+            query.order_by(DeviceEvent.created_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)
             .all()
         )
 
         total_pages = (
-            (total_count + page_size - 1) // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {

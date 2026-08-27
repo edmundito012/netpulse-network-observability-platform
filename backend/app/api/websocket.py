@@ -16,7 +16,6 @@ router = APIRouter(tags=["WebSocket"])
 
 
 class WebSocketConnectionManager:
-
     def __init__(self, name: str):
         self.name = name
         self.active_connections: list[WebSocket] = []
@@ -178,9 +177,7 @@ async def dashboard_websocket(
         state=get_dashboard_state(),
     )
 
-    heartbeat_task = asyncio.create_task(
-        dashboard_manager.heartbeat_loop(websocket)
-    )
+    heartbeat_task = asyncio.create_task(dashboard_manager.heartbeat_loop(websocket))
 
     try:
         while True:
@@ -224,9 +221,7 @@ async def device_state_websocket(
         state=get_all_device_states(),
     )
 
-    heartbeat_task = asyncio.create_task(
-        device_state_manager.heartbeat_loop(websocket)
-    )
+    heartbeat_task = asyncio.create_task(device_state_manager.heartbeat_loop(websocket))
 
     try:
         while True:

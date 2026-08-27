@@ -37,9 +37,7 @@ def override_viewer_user():
 def authenticated_user():
     """Authenticate each API test."""
 
-    app.dependency_overrides[
-        get_current_user
-    ] = override_viewer_user
+    app.dependency_overrides[get_current_user] = override_viewer_user
 
     yield
 
@@ -77,10 +75,7 @@ def build_summary() -> CorrelationAnalyticsSummary:
     )
 
 
-@patch(
-    "app.api.correlation_analytics."
-    "CorrelationAnalyticsService.get_summary"
-)
+@patch("app.api.correlation_analytics.CorrelationAnalyticsService.get_summary")
 def test_get_correlation_analytics(
     summary_mock,
 ) -> None:
@@ -102,10 +97,7 @@ def test_get_correlation_analytics(
 
     assert payload["total_evaluations"] == 10
 
-    assert (
-        payload["application_success_rate"]
-        == 80.0
-    )
+    assert payload["application_success_rate"] == 80.0
 
     assert payload["incident_reuse_rate"] == 62.5
 
@@ -117,8 +109,7 @@ def test_get_correlation_analytics(
     assert kwargs["recent_limit"] == 10
 
 
-def test_correlation_analytics_rejects_bad_window(
-) -> None:
+def test_correlation_analytics_rejects_bad_window() -> None:
     """Validate analytics temporal windows."""
 
     response = client.get(
@@ -131,8 +122,7 @@ def test_correlation_analytics_rejects_bad_window(
     assert response.status_code == 422
 
 
-def test_correlation_analytics_requires_auth(
-) -> None:
+def test_correlation_analytics_requires_auth() -> None:
     """Reject unauthenticated analytics requests."""
 
     app.dependency_overrides.pop(
@@ -140,9 +130,7 @@ def test_correlation_analytics_requires_auth(
         None,
     )
 
-    response = client.get(
-        "/analytics/correlations"
-    )
+    response = client.get("/analytics/correlations")
 
     assert response.status_code in {
         401,
@@ -150,11 +138,7 @@ def test_correlation_analytics_requires_auth(
     }
 
 
-def test_correlation_analytics_is_in_openapi(
-) -> None:
+def test_correlation_analytics_is_in_openapi() -> None:
     """Expose correlation analytics in OpenAPI."""
 
-    assert (
-        "/analytics/correlations"
-        in app.openapi()["paths"]
-    )
+    assert "/analytics/correlations" in app.openapi()["paths"]

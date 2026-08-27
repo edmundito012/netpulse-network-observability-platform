@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_summary_api():
 
-    response = client.get(
-        "/experience/summary"
-    )
+    response = client.get("/experience/summary")
 
     assert response.status_code == 200
 

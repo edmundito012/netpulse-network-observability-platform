@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_network_health_api():
 
-    response = client.get(
-        "/analytics/health-score"
-    )
+    response = client.get("/analytics/health-score")
 
     assert response.status_code == 200
 

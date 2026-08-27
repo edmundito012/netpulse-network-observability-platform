@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_top_risk_devices():
 
-    response = client.get(
-        "/devices/top-risk"
-    )
+    response = client.get("/devices/top-risk")
 
     assert response.status_code in [
         200,
@@ -18,7 +16,6 @@ def test_top_risk_devices():
     ]
 
     if response.status_code == 200:
-
         data = response.json()
 
         assert isinstance(

@@ -62,16 +62,13 @@ def get_network_anomalies(
     """Analyze a coherent historical series for one device."""
 
     try:
-        result = (
-            NetworkAnomalyApplicationService
-            .analyze_device_metric(
-                db=db,
-                device_id=device_id,
-                metric_name=metric_name,
-                start_at=start_at,
-                end_at=end_at,
-                limit=limit,
-            )
+        result = NetworkAnomalyApplicationService.analyze_device_metric(
+            db=db,
+            device_id=device_id,
+            metric_name=metric_name,
+            start_at=start_at,
+            end_at=end_at,
+            limit=limit,
         )
     except ValueError as exc:
         raise HTTPException(
@@ -85,9 +82,7 @@ def get_network_anomalies(
         metric_name=analysis.metric_name,
         latest_value=analysis.latest_value,
         baseline_average=analysis.baseline_average,
-        baseline_std_deviation=(
-            analysis.baseline_std_deviation
-        ),
+        baseline_std_deviation=(analysis.baseline_std_deviation),
         z_score=analysis.z_score,
         severity=analysis.severity,
         confidence=analysis.confidence,

@@ -22,10 +22,7 @@ from app.services.packet_loss_burst_service import (
 client = TestClient(app)
 
 
-@patch(
-    "app.api.packet_loss_bursts."
-    "PacketLossBurstApplicationService.analyze"
-)
+@patch("app.api.packet_loss_bursts.PacketLossBurstApplicationService.analyze")
 def test_packet_loss_burst_endpoint(
     analyze_mock,
 ) -> None:
@@ -75,12 +72,10 @@ def test_packet_loss_burst_endpoint(
         ],
     )
 
-    analyze_mock.return_value = (
-        PacketLossBurstApplicationResult(
-            device_id=7,
-            series=None,
-            analysis=analysis,
-        )
+    analyze_mock.return_value = PacketLossBurstApplicationResult(
+        device_id=7,
+        series=None,
+        analysis=analysis,
     )
 
     response = client.get(

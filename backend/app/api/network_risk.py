@@ -37,9 +37,7 @@ def get_network_risk(
         db.query(Alert)
         .filter(
             Alert.status == AlertStatus.OPEN,
-            Alert.message.ilike(
-                "%Predictive degradation%"
-            ),
+            Alert.message.ilike("%Predictive degradation%"),
         )
         .count()
     )
@@ -48,9 +46,7 @@ def get_network_risk(
         failure_risk=failure_risk,
         network_impact=network_impact.impact_score,
         predictive_alerts=predictive_alerts,
-        network_health_score=dashboard[
-            "network_health_score"
-        ],
+        network_health_score=dashboard["network_health_score"],
     )
 
     return NetworkRiskResponse(

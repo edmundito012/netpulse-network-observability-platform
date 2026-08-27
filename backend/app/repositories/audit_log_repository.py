@@ -4,7 +4,6 @@ from app.models.audit_log import AuditLog
 
 
 class AuditLogRepository:
-
     @staticmethod
     def create(
         db: Session,
@@ -34,8 +33,5 @@ class AuditLogRepository:
         limit: int = 100,
     ) -> list[AuditLog]:
         return (
-            db.query(AuditLog)
-            .order_by(AuditLog.created_at.desc())
-            .limit(limit)
-            .all()
+            db.query(AuditLog).order_by(AuditLog.created_at.desc()).limit(limit).all()
         )

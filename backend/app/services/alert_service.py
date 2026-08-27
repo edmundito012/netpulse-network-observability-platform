@@ -40,33 +40,22 @@ class AlertService:
         if severity is None:
             return None
 
-        message = (
-            f"Packet loss detected on {device_name}: "
-            f"{packet_loss_percent:.2f}%"
-        )
+        message = f"Packet loss detected on {device_name}: {packet_loss_percent:.2f}%"
 
-        result = (
-            AlertDeduplicationService
-            .create_or_update(
-                db=db,
-                device_id=device_id,
-                alert_type=AlertType.PACKET_LOSS,
-                severity=severity,
-                message=message,
-            )
+        result = AlertDeduplicationService.create_or_update(
+            db=db,
+            device_id=device_id,
+            alert_type=AlertType.PACKET_LOSS,
+            severity=severity,
+            message=message,
         )
 
         if result.created:
             DeviceEventRepository.create(
                 db=db,
                 device_id=device_id,
-                event_type=(
-                    DeviceEventType.ALERT_CREATED
-                ),
-                message=(
-                    f"{severity.value} alert created: "
-                    f"{result.alert.message}"
-                ),
+                event_type=(DeviceEventType.ALERT_CREATED),
+                message=(f"{severity.value} alert created: {result.alert.message}"),
             )
 
         return result.alert

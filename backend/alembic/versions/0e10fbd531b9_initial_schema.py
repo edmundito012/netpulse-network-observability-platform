@@ -5,6 +5,7 @@ Revises:
 Create Date: 2026-05-14 02:13:43.691530
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -63,7 +64,9 @@ def upgrade() -> None:
     )
 
     op.create_index(op.f("ix_devices_id"), "devices", ["id"], unique=False)
-    op.create_index(op.f("ix_devices_ip_address"), "devices", ["ip_address"], unique=True)
+    op.create_index(
+        op.f("ix_devices_ip_address"), "devices", ["ip_address"], unique=True
+    )
 
     op.create_table(
         "device_metrics",
@@ -76,9 +79,21 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
 
-    op.create_index(op.f("ix_device_metrics_id"), "device_metrics", ["id"], unique=False)
-    op.create_index(op.f("ix_device_metrics_device_id"), "device_metrics", ["device_id"], unique=False)
-    op.create_index(op.f("ix_device_metrics_checked_at"), "device_metrics", ["checked_at"], unique=False)
+    op.create_index(
+        op.f("ix_device_metrics_id"), "device_metrics", ["id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_device_metrics_device_id"),
+        "device_metrics",
+        ["device_id"],
+        unique=False,
+    )
+    op.create_index(
+        op.f("ix_device_metrics_checked_at"),
+        "device_metrics",
+        ["checked_at"],
+        unique=False,
+    )
 
     op.create_table(
         "device_snmp_system_snapshots",
@@ -89,7 +104,12 @@ def upgrade() -> None:
         sa.Column("syscontact", sa.String(), nullable=True),
         sa.Column("sysname", sa.String(), nullable=True),
         sa.Column("syslocation", sa.String(), nullable=True),
-        sa.Column("collected_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
+        sa.Column(
+            "collected_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
         sa.ForeignKeyConstraint(["device_id"], ["devices.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -109,8 +129,14 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("ix_device_snmp_system_snapshots_device_id"), table_name="device_snmp_system_snapshots")
-    op.drop_index(op.f("ix_device_snmp_system_snapshots_id"), table_name="device_snmp_system_snapshots")
+    op.drop_index(
+        op.f("ix_device_snmp_system_snapshots_device_id"),
+        table_name="device_snmp_system_snapshots",
+    )
+    op.drop_index(
+        op.f("ix_device_snmp_system_snapshots_id"),
+        table_name="device_snmp_system_snapshots",
+    )
     op.drop_table("device_snmp_system_snapshots")
 
     op.drop_index(op.f("ix_device_metrics_checked_at"), table_name="device_metrics")

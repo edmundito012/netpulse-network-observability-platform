@@ -52,16 +52,11 @@ class IncidentCorrelationService:
         db: Session,
         *,
         source_alert_id: int,
-        configuration: (
-            CorrelationConfiguration | None
-        ) = None,
+        configuration: (CorrelationConfiguration | None) = None,
     ) -> CorrelationEvaluationResult:
         """Evaluate one alert without applying the decision."""
 
-        config = (
-            configuration
-            or CorrelationConfiguration()
-        )
+        config = configuration or CorrelationConfiguration()
 
         source_alert = AlertRepository.get_by_id(
             db=db,
@@ -70,36 +65,22 @@ class IncidentCorrelationService:
 
         if source_alert is None:
             raise SourceAlertNotFoundError(
-                "source alert "
-                f"{source_alert_id} was not found"
+                f"source alert {source_alert_id} was not found"
             )
 
-        candidates = (
-            IncidentCorrelationRepository
-            .find_candidates(
-                db=db,
-                source_alert=source_alert,
-                window_seconds=(
-                    config.window_seconds
-                ),
-                limit=config.max_candidates,
-            )
+        candidates = IncidentCorrelationRepository.find_candidates(
+            db=db,
+            source_alert=source_alert,
+            window_seconds=(config.window_seconds),
+            limit=config.max_candidates,
         )
 
-        source_snapshot = (
-            cls._build_alert_snapshot(
-                source_alert
-            )
-        )
+        source_snapshot = cls._build_alert_snapshot(source_alert)
 
         scored_candidates = [
             CorrelationScoringService.score(
                 alert=source_snapshot,
-                incident=(
-                    cls._build_incident_snapshot(
-                        incident
-                    )
-                ),
+                incident=(cls._build_incident_snapshot(incident)),
                 configuration=config,
             )
             for incident in candidates
@@ -115,40 +96,22 @@ class IncidentCorrelationService:
             reverse=True,
         )
 
-        best_candidate = (
-            scored_candidates[0]
-            if scored_candidates
-            else None
-        )
+        best_candidate = scored_candidates[0] if scored_candidates else None
 
         accepted_candidate = (
             best_candidate
-            if (
-                best_candidate is not None
-                and best_candidate.accepted
-            )
+            if (best_candidate is not None and best_candidate.accepted)
             else None
         )
 
-        signal_family = (
-            CorrelationSignalService.classify(
-                source_alert.alert_type
-            )
-        )
+        signal_family = CorrelationSignalService.classify(source_alert.alert_type)
 
         if accepted_candidate is not None:
-            outcome = (
-                CorrelationOutcome.MATCHED_EXISTING
-            )
+            outcome = CorrelationOutcome.MATCHED_EXISTING
 
-            target_incident_id = (
-                accepted_candidate.incident_id
-            )
+            target_incident_id = accepted_candidate.incident_id
 
-            target_public_id = (
-                accepted_candidate
-                .incident_public_id
-            )
+            target_public_id = accepted_candidate.incident_public_id
 
             score = accepted_candidate.score
             reasons = accepted_candidate.reasons
@@ -165,30 +128,19 @@ class IncidentCorrelationService:
             target_incident_id = None
             target_public_id = None
 
-            score = (
-                best_candidate.score
-                if best_candidate is not None
-                else 0.0
-            )
+            score = best_candidate.score if best_candidate is not None else 0.0
 
             reasons = (
                 list(best_candidate.reasons)
                 if best_candidate is not None
-                else [
-                    CorrelationReason
-                    .NO_CANDIDATE_INCIDENT
-                ]
+                else [CorrelationReason.NO_CANDIDATE_INCIDENT]
             )
 
-            explanation = (
-                cls._build_create_new_explanation(
-                    source_alert=source_alert,
-                    best_candidate=best_candidate,
-                    candidate_count=len(
-                        scored_candidates
-                    ),
-                    threshold=config.threshold,
-                )
+            explanation = cls._build_create_new_explanation(
+                source_alert=source_alert,
+                best_candidate=best_candidate,
+                candidate_count=len(scored_candidates),
+                threshold=config.threshold,
             )
 
         return CorrelationEvaluationResult(
@@ -197,29 +149,15 @@ class IncidentCorrelationService:
             signal_family=signal_family,
             score=score,
             threshold=config.threshold,
-            correlated=(
-                accepted_candidate is not None
-            ),
-            target_incident_id=(
-                target_incident_id
-            ),
-            target_incident_public_id=(
-                target_public_id
-            ),
+            correlated=(accepted_candidate is not None),
+            target_incident_id=(target_incident_id),
+            target_incident_public_id=(target_public_id),
             reasons=reasons,
-            candidate_count=len(
-                scored_candidates
-            ),
-            window_seconds=(
-                config.window_seconds
-            ),
+            candidate_count=len(scored_candidates),
+            window_seconds=(config.window_seconds),
             explanation=explanation,
             candidates=[
-                cls._to_candidate_read(
-                    candidate
-                )
-                for candidate
-                in scored_candidates
+                cls._to_candidate_read(candidate) for candidate in scored_candidates
             ],
         )
 
@@ -229,9 +167,7 @@ class IncidentCorrelationService:
         db: Session,
         *,
         source_alert_id: int,
-        configuration: (
-            CorrelationConfiguration | None
-        ) = None,
+        configuration: (CorrelationConfiguration | None) = None,
     ) -> tuple[
         CorrelationEvaluationResult,
         IncidentCorrelation,
@@ -239,10 +175,7 @@ class IncidentCorrelationService:
     ]:
         """Evaluate and persist one idempotent decision."""
 
-        config = (
-            configuration
-            or CorrelationConfiguration()
-        )
+        config = configuration or CorrelationConfiguration()
 
         evaluation = cls.evaluate(
             db=db,
@@ -250,63 +183,36 @@ class IncidentCorrelationService:
             configuration=config,
         )
 
-        correlation_key = (
-            cls.build_correlation_key(
-                source_alert_id=source_alert_id,
-                configuration=config,
-            )
+        correlation_key = cls.build_correlation_key(
+            source_alert_id=source_alert_id,
+            configuration=config,
         )
 
-        command = (
-            IncidentCorrelationRepository
-            .build_create_command(
-                correlation_key=correlation_key,
-                source_alert_id=(
-                    evaluation.source_alert_id
-                ),
-                target_incident_id=(
-                    evaluation.target_incident_id
-                ),
-                outcome=evaluation.outcome,
-                signal_family=(
-                    evaluation.signal_family
-                ),
-                score=evaluation.score,
-                threshold=evaluation.threshold,
-                reasons=evaluation.reasons,
-                candidate_count=(
-                    evaluation.candidate_count
-                ),
-                window_seconds=(
-                    evaluation.window_seconds
-                ),
-                explanation=(
-                    evaluation.explanation
-                ),
-                metadata={
-                    "engine": (
-                        "deterministic-correlation-v1"
-                    ),
-                    "max_candidates": (
-                        config.max_candidates
-                    ),
-                    "candidate_scores": [
-                        candidate.model_dump(
-                            mode="json"
-                        )
-                        for candidate
-                        in evaluation.candidates
-                    ],
-                },
-            )
+        command = IncidentCorrelationRepository.build_create_command(
+            correlation_key=correlation_key,
+            source_alert_id=(evaluation.source_alert_id),
+            target_incident_id=(evaluation.target_incident_id),
+            outcome=evaluation.outcome,
+            signal_family=(evaluation.signal_family),
+            score=evaluation.score,
+            threshold=evaluation.threshold,
+            reasons=evaluation.reasons,
+            candidate_count=(evaluation.candidate_count),
+            window_seconds=(evaluation.window_seconds),
+            explanation=(evaluation.explanation),
+            metadata={
+                "engine": ("deterministic-correlation-v1"),
+                "max_candidates": (config.max_candidates),
+                "candidate_scores": [
+                    candidate.model_dump(mode="json")
+                    for candidate in evaluation.candidates
+                ],
+            },
         )
 
-        correlation, created = (
-            IncidentCorrelationRepository
-            .get_or_create(
-                db=db,
-                command=command,
-            )
+        correlation, created = IncidentCorrelationRepository.get_or_create(
+            db=db,
+            command=command,
         )
 
         return (
@@ -337,15 +243,9 @@ class IncidentCorrelationService:
             f"{configuration.weights.recent_detection:.6f}"
         )
 
-        digest = sha256(
-            raw_key.encode("utf-8")
-        ).hexdigest()
+        digest = sha256(raw_key.encode("utf-8")).hexdigest()
 
-        return (
-            f"correlation:v1:"
-            f"alert:{source_alert_id}:"
-            f"{digest}"
-        )
+        return f"correlation:v1:alert:{source_alert_id}:{digest}"
 
     @staticmethod
     def _build_alert_snapshot(
@@ -353,10 +253,7 @@ class IncidentCorrelationService:
     ) -> CorrelationAlertSnapshot:
         """Convert an Alert ORM model into scoring input."""
 
-        observed_at = (
-            alert.last_seen_at
-            or alert.created_at
-        )
+        observed_at = alert.last_seen_at or alert.created_at
 
         return CorrelationAlertSnapshot(
             id=alert.id,
@@ -372,24 +269,13 @@ class IncidentCorrelationService:
     ) -> CorrelationIncidentSnapshot:
         """Convert an Incident and its evidence into scoring input."""
 
-        alerts = [
-            link.alert
-            for link in incident.alert_links
-            if link.alert is not None
-        ]
+        alerts = [link.alert for link in incident.alert_links if link.alert is not None]
 
         if not alerts:
-            raise ValueError(
-                "candidate incidents must contain "
-                "at least one alert"
-            )
+            raise ValueError("candidate incidents must contain at least one alert")
 
         latest_signal_at = max(
-            (
-                alert.last_seen_at
-                or alert.created_at
-            )
-            for alert in alerts
+            (alert.last_seen_at or alert.created_at) for alert in alerts
         )
 
         return CorrelationIncidentSnapshot(
@@ -399,14 +285,8 @@ class IncidentCorrelationService:
             severity=incident.severity,
             detected_at=incident.detected_at,
             latest_signal_at=latest_signal_at,
-            device_ids=frozenset(
-                alert.device_id
-                for alert in alerts
-            ),
-            alert_types=frozenset(
-                alert.alert_type
-                for alert in alerts
-            ),
+            device_ids=frozenset(alert.device_id for alert in alerts),
+            alert_types=frozenset(alert.alert_type for alert in alerts),
         )
 
     @staticmethod
@@ -417,18 +297,12 @@ class IncidentCorrelationService:
 
         return CorrelationCandidateRead(
             incident_id=candidate.incident_id,
-            public_id=(
-                candidate.incident_public_id
-            ),
+            public_id=(candidate.incident_public_id),
             score=candidate.score,
             reasons=candidate.reasons,
-            time_distance_seconds=(
-                candidate.time_distance_seconds
-            ),
+            time_distance_seconds=(candidate.time_distance_seconds),
             is_active=not (
-                CorrelationReason
-                .INCIDENT_ALREADY_RESOLVED
-                in candidate.reasons
+                CorrelationReason.INCIDENT_ALREADY_RESOLVED in candidate.reasons
             ),
         )
 
@@ -436,9 +310,7 @@ class IncidentCorrelationService:
     def _build_create_new_explanation(
         *,
         source_alert: Alert,
-        best_candidate: (
-            CorrelationScoreBreakdown | None
-        ),
+        best_candidate: (CorrelationScoreBreakdown | None),
         candidate_count: int,
         threshold: float,
     ) -> str:
@@ -451,10 +323,7 @@ class IncidentCorrelationService:
                 f"{source_alert.id}; create a new incident."
             )
 
-        reason_text = ", ".join(
-            reason.value
-            for reason in best_candidate.reasons
-        )
+        reason_text = ", ".join(reason.value for reason in best_candidate.reasons)
 
         return (
             "No candidate reached the correlation "

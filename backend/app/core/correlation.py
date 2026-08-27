@@ -74,21 +74,13 @@ class CorrelationScoringWeights:
             self.recent_detection,
         )
 
-        if any(
-            value < 0.0 or value > 1.0
-            for value in values
-        ):
-            raise ValueError(
-                "correlation weights must be between "
-                "0.0 and 1.0"
-            )
+        if any(value < 0.0 or value > 1.0 for value in values):
+            raise ValueError("correlation weights must be between 0.0 and 1.0")
 
         total = sum(values)
 
         if abs(total - 1.0) > 0.000001:
-            raise ValueError(
-                "correlation weights must add up to 1.0"
-            )
+            raise ValueError("correlation weights must add up to 1.0")
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,36 +91,16 @@ class CorrelationConfiguration:
     threshold: float = 0.65
     max_candidates: int = 25
 
-    weights: CorrelationScoringWeights = (
-        CorrelationScoringWeights()
-    )
+    weights: CorrelationScoringWeights = CorrelationScoringWeights()
 
     def __post_init__(self) -> None:
         """Reject unsafe or meaningless configuration."""
 
-        if (
-            self.window_seconds < 60
-            or self.window_seconds > 86_400
-        ):
-            raise ValueError(
-                "window_seconds must be between "
-                "60 and 86400"
-            )
+        if self.window_seconds < 60 or self.window_seconds > 86_400:
+            raise ValueError("window_seconds must be between 60 and 86400")
 
-        if (
-            self.threshold < 0.0
-            or self.threshold > 1.0
-        ):
-            raise ValueError(
-                "threshold must be between "
-                "0.0 and 1.0"
-            )
+        if self.threshold < 0.0 or self.threshold > 1.0:
+            raise ValueError("threshold must be between 0.0 and 1.0")
 
-        if (
-            self.max_candidates < 1
-            or self.max_candidates > 100
-        ):
-            raise ValueError(
-                "max_candidates must be between "
-                "1 and 100"
-            )
+        if self.max_candidates < 1 or self.max_candidates > 100:
+            raise ValueError("max_candidates must be between 1 and 100")

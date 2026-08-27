@@ -12,9 +12,7 @@ class IncidentNotFoundError(IncidentError):
         self,
         incident_identifier: int | str,
     ) -> None:
-        super().__init__(
-            f"Incident {incident_identifier!r} was not found"
-        )
+        super().__init__(f"Incident {incident_identifier!r} was not found")
 
 
 class IncidentOwnerNotFoundError(IncidentError):
@@ -24,9 +22,7 @@ class IncidentOwnerNotFoundError(IncidentError):
         self,
         owner_id: int,
     ) -> None:
-        super().__init__(
-            f"User {owner_id} was not found"
-        )
+        super().__init__(f"User {owner_id} was not found")
 
 
 class IncidentAlertNotFoundError(IncidentError):
@@ -36,9 +32,7 @@ class IncidentAlertNotFoundError(IncidentError):
         self,
         alert_id: int,
     ) -> None:
-        super().__init__(
-            f"Alert {alert_id} was not found"
-        )
+        super().__init__(f"Alert {alert_id} was not found")
 
 
 class IncidentAlertConflictError(IncidentError):
@@ -51,8 +45,7 @@ class IncidentAlertConflictError(IncidentError):
         public_id: str,
     ) -> None:
         super().__init__(
-            f"Alert {alert_id} is already attached "
-            f"to incident {public_id}"
+            f"Alert {alert_id} is already attached to incident {public_id}"
         )
 
 
@@ -65,10 +58,7 @@ class IncidentAlertNotAttachedError(IncidentError):
         alert_id: int,
         public_id: str,
     ) -> None:
-        super().__init__(
-            f"Alert {alert_id} is not attached "
-            f"to incident {public_id}"
-        )
+        super().__init__(f"Alert {alert_id} is not attached to incident {public_id}")
 
 
 class InvalidIncidentTransitionError(IncidentError):
@@ -81,8 +71,7 @@ class InvalidIncidentTransitionError(IncidentError):
         target_status: str,
     ) -> None:
         super().__init__(
-            "Invalid incident transition: "
-            f"{current_status} -> {target_status}"
+            f"Invalid incident transition: {current_status} -> {target_status}"
         )
 
 

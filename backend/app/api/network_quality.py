@@ -33,12 +33,6 @@ def network_quality():
         20,
     ]
 
-    result = (
-        NetworkQualityService.analyze(
-            latencies
-        )
-    )
+    result = NetworkQualityService.analyze(latencies)
 
-    return NetworkQualityResponse(
-        **result.__dict__
-    )
+    return NetworkQualityResponse(**result.__dict__)

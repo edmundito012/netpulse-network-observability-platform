@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_device_risk_ranking():
 
-    response = client.get(
-        "/devices/risk-ranking"
-    )
+    response = client.get("/devices/risk-ranking")
 
     assert response.status_code in [200, 401, 403]
 

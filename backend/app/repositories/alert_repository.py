@@ -31,23 +31,16 @@ class AlertRepository:
         query = db.query(Alert)
 
         if device_id is not None:
-            query = query.filter(
-                Alert.device_id == device_id
-            )
+            query = query.filter(Alert.device_id == device_id)
 
         if severity is not None:
-            query = query.filter(
-                Alert.severity == severity
-            )
+            query = query.filter(Alert.severity == severity)
 
         if status is not None:
-            query = query.filter(
-                Alert.status == status
-            )
+            query = query.filter(Alert.status == status)
 
         return (
-            query
-            .order_by(
+            query.order_by(
                 Alert.created_at.desc(),
                 Alert.id.desc(),
             )
@@ -67,44 +60,28 @@ class AlertRepository:
         query = db.query(Alert)
 
         if device_id is not None:
-            query = query.filter(
-                Alert.device_id == device_id
-            )
+            query = query.filter(Alert.device_id == device_id)
 
         if severity is not None:
-            query = query.filter(
-                Alert.severity == severity
-            )
+            query = query.filter(Alert.severity == severity)
 
         if status is not None:
-            query = query.filter(
-                Alert.status == status
-            )
+            query = query.filter(Alert.status == status)
 
         total_count = query.count()
 
         items = (
-            query
-            .order_by(
+            query.order_by(
                 Alert.created_at.desc(),
                 Alert.id.desc(),
             )
-            .offset(
-                (page - 1) * page_size
-            )
+            .offset((page - 1) * page_size)
             .limit(page_size)
             .all()
         )
 
         total_pages = (
-            (
-                total_count
-                + page_size
-                - 1
-            )
-            // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {
@@ -120,13 +97,7 @@ class AlertRepository:
         db: Session,
         alert_id: int,
     ) -> Alert | None:
-        return (
-            db.query(Alert)
-            .filter(
-                Alert.id == alert_id
-            )
-            .first()
-        )
+        return db.query(Alert).filter(Alert.id == alert_id).first()
 
     @staticmethod
     def get_open_alerts(
@@ -134,9 +105,7 @@ class AlertRepository:
     ) -> list[Alert]:
         return (
             db.query(Alert)
-            .filter(
-                Alert.status == AlertStatus.OPEN
-            )
+            .filter(Alert.status == AlertStatus.OPEN)
             .order_by(
                 Alert.created_at.desc(),
                 Alert.id.desc(),
@@ -156,9 +125,7 @@ class AlertRepository:
             db.query(Alert)
             .filter(
                 Alert.device_id == device_id,
-                Alert.status.in_(
-                    cls.ACTIVE_STATUSES
-                ),
+                Alert.status.in_(cls.ACTIVE_STATUSES),
             )
             .order_by(
                 Alert.created_at.desc(),
@@ -181,11 +148,8 @@ class AlertRepository:
             db.query(Alert)
             .filter(
                 Alert.device_id == device_id,
-                Alert.deduplication_key
-                == deduplication_key,
-                Alert.status.in_(
-                    cls.ACTIVE_STATUSES
-                ),
+                Alert.deduplication_key == deduplication_key,
+                Alert.status.in_(cls.ACTIVE_STATUSES),
             )
             .order_by(
                 Alert.created_at.desc(),
@@ -207,12 +171,8 @@ class AlertRepository:
 
         now = datetime.now(UTC)
 
-        effective_key = (
-            deduplication_key
-            or (
-                f"device:{device_id}:"
-                f"{alert_type.value.lower()}"
-            )
+        effective_key = deduplication_key or (
+            f"device:{device_id}:{alert_type.value.lower()}"
         )
 
         alert = Alert(
@@ -272,10 +232,7 @@ class AlertRepository:
             AlertSeverity.CRITICAL: 3,
         }
 
-        return (
-            ranking[new_severity]
-            > ranking[current_severity]
-        )
+        return ranking[new_severity] > ranking[current_severity]
 
     @staticmethod
     def resolve(

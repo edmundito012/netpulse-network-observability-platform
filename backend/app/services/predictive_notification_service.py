@@ -8,7 +8,6 @@ from app.services.providers.telegram_provider import (
 
 
 class PredictiveNotificationService:
-
     @staticmethod
     def send_predictive_alert(
         device_name: str,
@@ -16,13 +15,10 @@ class PredictiveNotificationService:
         reason: str,
     ) -> bool:
 
-        notification = (
-            NotificationService
-            .build_predictive_alert_message(
-                device_name=device_name,
-                risk_score=risk_score,
-                reason=reason,
-            )
+        notification = NotificationService.build_predictive_alert_message(
+            device_name=device_name,
+            risk_score=risk_score,
+            reason=reason,
         )
 
         provider = TelegramProvider()

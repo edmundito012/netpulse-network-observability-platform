@@ -19,9 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        "ALTER TYPE alertstatus ADD VALUE IF NOT EXISTS 'ACKNOWLEDGED';"
-    )
+    op.execute("ALTER TYPE alertstatus ADD VALUE IF NOT EXISTS 'ACKNOWLEDGED';")
 
 
 def downgrade() -> None:

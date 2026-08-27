@@ -14,7 +14,6 @@ from app.repositories.device_snmp_system_snapshot_repository import (
 
 
 class DeviceSummaryService:
-
     @staticmethod
     def get_summary(
         db: Session,
@@ -28,33 +27,25 @@ class DeviceSummaryService:
         if not device:
             return None
 
-        latest_metric = (
-            DeviceMetricRepository.get_latest_by_device(
-                db=db,
-                device_id=device_id,
-            )
+        latest_metric = DeviceMetricRepository.get_latest_by_device(
+            db=db,
+            device_id=device_id,
         )
 
-        latest_snmp_snapshot = (
-            DeviceSNMPSystemSnapshotRepository.get_latest_by_device(
-                db=db,
-                device_id=device_id,
-            )
+        latest_snmp_snapshot = DeviceSNMPSystemSnapshotRepository.get_latest_by_device(
+            db=db,
+            device_id=device_id,
         )
 
-        active_alert = (
-            AlertRepository.get_active_alert_for_device(
-                db=db,
-                device_id=device_id,
-            )
+        active_alert = AlertRepository.get_active_alert_for_device(
+            db=db,
+            device_id=device_id,
         )
 
-        recent_events = (
-            DeviceEventRepository.get_by_device(
-                db=db,
-                device_id=device_id,
-                limit=10,
-            )
+        recent_events = DeviceEventRepository.get_by_device(
+            db=db,
+            device_id=device_id,
+            limit=10,
         )
 
         return {

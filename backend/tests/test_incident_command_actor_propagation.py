@@ -41,13 +41,9 @@ def build_incident():
 
 
 @patch(
-    "app.services.incident_command_service."
-    "IncidentService.get_required_by_public_id"
+    "app.services.incident_command_service.IncidentService.get_required_by_public_id"
 )
-@patch(
-    "app.services.incident_command_service."
-    "IncidentService.update"
-)
+@patch("app.services.incident_command_service.IncidentService.update")
 def test_update_propagates_actor(
     update_mock: Mock,
     get_incident_mock: Mock,
@@ -72,25 +68,17 @@ def test_update_propagates_actor(
     update_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        incident_data=update_mock
-        .call_args
-        .kwargs["incident_data"],
-        actor_type=(
-            IncidentTimelineActorType.USER
-        ),
+        incident_data=update_mock.call_args.kwargs["incident_data"],
+        actor_type=(IncidentTimelineActorType.USER),
         actor_id=9,
         actor_label="noc-operator",
     )
 
 
 @patch(
-    "app.services.incident_command_service."
-    "IncidentService.get_required_by_public_id"
+    "app.services.incident_command_service.IncidentService.get_required_by_public_id"
 )
-@patch(
-    "app.services.incident_command_service."
-    "IncidentLifecycleService.acknowledge"
-)
+@patch("app.services.incident_command_service.IncidentLifecycleService.acknowledge")
 def test_acknowledge_propagates_actor(
     acknowledge_mock: Mock,
     get_incident_mock: Mock,
@@ -110,22 +98,16 @@ def test_acknowledge_propagates_actor(
     acknowledge_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        actor_type=(
-            IncidentTimelineActorType.USER
-        ),
+        actor_type=(IncidentTimelineActorType.USER),
         actor_id=9,
         actor_label="noc-operator",
     )
 
 
 @patch(
-    "app.services.incident_command_service."
-    "IncidentService.get_required_by_public_id"
+    "app.services.incident_command_service.IncidentService.get_required_by_public_id"
 )
-@patch(
-    "app.services.incident_command_service."
-    "IncidentLifecycleService.resolve"
-)
+@patch("app.services.incident_command_service.IncidentLifecycleService.resolve")
 def test_resolve_propagates_actor(
     resolve_mock: Mock,
     get_incident_mock: Mock,
@@ -141,9 +123,7 @@ def test_resolve_propagates_actor(
         public_id=incident.public_id,
         resolution_data=(
             IncidentResolveRequest(
-                resolution_summary=(
-                    "Connectivity restored"
-                ),
+                resolution_summary=("Connectivity restored"),
             )
         ),
         actor=build_actor(),
@@ -152,26 +132,18 @@ def test_resolve_propagates_actor(
     resolve_mock.assert_called_once_with(
         db=db,
         incident=incident,
-        resolution_summary=(
-            "Connectivity restored"
-        ),
+        resolution_summary=("Connectivity restored"),
         root_cause=None,
-        actor_type=(
-            IncidentTimelineActorType.USER
-        ),
+        actor_type=(IncidentTimelineActorType.USER),
         actor_id=9,
         actor_label="noc-operator",
     )
 
 
 @patch(
-    "app.services.incident_command_service."
-    "IncidentService.get_required_by_public_id"
+    "app.services.incident_command_service.IncidentService.get_required_by_public_id"
 )
-@patch(
-    "app.services.incident_command_service."
-    "IncidentService.attach_alert"
-)
+@patch("app.services.incident_command_service.IncidentService.attach_alert")
 def test_attach_alerts_propagates_actor(
     attach_mock: Mock,
     get_incident_mock: Mock,
@@ -198,11 +170,6 @@ def test_attach_alerts_propagates_actor(
     assert attach_mock.call_count == 2
 
     for call in attach_mock.call_args_list:
-        assert call.kwargs["actor_type"] == (
-            IncidentTimelineActorType.USER
-        )
+        assert call.kwargs["actor_type"] == (IncidentTimelineActorType.USER)
         assert call.kwargs["actor_id"] == 9
-        assert (
-            call.kwargs["actor_label"]
-            == "noc-operator"
-        )
+        assert call.kwargs["actor_label"] == "noc-operator"

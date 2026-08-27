@@ -45,12 +45,8 @@ def build_alert(
     *,
     alert_id: int = 42,
     device_id: int = 10,
-    alert_type: AlertType = (
-        AlertType.PACKET_LOSS
-    ),
-    severity: AlertSeverity = (
-        AlertSeverity.CRITICAL
-    ),
+    alert_type: AlertType = (AlertType.PACKET_LOSS),
+    severity: AlertSeverity = (AlertSeverity.CRITICAL),
     observed_at: datetime = NOW,
 ) -> CorrelationAlertSnapshot:
     """Build a source alert snapshot."""
@@ -68,12 +64,8 @@ def build_incident(
     *,
     incident_id: int = 7,
     public_id: str = "INC-2026-000007",
-    status: IncidentStatus = (
-        IncidentStatus.INVESTIGATING
-    ),
-    severity: IncidentSeverity = (
-        IncidentSeverity.CRITICAL
-    ),
+    status: IncidentStatus = (IncidentStatus.INVESTIGATING),
+    severity: IncidentSeverity = (IncidentSeverity.CRITICAL),
     detected_at: datetime = NOW,
     latest_signal_at: datetime = NOW,
     device_ids: frozenset[int] = frozenset(
@@ -81,9 +73,7 @@ def build_incident(
             10,
         }
     ),
-    alert_types: frozenset[
-        AlertType
-    ] = frozenset(
+    alert_types: frozenset[AlertType] = frozenset(
         {
             AlertType.PACKET_LOSS_BURST,
         }
@@ -113,40 +103,17 @@ def test_strong_candidate_is_accepted() -> None:
     assert result.accepted is True
     assert result.blocked is False
 
-    assert (
-        CorrelationReason.SAME_DEVICE
-        in result.reasons
-    )
+    assert CorrelationReason.SAME_DEVICE in result.reasons
 
-    assert (
-        CorrelationReason
-        .WITHIN_TEMPORAL_WINDOW
-        in result.reasons
-    )
+    assert CorrelationReason.WITHIN_TEMPORAL_WINDOW in result.reasons
 
-    assert (
-        CorrelationReason
-        .COMPATIBLE_SIGNAL_FAMILY
-        in result.reasons
-    )
+    assert CorrelationReason.COMPATIBLE_SIGNAL_FAMILY in result.reasons
 
-    assert (
-        CorrelationReason
-        .SEVERITY_ALIGNED
-        in result.reasons
-    )
+    assert CorrelationReason.SEVERITY_ALIGNED in result.reasons
 
-    assert (
-        CorrelationReason
-        .ACTIVE_INCIDENT_AVAILABLE
-        in result.reasons
-    )
+    assert CorrelationReason.ACTIVE_INCIDENT_AVAILABLE in result.reasons
 
-    assert (
-        CorrelationReason
-        .INCIDENT_RECENTLY_DETECTED
-        in result.reasons
-    )
+    assert CorrelationReason.INCIDENT_RECENTLY_DETECTED in result.reasons
 
 
 def test_exact_alert_type_is_explained() -> None:
@@ -161,10 +128,7 @@ def test_exact_alert_type_is_explained() -> None:
         ),
     )
 
-    assert (
-        CorrelationReason.SAME_ALERT_TYPE
-        in result.reasons
-    )
+    assert CorrelationReason.SAME_ALERT_TYPE in result.reasons
 
     assert result.accepted is True
 
@@ -183,21 +147,11 @@ def test_compatible_signal_families_score() -> None:
         ),
     )
 
-    assert (
-        result.alert_family
-        == CorrelationSignalFamily.CONNECTIVITY
-    )
+    assert result.alert_family == CorrelationSignalFamily.CONNECTIVITY
 
-    assert (
-        CorrelationSignalFamily.PERFORMANCE
-        in result.candidate_families
-    )
+    assert CorrelationSignalFamily.PERFORMANCE in result.candidate_families
 
-    assert (
-        CorrelationReason
-        .COMPATIBLE_SIGNAL_FAMILY
-        in result.reasons
-    )
+    assert CorrelationReason.COMPATIBLE_SIGNAL_FAMILY in result.reasons
 
 
 def test_incompatible_signal_family_scores_zero() -> None:
@@ -216,11 +170,7 @@ def test_incompatible_signal_family_scores_zero() -> None:
 
     assert result.components.signal == 0.0
 
-    assert (
-        CorrelationReason
-        .INCOMPATIBLE_SIGNAL_FAMILY
-        in result.reasons
-    )
+    assert CorrelationReason.INCOMPATIBLE_SIGNAL_FAMILY in result.reasons
 
 
 def test_device_mismatch_is_hard_blocker() -> None:
@@ -234,16 +184,9 @@ def test_device_mismatch_is_hard_blocker() -> None:
     assert result.accepted is False
     assert result.blocked is True
 
-    assert (
-        CorrelationReason.DEVICE_MISMATCH
-        in result.reasons
-    )
+    assert CorrelationReason.DEVICE_MISMATCH in result.reasons
 
-    assert (
-        CorrelationReason
-        .SCORE_BELOW_THRESHOLD
-        in result.reasons
-    )
+    assert CorrelationReason.SCORE_BELOW_THRESHOLD in result.reasons
 
 
 def test_outside_window_is_hard_blocker() -> None:
@@ -262,11 +205,7 @@ def test_outside_window_is_hard_blocker() -> None:
     assert result.accepted is False
     assert result.blocked is True
 
-    assert (
-        CorrelationReason
-        .OUTSIDE_TEMPORAL_WINDOW
-        in result.reasons
-    )
+    assert CorrelationReason.OUTSIDE_TEMPORAL_WINDOW in result.reasons
 
 
 def test_exact_window_boundary_is_allowed() -> None:
@@ -282,17 +221,9 @@ def test_exact_window_boundary_is_allowed() -> None:
         ),
     )
 
-    assert (
-        CorrelationReason
-        .WITHIN_TEMPORAL_WINDOW
-        in result.reasons
-    )
+    assert CorrelationReason.WITHIN_TEMPORAL_WINDOW in result.reasons
 
-    assert (
-        CorrelationReason
-        .OUTSIDE_TEMPORAL_WINDOW
-        not in result.reasons
-    )
+    assert CorrelationReason.OUTSIDE_TEMPORAL_WINDOW not in result.reasons
 
     assert result.blocked is False
 
@@ -308,11 +239,7 @@ def test_resolved_incident_is_hard_blocker() -> None:
     assert result.accepted is False
     assert result.blocked is True
 
-    assert (
-        CorrelationReason
-        .INCIDENT_ALREADY_RESOLVED
-        in result.reasons
-    )
+    assert CorrelationReason.INCIDENT_ALREADY_RESOLVED in result.reasons
 
 
 def test_temporal_component_decays_linearly() -> None:
@@ -334,9 +261,7 @@ def test_temporal_component_decays_linearly() -> None:
         )
     )
 
-    assert result.time_distance_seconds == (
-        450.0
-    )
+    assert result.time_distance_seconds == (450.0)
 
 
 def test_adjacent_severity_receives_half_credit() -> None:
@@ -355,11 +280,7 @@ def test_adjacent_severity_receives_half_credit() -> None:
         )
     )
 
-    assert (
-        CorrelationReason
-        .SEVERITY_ALIGNED
-        not in result.reasons
-    )
+    assert CorrelationReason.SEVERITY_ALIGNED not in result.reasons
 
 
 def test_opposite_severity_receives_no_credit() -> None:
@@ -438,11 +359,7 @@ def test_score_below_threshold_is_rejected() -> None:
     assert result.accepted is False
     assert result.blocked is False
 
-    assert (
-        CorrelationReason
-        .SCORE_BELOW_THRESHOLD
-        in result.reasons
-    )
+    assert CorrelationReason.SCORE_BELOW_THRESHOLD in result.reasons
 
 
 def test_result_contains_component_total() -> None:
@@ -460,9 +377,7 @@ def test_result_contains_component_total() -> None:
         + result.components.recent_detection
     )
 
-    assert result.score == pytest.approx(
-        component_total
-    )
+    assert result.score == pytest.approx(component_total)
 
 
 def test_explanation_contains_decision_and_score() -> None:
@@ -471,14 +386,8 @@ def test_explanation_contains_decision_and_score() -> None:
         incident=build_incident(),
     )
 
-    assert "candidate accepted" in (
-        result.explanation
-    )
+    assert "candidate accepted" in (result.explanation)
 
-    assert "score=1.0000" in (
-        result.explanation
-    )
+    assert "score=1.0000" in (result.explanation)
 
-    assert "threshold=0.6500" in (
-        result.explanation
-    )
+    assert "threshold=0.6500" in (result.explanation)

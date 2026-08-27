@@ -115,9 +115,7 @@ def translate_incident_error(
         )
 
     return HTTPException(
-        status_code=(
-            status.HTTP_400_BAD_REQUEST
-        ),
+        status_code=(status.HTTP_400_BAD_REQUEST),
         detail=str(exc),
     )
 
@@ -131,29 +129,21 @@ def translate_incident_error(
 def create_incident(
     incident_data: IncidentCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Create an incident and optionally attach alert evidence."""
 
     del current_user
 
     try:
-        incident = (
-            IncidentCommandService.create(
-                db=db,
-                incident_data=incident_data,
-            )
+        incident = IncidentCommandService.create(
+            db=db,
+            incident_data=incident_data,
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.get(
@@ -192,9 +182,7 @@ def list_incidents(
         le=100,
     ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentPaginationResponse:
     """Return filtered and paginated incidents."""
 
@@ -214,17 +202,11 @@ def list_incidents(
         )
     except ValueError as exc:
         raise HTTPException(
-            status_code=(
-                status.HTTP_422_UNPROCESSABLE_CONTENT
-            ),
+            status_code=(status.HTTP_422_UNPROCESSABLE_CONTENT),
             detail=str(exc),
         ) from exc
 
-    return (
-        IncidentResponseService.to_paginated(
-            result
-        )
-    )
+    return IncidentResponseService.to_paginated(result)
 
 
 @router.get(
@@ -235,30 +217,21 @@ def list_incidents(
 def get_incident(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentRead:
     """Return a complete incident by public ID."""
 
     del current_user
 
     try:
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.patch(
@@ -270,31 +243,21 @@ def update_incident(
     public_id: str,
     incident_data: IncidentUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Update editable incident information."""
 
     try:
-        incident = (
-            IncidentCommandService.update(
-                db=db,
-                public_id=public_id,
-                incident_data=incident_data,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.update(
+            db=db,
+            public_id=public_id,
+            incident_data=incident_data,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.post(
@@ -305,31 +268,20 @@ def update_incident(
 def acknowledge_incident(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Acknowledge an open incident."""
 
     try:
-        incident = (
-            IncidentCommandService
-            .acknowledge(
-                db=db,
-                public_id=public_id,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.acknowledge(
+            db=db,
+            public_id=public_id,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.post(
@@ -340,31 +292,20 @@ def acknowledge_incident(
 def investigate_incident(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Move an incident into investigation."""
 
     try:
-        incident = (
-            IncidentCommandService
-            .investigate(
-                db=db,
-                public_id=public_id,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.investigate(
+            db=db,
+            public_id=public_id,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.post(
@@ -375,30 +316,20 @@ def investigate_incident(
 def monitor_incident(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Move an investigated incident into monitoring."""
 
     try:
-        incident = (
-            IncidentCommandService.monitor(
-                db=db,
-                public_id=public_id,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.monitor(
+            db=db,
+            public_id=public_id,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.post(
@@ -410,31 +341,21 @@ def resolve_incident(
     public_id: str,
     resolution_data: IncidentResolveRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Resolve a monitored incident."""
 
     try:
-        incident = (
-            IncidentCommandService.resolve(
-                db=db,
-                public_id=public_id,
-                resolution_data=resolution_data,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.resolve(
+            db=db,
+            public_id=public_id,
+            resolution_data=resolution_data,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
 
 
 @router.post(
@@ -446,32 +367,22 @@ def attach_incident_alerts(
     public_id: str,
     attachment_data: IncidentAlertAttachRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentRead:
     """Attach one or more alerts to an incident."""
 
     try:
-        incident = (
-            IncidentCommandService
-            .attach_alerts(
-                db=db,
-                public_id=public_id,
-                attachment_data=attachment_data,
-                actor=build_user_actor(
-                    current_user
-                ),
-            )
+        incident = IncidentCommandService.attach_alerts(
+            db=db,
+            public_id=public_id,
+            attachment_data=attachment_data,
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return IncidentResponseService.to_read(
-        incident
-    )
+    return IncidentResponseService.to_read(incident)
+
 
 @router.delete(
     "/{public_id}/alerts/{alert_id}",
@@ -482,9 +393,7 @@ def detach_incident_alert(
     public_id: str,
     alert_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        write_access
-    ),
+    current_user: User = Depends(write_access),
 ) -> IncidentAlertDetachResponse:
     """Detach an alert from an incident."""
 
@@ -493,14 +402,10 @@ def detach_incident_alert(
             db=db,
             public_id=public_id,
             alert_id=alert_id,
-            actor=build_user_actor(
-                current_user
-            ),
+            actor=build_user_actor(current_user),
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
     return IncidentAlertDetachResponse(
         public_id=public_id,
@@ -517,35 +422,23 @@ def detach_incident_alert(
 def get_incident_statistics(
     public_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        read_access
-    ),
+    current_user: User = Depends(read_access),
 ) -> IncidentStatisticsResponse:
     """Return calculated operational incident statistics."""
 
     del current_user
 
     try:
-        incident = (
-            IncidentService
-            .get_required_by_public_id(
-                db=db,
-                public_id=public_id,
-            )
+        incident = IncidentService.get_required_by_public_id(
+            db=db,
+            public_id=public_id,
         )
 
-        statistics = (
-            IncidentService.get_statistics(
-                db=db,
-                incident=incident,
-            )
+        statistics = IncidentService.get_statistics(
+            db=db,
+            incident=incident,
         )
     except IncidentError as exc:
-        raise translate_incident_error(
-            exc
-        ) from exc
+        raise translate_incident_error(exc) from exc
 
-    return (
-        IncidentResponseService
-        .to_statistics(statistics)
-    )
+    return IncidentResponseService.to_statistics(statistics)

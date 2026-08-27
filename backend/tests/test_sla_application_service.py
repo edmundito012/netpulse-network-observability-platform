@@ -10,14 +10,8 @@ from app.services.sla_application_service import (
 )
 
 
-@patch(
-    "app.services.sla_application_service."
-    "SLAService.calculate"
-)
-@patch(
-    "app.services.sla_application_service."
-    "DeviceMetricRepository.get_window"
-)
+@patch("app.services.sla_application_service.SLAService.calculate")
+@patch("app.services.sla_application_service.DeviceMetricRepository.get_window")
 def test_calculate_compliance_ignores_missing_measurements(
     get_window_mock: Mock,
     calculate_mock: Mock,
@@ -70,13 +64,9 @@ def test_calculate_compliance_ignores_missing_measurements(
     )
 
 
+@patch("app.services.sla_application_service.SLAService.calculate")
 @patch(
-    "app.services.sla_application_service."
-    "SLAService.calculate"
-)
-@patch(
-    "app.services.sla_application_service."
-    "DeviceMetricRepository.get_latest_device_id"
+    "app.services.sla_application_service.DeviceMetricRepository.get_latest_device_id"
 )
 def test_calculate_compliance_handles_empty_database(
     get_latest_device_id_mock: Mock,
@@ -103,8 +93,7 @@ def test_calculate_compliance_handles_empty_database(
 
 
 @patch(
-    "app.services.sla_application_service."
-    "DeviceMetricRepository.get_latest_device_id"
+    "app.services.sla_application_service.DeviceMetricRepository.get_latest_device_id"
 )
 def test_resolve_device_id_uses_latest_metric_device(
     get_latest_device_id_mock: Mock,
@@ -126,23 +115,10 @@ def test_resolve_device_id_uses_latest_metric_device(
 
 
 def test_normalize_status_handles_enum_values() -> None:
-    assert (
-        SLAApplicationService.normalize_status(
-            DeviceStatus.ONLINE
-        )
-        == "ONLINE"
-    )
+    assert SLAApplicationService.normalize_status(DeviceStatus.ONLINE) == "ONLINE"
 
-    assert (
-        SLAApplicationService.normalize_status(
-            DeviceStatus.OFFLINE
-        )
-        == "OFFLINE"
-    )
+    assert SLAApplicationService.normalize_status(DeviceStatus.OFFLINE) == "OFFLINE"
 
 
 def test_normalize_status_handles_none() -> None:
-    assert (
-        SLAApplicationService.normalize_status(None)
-        == "UNKNOWN"
-    )
+    assert SLAApplicationService.normalize_status(None) == "UNKNOWN"

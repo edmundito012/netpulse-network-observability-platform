@@ -5,11 +5,9 @@ from app.services.experience_summary_service import (
 
 def test_summary():
 
-    result = (
-        ExperienceSummaryService.build(
-            gaming_score=95,
-            streaming_score=90,
-        )
+    result = ExperienceSummaryService.build(
+        gaming_score=95,
+        streaming_score=90,
     )
 
     assert result.overall_qoe_score >= 90
@@ -18,11 +16,9 @@ def test_summary():
 
 def test_excellent_summary():
 
-    result = (
-        ExperienceSummaryService.build(
-            gaming_score=98,
-            streaming_score=96,
-        )
+    result = ExperienceSummaryService.build(
+        gaming_score=98,
+        streaming_score=96,
     )
 
     assert result.overall_status == "EXCELLENT"

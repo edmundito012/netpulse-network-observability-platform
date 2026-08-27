@@ -15,12 +15,7 @@ def test_detect_latency_trend():
         SimpleNamespace(response_time_ms=50),
     ]
 
-    assert (
-        PredictiveAlertService.detect_latency_trend(
-            metrics
-        )
-        is True
-    )
+    assert PredictiveAlertService.detect_latency_trend(metrics) is True
 
 
 def test_detect_packet_loss_trend():
@@ -33,12 +28,7 @@ def test_detect_packet_loss_trend():
         SimpleNamespace(packet_loss_percent=5),
     ]
 
-    assert (
-        PredictiveAlertService.detect_packet_loss_trend(
-            metrics
-        )
-        is True
-    )
+    assert PredictiveAlertService.detect_packet_loss_trend(metrics) is True
 
 
 def test_detect_jitter_trend():
@@ -51,9 +41,4 @@ def test_detect_jitter_trend():
         SimpleNamespace(jitter_ms=25),
     ]
 
-    assert (
-        PredictiveAlertService.detect_jitter_trend(
-            metrics
-        )
-        is True
-    )
+    assert PredictiveAlertService.detect_jitter_trend(metrics) is True

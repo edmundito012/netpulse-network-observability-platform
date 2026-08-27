@@ -133,9 +133,7 @@ def upgrade() -> None:
             "deduplication_key",
         ],
         unique=True,
-        postgresql_where=sa.text(
-            "status <> 'RESOLVED'"
-        ),
+        postgresql_where=sa.text("status <> 'RESOLVED'"),
     )
 
     op.alter_column(

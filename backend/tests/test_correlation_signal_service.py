@@ -51,24 +51,17 @@ def test_classify_alert_type(
     alert_type: AlertType,
     expected_family: CorrelationSignalFamily,
 ) -> None:
-    assert (
-        CorrelationSignalService.classify(
-            alert_type
-        )
-        == expected_family
-    )
+    assert CorrelationSignalService.classify(alert_type) == expected_family
 
 
 def test_classify_many_removes_duplicates() -> None:
-    result = (
-        CorrelationSignalService.classify_many(
-            frozenset(
-                {
-                    AlertType.PACKET_LOSS,
-                    AlertType.PACKET_LOSS_BURST,
-                    AlertType.JITTER,
-                }
-            )
+    result = CorrelationSignalService.classify_many(
+        frozenset(
+            {
+                AlertType.PACKET_LOSS,
+                AlertType.PACKET_LOSS_BURST,
+                AlertType.JITTER,
+            }
         )
     )
 
@@ -157,11 +150,7 @@ def test_incompatible_signal_families(
     source: CorrelationSignalFamily,
     candidate: CorrelationSignalFamily,
 ) -> None:
-    expected = (
-        source == candidate
-        and source
-        != CorrelationSignalFamily.GENERIC
-    )
+    expected = source == candidate and source != CorrelationSignalFamily.GENERIC
 
     assert (
         CorrelationSignalService.are_compatible(
@@ -173,34 +162,28 @@ def test_incompatible_signal_families(
 
 
 def test_has_compatible_candidate_family() -> None:
-    result = (
-        CorrelationSignalService
-        .has_compatible_family(
-            CorrelationSignalFamily.CONNECTIVITY,
-            frozenset(
-                {
-                    CorrelationSignalFamily.PREDICTIVE,
-                    CorrelationSignalFamily.PERFORMANCE,
-                }
-            ),
-        )
+    result = CorrelationSignalService.has_compatible_family(
+        CorrelationSignalFamily.CONNECTIVITY,
+        frozenset(
+            {
+                CorrelationSignalFamily.PREDICTIVE,
+                CorrelationSignalFamily.PERFORMANCE,
+            }
+        ),
     )
 
     assert result is True
 
 
 def test_has_no_compatible_candidate_family() -> None:
-    result = (
-        CorrelationSignalService
-        .has_compatible_family(
-            CorrelationSignalFamily.PREDICTIVE,
-            frozenset(
-                {
-                    CorrelationSignalFamily.STABILITY,
-                    CorrelationSignalFamily.PERFORMANCE,
-                }
-            ),
-        )
+    result = CorrelationSignalService.has_compatible_family(
+        CorrelationSignalFamily.PREDICTIVE,
+        frozenset(
+            {
+                CorrelationSignalFamily.STABILITY,
+                CorrelationSignalFamily.PERFORMANCE,
+            }
+        ),
     )
 
     assert result is False

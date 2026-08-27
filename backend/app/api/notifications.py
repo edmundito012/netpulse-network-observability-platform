@@ -21,14 +21,9 @@ router = APIRouter(
 
 @router.get(
     "/history",
-    response_model=list[
-        NotificationLogRead
-    ],
+    response_model=list[NotificationLogRead],
 )
 def get_notification_history(
     db: Session = Depends(get_db),
 ):
-    return (
-        NotificationLogService
-        .get_history(db)
-    )
+    return NotificationLogService.get_history(db)

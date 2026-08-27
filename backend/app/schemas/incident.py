@@ -37,17 +37,11 @@ class IncidentCreate(BaseModel):
         max_length=10_000,
     )
 
-    severity: IncidentSeverity = (
-        IncidentSeverity.WARNING
-    )
+    severity: IncidentSeverity = IncidentSeverity.WARNING
 
-    priority: IncidentPriority = (
-        IncidentPriority.MEDIUM
-    )
+    priority: IncidentPriority = IncidentPriority.MEDIUM
 
-    source: IncidentSource = (
-        IncidentSource.MANUAL
-    )
+    source: IncidentSource = IncidentSource.MANUAL
 
     owner_id: int | None = Field(
         default=None,
@@ -112,10 +106,7 @@ class IncidentCreate(BaseModel):
                 continue
 
             if len(normalized) > 64:
-                raise ValueError(
-                    "each tag must contain at most "
-                    "64 characters"
-                )
+                raise ValueError("each tag must contain at most 64 characters")
 
             if normalized in seen:
                 continue
@@ -134,14 +125,9 @@ class IncidentCreate(BaseModel):
         """Validate and deduplicate alert identifiers."""
 
         if any(alert_id < 1 for alert_id in value):
-            raise ValueError(
-                "alert IDs must be greater than "
-                "or equal to 1"
-            )
+            raise ValueError("alert IDs must be greater than or equal to 1")
 
-        return list(
-            dict.fromkeys(value)
-        )
+        return list(dict.fromkeys(value))
 
 
 class IncidentUpdate(BaseModel):
@@ -220,10 +206,7 @@ class IncidentUpdate(BaseModel):
                 continue
 
             if len(normalized) > 64:
-                raise ValueError(
-                    "each tag must contain at most "
-                    "64 characters"
-                )
+                raise ValueError("each tag must contain at most 64 characters")
 
             if normalized in seen:
                 continue
@@ -279,14 +262,9 @@ class IncidentAlertAttachRequest(BaseModel):
         value: list[int],
     ) -> list[int]:
         if any(alert_id < 1 for alert_id in value):
-            raise ValueError(
-                "alert IDs must be greater than "
-                "or equal to 1"
-            )
+            raise ValueError("alert IDs must be greater than or equal to 1")
 
-        return list(
-            dict.fromkeys(value)
-        )
+        return list(dict.fromkeys(value))
 
 
 class IncidentLifecycleTransition(BaseModel):
@@ -300,8 +278,7 @@ class IncidentLifecycleTransition(BaseModel):
     ) -> "IncidentLifecycleTransition":
         if self.target_status == IncidentStatus.RESOLVED:
             raise ValueError(
-                "use the incident resolution operation "
-                "to resolve an incident"
+                "use the incident resolution operation to resolve an incident"
             )
 
         return self

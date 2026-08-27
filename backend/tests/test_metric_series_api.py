@@ -20,10 +20,7 @@ from app.services.metric_series_service import (
 client = TestClient(app)
 
 
-@patch(
-    "app.api.metric_series."
-    "MetricSeriesService.get_series"
-)
+@patch("app.api.metric_series.MetricSeriesService.get_series")
 def test_get_metric_series_returns_temporal_samples(
     get_series_mock,
 ) -> None:

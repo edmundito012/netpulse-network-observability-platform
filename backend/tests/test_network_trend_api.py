@@ -7,9 +7,7 @@ client = TestClient(app)
 
 def test_network_trends_api():
 
-    response = client.get(
-        "/analytics/network-trends"
-    )
+    response = client.get("/analytics/network-trends")
 
     assert response.status_code == 200
 

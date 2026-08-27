@@ -13,7 +13,6 @@ class StreamingExperienceResult:
 
 
 class StreamingExperienceService:
-
     @staticmethod
     def calculate_score(
         latency_ms: float,
@@ -85,16 +84,10 @@ class StreamingExperienceService:
         jitter_ms: float,
     ) -> str:
 
-        if (
-            packet_loss_percent >= 5
-            or jitter_ms >= 40
-        ):
+        if packet_loss_percent >= 5 or jitter_ms >= 40:
             return "HIGH"
 
-        if (
-            packet_loss_percent >= 2
-            or jitter_ms >= 20
-        ):
+        if packet_loss_percent >= 2 or jitter_ms >= 20:
             return "MEDIUM"
 
         return "LOW"
@@ -106,11 +99,7 @@ class StreamingExperienceService:
         packet_loss_percent: float,
     ) -> bool:
 
-        return (
-            latency_ms < 50
-            and jitter_ms < 15
-            and packet_loss_percent < 1
-        )
+        return latency_ms < 50 and jitter_ms < 15 and packet_loss_percent < 1
 
     @staticmethod
     def recommendation(
@@ -118,24 +107,15 @@ class StreamingExperienceService:
     ) -> str:
 
         if quality == "EXCELLENT":
-            return (
-                "Excellent for Netflix, YouTube "
-                "and Twitch streaming."
-            )
+            return "Excellent for Netflix, YouTube and Twitch streaming."
 
         if quality == "GOOD":
-            return (
-                "Good for HD streaming."
-            )
+            return "Good for HD streaming."
 
         if quality == "FAIR":
-            return (
-                "Occasional buffering may occur."
-            )
+            return "Occasional buffering may occur."
 
-        return (
-            "Streaming quality may be poor."
-        )
+        return "Streaming quality may be poor."
 
     @staticmethod
     def analyze(
@@ -144,37 +124,28 @@ class StreamingExperienceService:
         packet_loss_percent: float,
     ) -> StreamingExperienceResult:
 
-        score = (
-            StreamingExperienceService.calculate_score(
-                latency_ms,
-                jitter_ms,
-                packet_loss_percent,
-            )
+        score = StreamingExperienceService.calculate_score(
+            latency_ms,
+            jitter_ms,
+            packet_loss_percent,
         )
 
-        quality = (
-            StreamingExperienceService.classify_quality(
-                score
-            )
-        )
+        quality = StreamingExperienceService.classify_quality(score)
 
         return StreamingExperienceResult(
             streaming_score=score,
             quality=quality,
             recommended_resolution=(
-                StreamingExperienceService
-                .recommended_resolution(score)
+                StreamingExperienceService.recommended_resolution(score)
             ),
             buffering_risk=(
-                StreamingExperienceService
-                .buffering_risk(
+                StreamingExperienceService.buffering_risk(
                     packet_loss_percent,
                     jitter_ms,
                 )
             ),
             live_stream_ready=(
-                StreamingExperienceService
-                .live_stream_ready(
+                StreamingExperienceService.live_stream_ready(
                     latency_ms,
                     jitter_ms,
                     packet_loss_percent,
@@ -186,10 +157,5 @@ class StreamingExperienceService:
                 "Disney+",
                 "Twitch",
             ],
-            recommendation=(
-                StreamingExperienceService
-                .recommendation(
-                    quality
-                )
-            ),
+            recommendation=(StreamingExperienceService.recommendation(quality)),
         )

@@ -8,7 +8,6 @@ from app.models.device import DeviceStatus
 
 
 class MonitoringService:
-
     @staticmethod
     def ping_device(
         ip_address: str,
@@ -51,21 +50,14 @@ class MonitoringService:
             jitter_ms = 0.0
 
             if len(successful_pings) >= 2:
-
                 differences = []
 
                 for i in range(1, len(successful_pings)):
                     differences.append(
-                        abs(
-                            successful_pings[i]
-                            - successful_pings[i - 1]
-                        )
+                        abs(successful_pings[i] - successful_pings[i - 1])
                     )
 
-                jitter_ms = (
-                    sum(differences)
-                    / len(differences)
-                ) * 1000
+                jitter_ms = (sum(differences) / len(differences)) * 1000
 
             logger.info(
                 "Ping successful for device IP %s: %.2f ms avg, %.2f%% packet loss, %.2f ms jitter",

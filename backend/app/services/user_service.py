@@ -5,23 +5,17 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
 from app.core.security import hash_password, verify_password, create_access_token
 
-class UserService:
 
+class UserService:
     @staticmethod
     def create_user(db: Session, user_data: UserCreate):
 
-        existing_email = UserRepository.get_by_email(
-            db,
-            user_data.email
-        )
+        existing_email = UserRepository.get_by_email(db, user_data.email)
 
         if existing_email:
             raise ValueError("Email already registered")
 
-        existing_username = UserRepository.get_by_username(
-            db,
-            user_data.username
-        )
+        existing_username = UserRepository.get_by_username(db, user_data.username)
 
         if existing_username:
             raise ValueError("Username already exists")
@@ -29,10 +23,9 @@ class UserService:
         hashed_password = hash_password(user_data.password)
 
         return UserRepository.create(
-            db=db,
-            user_data=user_data,
-            hashed_password=hashed_password
+            db=db, user_data=user_data, hashed_password=hashed_password
         )
+
     @staticmethod
     def authenticate_user(db: Session, email: str, password: str):
 
@@ -48,11 +41,7 @@ class UserService:
             raise ValueError("Inactive user")
 
         token = create_access_token(
-            data={
-                "sub": user.email,
-                "role": user.role.value,
-                "user_id": user.id
-            }
+            data={"sub": user.email, "role": user.role.value, "user_id": user.id}
         )
 
         return token

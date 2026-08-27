@@ -68,29 +68,17 @@ class PacketLossBurstIncidentService:
     ) -> PacketLossBurstIncidentResult:
         """Evaluate recent metrics and create or reuse alert/incident state."""
 
-        analysis_result = (
-            PacketLossBurstApplicationService.analyze(
-                db=db,
-                device_id=device_id,
-                limit=cls.DEFAULT_SERIES_LIMIT,
-                warning_threshold_percent=(
-                    cls.DEFAULT_WARNING_THRESHOLD_PERCENT
-                ),
-                critical_threshold_percent=(
-                    cls.DEFAULT_CRITICAL_THRESHOLD_PERCENT
-                ),
-                minimum_consecutive_samples=(
-                    cls.DEFAULT_MINIMUM_CONSECUTIVE_SAMPLES
-                ),
-                maximum_gap_seconds=(
-                    cls.DEFAULT_MAXIMUM_GAP_SECONDS
-                ),
-            )
+        analysis_result = PacketLossBurstApplicationService.analyze(
+            db=db,
+            device_id=device_id,
+            limit=cls.DEFAULT_SERIES_LIMIT,
+            warning_threshold_percent=(cls.DEFAULT_WARNING_THRESHOLD_PERCENT),
+            critical_threshold_percent=(cls.DEFAULT_CRITICAL_THRESHOLD_PERCENT),
+            minimum_consecutive_samples=(cls.DEFAULT_MINIMUM_CONSECUTIVE_SAMPLES),
+            maximum_gap_seconds=(cls.DEFAULT_MAXIMUM_GAP_SECONDS),
         )
 
-        active_burst = cls._get_active_burst(
-            analysis_result
-        )
+        active_burst = cls._get_active_burst(analysis_result)
 
         if active_burst is None:
             return PacketLossBurstIncidentResult(
@@ -102,28 +90,22 @@ class PacketLossBurstIncidentService:
                 incident_created=False,
             )
 
-        alert_severity = cls._to_alert_severity(
-            active_burst.severity
+        alert_severity = cls._to_alert_severity(active_burst.severity)
+
+        alert_result = AlertDeduplicationService.create_or_update(
+            db=db,
+            device_id=device_id,
+            alert_type=AlertType.PACKET_LOSS_BURST,
+            severity=alert_severity,
+            message=cls._build_alert_message(
+                device_name=device_name,
+                burst=active_burst,
+            ),
         )
 
-        alert_result = (
-            AlertDeduplicationService.create_or_update(
-                db=db,
-                device_id=device_id,
-                alert_type=AlertType.PACKET_LOSS_BURST,
-                severity=alert_severity,
-                message=cls._build_alert_message(
-                    device_name=device_name,
-                    burst=active_burst,
-                ),
-            )
-        )
-
-        existing_link = (
-            IncidentRepository.get_alert_link(
-                db=db,
-                alert_id=alert_result.alert.id,
-            )
+        existing_link = IncidentRepository.get_alert_link(
+            db=db,
+            alert_id=alert_result.alert.id,
         )
 
         if existing_link is not None:
@@ -132,19 +114,14 @@ class PacketLossBurstIncidentService:
                 alert=alert_result.alert,
                 incident=existing_link.incident,
                 alert_created=alert_result.created,
-                alert_deduplicated=(
-                    alert_result.deduplicated
-                ),
+                alert_deduplicated=(alert_result.deduplicated),
                 incident_created=False,
             )
 
         incident = IncidentService.create(
             db=db,
             incident_data=IncidentCreate(
-                title=(
-                    "Packet loss burst affecting "
-                    f"{device_name}"
-                ),
+                title=(f"Packet loss burst affecting {device_name}"),
                 description=(
                     "NetPulse detected sustained packet loss "
                     f"on device {device_name}. "
@@ -155,12 +132,8 @@ class PacketLossBurstIncidentService:
                     f"and averaged "
                     f"{active_burst.average_packet_loss_percent:.2f}%."
                 ),
-                severity=cls._to_incident_severity(
-                    active_burst.severity
-                ),
-                priority=cls._to_incident_priority(
-                    active_burst.severity
-                ),
+                severity=cls._to_incident_severity(active_burst.severity),
+                priority=cls._to_incident_priority(active_burst.severity),
                 source=IncidentSource.ALERT_ENGINE,
                 business_impact=(
                     "Sustained packet loss may degrade "
@@ -177,19 +150,11 @@ class PacketLossBurstIncidentService:
                     "detector": "packet_loss_burst",
                     "device_id": device_id,
                     "device_name": device_name,
-                    "sample_count": (
-                        active_burst.sample_count
-                    ),
-                    "duration_seconds": (
-                        active_burst.duration_seconds
-                    ),
-                    "peak_packet_loss_percent": (
-                        active_burst
-                        .peak_packet_loss_percent
-                    ),
+                    "sample_count": (active_burst.sample_count),
+                    "duration_seconds": (active_burst.duration_seconds),
+                    "peak_packet_loss_percent": (active_burst.peak_packet_loss_percent),
                     "average_packet_loss_percent": (
-                        active_burst
-                        .average_packet_loss_percent
+                        active_burst.average_packet_loss_percent
                     ),
                 },
                 alert_ids=[
@@ -203,9 +168,7 @@ class PacketLossBurstIncidentService:
             alert=alert_result.alert,
             incident=incident,
             alert_created=alert_result.created,
-            alert_deduplicated=(
-                alert_result.deduplicated
-            ),
+            alert_deduplicated=(alert_result.deduplicated),
             incident_created=True,
         )
 

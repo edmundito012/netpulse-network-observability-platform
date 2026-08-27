@@ -15,7 +15,6 @@ class LatencyIntelligenceResult:
 
 
 class LatencyIntelligenceService:
-
     SPIKE_THRESHOLD_MS = 100
 
     @staticmethod
@@ -24,7 +23,6 @@ class LatencyIntelligenceService:
     ) -> LatencyIntelligenceResult:
 
         if not latencies:
-
             return LatencyIntelligenceResult(
                 average_latency_ms=0,
                 min_latency_ms=0,
@@ -34,36 +32,26 @@ class LatencyIntelligenceService:
                 latency_stability="UNKNOWN",
             )
 
-        average_latency = (
-            sum(latencies)
-            / len(latencies)
-        )
+        average_latency = sum(latencies) / len(latencies)
 
         min_latency = min(latencies)
 
         max_latency = max(latencies)
 
-        spread = (
-            max_latency
-            - min_latency
-        )
+        spread = max_latency - min_latency
 
         spike_detected = (
-            max_latency
-            - average_latency
+            max_latency - average_latency
             >= LatencyIntelligenceService.SPIKE_THRESHOLD_MS
         )
 
         if spread >= 80:
-
             stability = "UNSTABLE"
 
         elif spread >= 40:
-
             stability = "DEGRADED"
 
         else:
-
             stability = "STABLE"
 
         return LatencyIntelligenceResult(

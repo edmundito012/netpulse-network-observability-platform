@@ -78,9 +78,7 @@ class DeviceMetricRepository:
         """
 
         if limit < 1:
-            raise ValueError(
-                "limit must be greater than or equal to 1"
-            )
+            raise ValueError("limit must be greater than or equal to 1")
 
         statement = cls._build_window_statement(
             device_id=device_id,
@@ -90,12 +88,10 @@ class DeviceMetricRepository:
 
         recent_metrics = list(
             db.scalars(
-                statement
-                .order_by(
+                statement.order_by(
                     desc(DeviceMetric.checked_at),
                     desc(DeviceMetric.id),
-                )
-                .limit(limit)
+                ).limit(limit)
             ).all()
         )
 
@@ -105,10 +101,7 @@ class DeviceMetricRepository:
                 metric.checked_at,
                 metric.id,
             ),
-            reverse=(
-                sort_direction
-                == SortDirection.DESCENDING
-            ),
+            reverse=(sort_direction == SortDirection.DESCENDING),
         )
 
     @staticmethod
@@ -118,19 +111,13 @@ class DeviceMetricRepository:
         start_at: datetime | None,
         end_at: datetime | None,
     ) -> Select[tuple[DeviceMetric]]:
-        statement = select(DeviceMetric).where(
-            DeviceMetric.device_id == device_id
-        )
+        statement = select(DeviceMetric).where(DeviceMetric.device_id == device_id)
 
         if start_at is not None:
-            statement = statement.where(
-                DeviceMetric.checked_at >= start_at
-            )
+            statement = statement.where(DeviceMetric.checked_at >= start_at)
 
         if end_at is not None:
-            statement = statement.where(
-                DeviceMetric.checked_at <= end_at
-            )
+            statement = statement.where(DeviceMetric.checked_at <= end_at)
 
         return statement
 
@@ -144,9 +131,7 @@ class DeviceMetricRepository:
 
         statement = (
             select(DeviceMetric)
-            .where(
-                DeviceMetric.device_id == device_id
-            )
+            .where(DeviceMetric.device_id == device_id)
             .order_by(
                 desc(DeviceMetric.checked_at),
                 desc(DeviceMetric.id),
@@ -154,9 +139,7 @@ class DeviceMetricRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement).all()
-        )
+        return list(db.scalars(statement).all())
 
     @staticmethod
     def get_paginated_by_device_id(
@@ -167,15 +150,12 @@ class DeviceMetricRepository:
     ) -> dict[str, object]:
         """Return paginated metrics for a device."""
 
-        query = db.query(DeviceMetric).filter(
-            DeviceMetric.device_id == device_id
-        )
+        query = db.query(DeviceMetric).filter(DeviceMetric.device_id == device_id)
 
         total_count = query.count()
 
         items = (
-            query
-            .order_by(
+            query.order_by(
                 DeviceMetric.checked_at.desc(),
                 DeviceMetric.id.desc(),
             )
@@ -185,9 +165,7 @@ class DeviceMetricRepository:
         )
 
         total_pages = (
-            (total_count + page_size - 1) // page_size
-            if total_count > 0
-            else 0
+            (total_count + page_size - 1) // page_size if total_count > 0 else 0
         )
 
         return {
@@ -207,9 +185,7 @@ class DeviceMetricRepository:
 
         statement = (
             select(DeviceMetric)
-            .where(
-                DeviceMetric.device_id == device_id
-            )
+            .where(DeviceMetric.device_id == device_id)
             .order_by(
                 desc(DeviceMetric.checked_at),
                 desc(DeviceMetric.id),
@@ -240,9 +216,7 @@ class DeviceMetricRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement).all()
-        )
+        return list(db.scalars(statement).all())
 
     @staticmethod
     def get_latest_status_metrics(
@@ -254,9 +228,7 @@ class DeviceMetricRepository:
 
         statement = (
             select(DeviceMetric)
-            .where(
-                DeviceMetric.device_id == device_id
-            )
+            .where(DeviceMetric.device_id == device_id)
             .order_by(
                 desc(DeviceMetric.checked_at),
                 desc(DeviceMetric.id),
@@ -264,6 +236,4 @@ class DeviceMetricRepository:
             .limit(limit)
         )
 
-        return list(
-            db.scalars(statement).all()
-        )
+        return list(db.scalars(statement).all())

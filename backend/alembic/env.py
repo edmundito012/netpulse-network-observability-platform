@@ -27,9 +27,7 @@ config = context.config
 
 
 if config.config_file_name is not None:
-    fileConfig(
-        config.config_file_name
-    )
+    fileConfig(config.config_file_name)
 
 
 target_metadata = Base.metadata
@@ -68,9 +66,7 @@ def run_migrations_online() -> None:
         {},
     )
 
-    configuration["sqlalchemy.url"] = (
-        get_database_url()
-    )
+    configuration["sqlalchemy.url"] = get_database_url()
 
     connectable = engine_from_config(
         configuration,

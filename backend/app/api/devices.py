@@ -59,10 +59,7 @@ from app.services.risk_service import (
 )
 
 
-router = APIRouter(
-    prefix="/devices",
-    tags=["Devices"]
-)
+router = APIRouter(prefix="/devices", tags=["Devices"])
 
 
 @router.get("/", response_model=list[DeviceRead])
@@ -70,9 +67,10 @@ def list_devices(
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
-    )
+    ),
 ):
     return DeviceService.get_devices(db)
+
 
 @router.get(
     "/{device_id}/health-score",
@@ -92,6 +90,7 @@ def get_device_health_score(
         device=device,
     )
 
+
 @router.get(
     "/{device_id}/failure-risk",
     response_model=FailureRiskRead,
@@ -109,6 +108,7 @@ def get_device_failure_risk(
         db=db,
         device=device,
     )
+
 
 @router.get(
     "/risk/top",
@@ -128,9 +128,7 @@ def get_top_risk_devices(
 def create_device(
     device_data: DeviceCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.OPERATOR)
-    )
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OPERATOR)),
 ):
     try:
         created_device = DeviceService.create_device(
@@ -153,30 +151,21 @@ def create_device(
         return created_device
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/{device_id}/ping", response_model=DeviceRead)
 def ping_device(
     device_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.OPERATOR)
-    )
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OPERATOR)),
 ):
     try:
-        return DeviceService.ping_device(
-            db=db,
-            device_id=device_id
-        )
+        return DeviceService.ping_device(db=db, device_id=device_id)
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.get(
     "/{device_id}/metrics",
@@ -201,6 +190,7 @@ def get_device_metrics(
         page=page,
         page_size=page_size,
     )
+
 
 @router.get("/{device_id}/snmp/system")
 async def get_device_snmp_system(
@@ -239,6 +229,7 @@ async def get_device_snmp_system(
             detail=f"SNMP error: {str(e)}",
         )
 
+
 @router.get(
     "/{device_id}/snmp/system/snapshots",
     response_model=PaginatedResponse[DeviceSNMPSystemSnapshotRead],
@@ -270,6 +261,8 @@ def get_device_snmp_system_snapshots(
         page=page,
         page_size=page_size,
     )
+
+
 @router.post("/{device_id}/snmp/system/snapshot")
 async def create_device_snmp_system_snapshot(
     device_id: int,
@@ -312,39 +305,29 @@ async def create_device_snmp_system_snapshot(
             detail=f"SNMP error: {str(e)}",
         )
 
+
 @router.get("/{device_id}/snmp/sysdescr")
 async def get_device_sysdescr(
     device_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(
-        require_roles(
-            UserRole.ADMIN,
-            UserRole.OPERATOR,
-            UserRole.VIEWER
-        )
-    )
+        require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
+    ),
 ):
     try:
-        device = DeviceService.get_device(
-            db=db,
-            device_id=device_id
-        )
+        device = DeviceService.get_device(db=db, device_id=device_id)
 
-        sysdescr = await SNMPService.get_sysdescr(
-            ip_address=device.ip_address
-        )
+        sysdescr = await SNMPService.get_sysdescr(ip_address=device.ip_address)
 
         return {
             "device_id": device.id,
             "ip_address": device.ip_address,
-            "sysdescr": sysdescr
+            "sysdescr": sysdescr,
         }
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/{device_id}/summary", response_model=DeviceSummaryRead)
 def get_device_summary(
@@ -372,7 +355,9 @@ def get_device_summary(
     return summary
 
 
-@router.get("/{device_id}/events",response_model=PaginatedResponse[DeviceEventRead],
+@router.get(
+    "/{device_id}/events",
+    response_model=PaginatedResponse[DeviceEventRead],
 )
 def get_device_events(
     device_id: int,
@@ -394,33 +379,27 @@ def get_device_events(
         page_size=page_size,
     )
 
+
 @router.get("/{device_id}", response_model=DeviceRead)
 def get_device(
     device_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(
         require_roles(UserRole.ADMIN, UserRole.OPERATOR, UserRole.VIEWER)
-    )
+    ),
 ):
     try:
-        return DeviceService.get_device(
-            db=db,
-            device_id=device_id
-        )
+        return DeviceService.get_device(db=db, device_id=device_id)
     except ValueError as e:
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=404, detail=str(e))
+
 
 @router.put("/{device_id}", response_model=DeviceRead)
 def update_device(
     device_id: int,
     device_data: DeviceUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(UserRole.ADMIN, UserRole.OPERATOR)
-    )
+    current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.OPERATOR)),
 ):
     try:
         updated_device = DeviceService.update_device(
@@ -444,19 +423,14 @@ def update_device(
         return updated_device
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.delete("/{device_id}")
 def delete_device(
     device_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(
-        require_roles(UserRole.ADMIN)
-    )
+    current_user: User = Depends(require_roles(UserRole.ADMIN)),
 ):
     try:
         device = DeviceService.get_device(
@@ -464,10 +438,7 @@ def delete_device(
             device_id=device_id,
         )
 
-        DeviceService.delete_device(
-            db=db,
-            device_id=device_id
-        )
+        DeviceService.delete_device(db=db, device_id=device_id)
 
         AuditLogService.log(
             db=db,
@@ -484,7 +455,4 @@ def delete_device(
         return {"message": "Device deleted successfully"}
 
     except ValueError as e:
-        raise HTTPException(
-            status_code=404,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=404, detail=str(e))
