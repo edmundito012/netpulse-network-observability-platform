@@ -1,4 +1,4 @@
-﻿name: Backend CI
+name: Backend CI
 
 on:
   push:
@@ -13,8 +13,40 @@ permissions:
   contents: read
 
 jobs:
+  format:
+    name: Ruff format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: python -m pip install uv==0.12.1
+
+      - name: Verify lockfile
+        run: uv lock --check
+
+      - name: Install locked development dependencies
+        run: uv sync --frozen --dev
+
+      - name: Verify Ruff formatting
+        run: uv run ruff format --check .
+
   test:
     name: Test
+    needs:
+      - format
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
