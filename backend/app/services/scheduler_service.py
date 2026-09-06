@@ -29,6 +29,9 @@ from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
 from app.services.alert_service import AlertService
+from app.services.correlation_worker_lock_service import (
+    CorrelationWorkerLockService,
+)
 from app.services.correlation_worker_service import (
     CorrelationWorkerService,
 )
@@ -43,10 +46,6 @@ from app.services.monitoring_service import MonitoringService
 from app.services.snmp_service import SNMPService
 
 scheduler = BackgroundScheduler()
-
-from app.services.correlation_worker_lock_service import (
-    CorrelationWorkerLockService,
-)
 
 
 def update_device_status_metrics():
