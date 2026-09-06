@@ -21,7 +21,6 @@ from app.services.incident_service import (
     IncidentStatistics,
 )
 
-
 NOW = datetime(
     2026,
     7,

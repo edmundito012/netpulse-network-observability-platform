@@ -5,15 +5,14 @@ from fastapi import (
     Depends,
     HTTPException,
     Query,
-    Response,
     status,
 )
 from sqlalchemy.orm import Session
 
 from app.api.deps import (
-    get_current_user,
     require_roles,
 )
+from app.api.incident_actor import build_user_actor
 from app.db.session import get_db
 from app.models.incident import (
     IncidentPriority,
@@ -54,7 +53,6 @@ from app.services.incident_response_service import (
 from app.services.incident_service import (
     IncidentService,
 )
-from app.api.incident_actor import build_user_actor
 
 router = APIRouter(
     prefix="/incidents",

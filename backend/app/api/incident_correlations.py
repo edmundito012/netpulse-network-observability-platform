@@ -50,7 +50,6 @@ from app.services.incident_exceptions import (
     IncidentError,
 )
 
-
 router = APIRouter(
     prefix="/incident-correlations",
     tags=["Incident Correlations"],

@@ -1,14 +1,11 @@
-from fastapi import APIRouter
-from fastapi import Depends
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.models.device_metric import DeviceMetric
-
 from app.schemas.streaming_experience import (
     StreamingExperienceResponse,
 )
-
 from app.services.streaming_experience_service import (
     StreamingExperienceService,
 )

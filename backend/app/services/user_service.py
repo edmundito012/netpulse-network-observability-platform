@@ -1,9 +1,8 @@
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import create_access_token, hash_password, verify_password
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreate
-from app.core.security import hash_password, verify_password, create_access_token
 
 
 class UserService:

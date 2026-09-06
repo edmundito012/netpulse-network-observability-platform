@@ -19,7 +19,6 @@ from app.schemas.incident_correlation import (
     IncidentCorrelationRead,
 )
 
-
 NOW = datetime(
     2026,
     7,

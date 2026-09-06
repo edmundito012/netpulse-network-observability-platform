@@ -12,6 +12,9 @@ from app.models.incident import (
     IncidentSource,
     IncidentStatus,
 )
+from app.models.incident_timeline_event import (
+    IncidentTimelineActorType,
+)
 from app.schemas.incident import IncidentCreate
 from app.services.incident_exceptions import (
     IncidentAlertConflictError,
@@ -22,9 +25,6 @@ from app.services.incident_exceptions import (
 )
 from app.services.incident_service import (
     IncidentService,
-)
-from app.models.incident_timeline_event import (
-    IncidentTimelineActorType,
 )
 
 

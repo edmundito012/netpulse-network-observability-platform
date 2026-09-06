@@ -16,7 +16,6 @@ from app.services.correlation_analytics_service import (
     CorrelationAnalyticsService,
 )
 
-
 router = APIRouter(
     prefix="/portfolio/correlations",
     tags=["Portfolio"],

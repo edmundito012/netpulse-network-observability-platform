@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 from app.schemas.device_event import DeviceEventRead
 
@@ -24,6 +23,6 @@ class DashboardOverviewRead(BaseModel):
     network_health_score: int
 
     devices_at_risk: int
-    highest_risk_device: Optional[dict]
+    highest_risk_device: dict | None
 
     latest_events: list[DeviceEventRead]

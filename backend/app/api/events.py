@@ -9,7 +9,6 @@ from app.repositories.device_event_repository import DeviceEventRepository
 from app.schemas.device_event import DeviceEventRead
 from app.schemas.pagination import PaginatedResponse
 
-
 router = APIRouter(
     prefix="/events",
     tags=["Events"],

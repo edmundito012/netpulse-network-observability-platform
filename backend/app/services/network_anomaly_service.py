@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from statistics import mean
-from statistics import pstdev
+from statistics import mean, pstdev
 
 
 @dataclass

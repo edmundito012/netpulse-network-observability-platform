@@ -7,14 +7,16 @@ from enum import Enum
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
+    JSON,
     DateTime,
-    Enum as SQLEnum,
     ForeignKey,
     Index,
-    JSON,
     String,
     Text,
     text,
+)
+from sqlalchemy import (
+    Enum as SQLEnum,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -23,7 +25,6 @@ from sqlalchemy.orm import (
 )
 
 from app.models.base import Base
-
 
 if TYPE_CHECKING:
     from app.models.incident import Incident

@@ -11,7 +11,6 @@ from app.core.metrics import active_websocket_connections
 from app.core.websocket_auth import authenticate_websocket
 from app.db.session import get_db
 
-
 router = APIRouter(tags=["WebSocket"])
 
 

@@ -38,7 +38,6 @@ from app.services.incident_timeline_service import (
     IncidentTimelineService,
 )
 
-
 router = APIRouter(
     prefix="/incidents/{public_id}/timeline",
     tags=["Incident Timeline"],

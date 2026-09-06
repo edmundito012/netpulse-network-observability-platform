@@ -1,7 +1,6 @@
 from app.services.notification_service import (
     NotificationService,
 )
-
 from app.services.providers.telegram_provider import (
     TelegramProvider,
 )

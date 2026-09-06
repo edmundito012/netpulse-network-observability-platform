@@ -1,7 +1,4 @@
 from app.models.alert import AlertSeverity
-from app.services.predictive_alert_service import (
-    PredictiveAlertService,
-)
 
 
 class PredictiveAlertGenerationService:

@@ -15,7 +15,6 @@ from app.schemas.incident_timeline import (
     IncidentTimelineEventRead,
 )
 
-
 NOW = datetime(
     2026,
     7,

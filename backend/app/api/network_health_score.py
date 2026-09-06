@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from app.schemas.network_health_score import (
     NetworkHealthScoreResponse,
 )
-
 from app.services.network_health_score_service import (
     NetworkHealthScoreService,
 )

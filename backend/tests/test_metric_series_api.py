@@ -16,7 +16,6 @@ from app.services.metric_series_service import (
     MetricSeriesSampleResult,
 )
 
-
 client = TestClient(app)
 
 

@@ -17,7 +17,6 @@ from app.schemas.correlation_analytics import (
     CorrelationAnalyticsSummary,
 )
 
-
 client = TestClient(app)
 
 

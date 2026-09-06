@@ -17,7 +17,6 @@ from app.services.sla_application_service import (
     SLAApplicationService,
 )
 
-
 router = APIRouter(
     prefix="/analytics",
     tags=["SLA Analytics"],

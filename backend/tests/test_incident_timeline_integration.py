@@ -9,9 +9,6 @@ from app.models.incident import (
     IncidentSource,
     IncidentStatus,
 )
-from app.models.incident_timeline_event import (
-    IncidentTimelineEventType,
-)
 from app.schemas.incident import (
     IncidentCreate,
     IncidentUpdate,

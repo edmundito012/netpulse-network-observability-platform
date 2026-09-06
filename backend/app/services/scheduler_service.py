@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.api.websocket import dashboard_manager, device_state_manager
 from app.core.config import settings
+from app.core.correlation import (
+    CorrelationConfiguration,
+)
 from app.core.device_state_cache import (
     get_all_device_states,
     update_device_state,
@@ -25,25 +28,21 @@ from app.repositories.device_repository import DeviceRepository
 from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
-from app.services.dashboard_service import DashboardService
-from app.services.monitoring_service import MonitoringService
-from app.services.snmp_service import SNMPService
 from app.services.alert_service import AlertService
-from app.services.latency_alert_service import (
-    LatencyAlertService,
-)
-from app.services.flapping_alert_service import (
-    FlappingAlertService,
-)
-from app.core.correlation import (
-    CorrelationConfiguration,
-)
 from app.services.correlation_worker_service import (
     CorrelationWorkerService,
 )
+from app.services.dashboard_service import DashboardService
+from app.services.flapping_alert_service import (
+    FlappingAlertService,
+)
+from app.services.latency_alert_service import (
+    LatencyAlertService,
+)
+from app.services.monitoring_service import MonitoringService
+from app.services.snmp_service import SNMPService
 
 scheduler = BackgroundScheduler()
-from app.db.session import SessionLocal
 
 from app.services.correlation_worker_lock_service import (
     CorrelationWorkerLockService,

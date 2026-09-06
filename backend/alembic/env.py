@@ -2,26 +2,14 @@
 
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import (
     engine_from_config,
     pool,
 )
 
+from alembic import context
 from app.core.config import settings
 from app.models.base import Base
-
-from app.models import alert
-from app.models import device
-from app.models import device_event
-from app.models import device_metric
-from app.models import device_snmp_system_snapshot
-from app.models import incident
-from app.models import incident_alert
-from app.models import incident_correlation
-from app.models import incident_timeline_event
-from app.models import user
-
 
 config = context.config
 

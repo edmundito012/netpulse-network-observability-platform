@@ -18,7 +18,6 @@ from app.services.packet_loss_burst_service import (
     PacketLossBurstResult,
 )
 
-
 client = TestClient(app)
 
 

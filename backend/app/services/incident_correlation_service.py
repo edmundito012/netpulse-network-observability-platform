@@ -301,9 +301,8 @@ class IncidentCorrelationService:
             score=candidate.score,
             reasons=candidate.reasons,
             time_distance_seconds=(candidate.time_distance_seconds),
-            is_active=not (
-                CorrelationReason.INCIDENT_ALREADY_RESOLVED in candidate.reasons
-            ),
+            is_active=CorrelationReason.INCIDENT_ALREADY_RESOLVED
+            not in candidate.reasons,
         )
 
     @staticmethod

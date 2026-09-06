@@ -1,63 +1,45 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-
-from fastapi import Query
-from app.repositories.device_event_repository import DeviceEventRepository
-from app.schemas.device_event import DeviceEventRead
 
 from app.api.deps import require_roles
 from app.db.session import get_db
-
 from app.models.user import User, UserRole
-
-from app.schemas.device import (
-    DeviceCreate,
-    DeviceRead,
-    DeviceUpdate,
-)
-
-from app.schemas.device_metric import DeviceMetricRead
-
-from app.services.device_service import DeviceService
-from app.services.snmp_service import SNMPService
-
+from app.repositories.device_event_repository import DeviceEventRepository
 from app.repositories.device_metric_repository import (
     DeviceMetricRepository,
 )
 from app.repositories.device_repository import (
     DeviceRepository,
 )
-from app.repositories.device_repository import DeviceRepository
-from app.repositories.device_metric_repository import DeviceMetricRepository
 from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
 )
-
-from app.schemas.device_summary import DeviceSummaryRead
-from app.services.device_summary_service import DeviceSummaryService
-
+from app.schemas.device import (
+    DeviceCreate,
+    DeviceRead,
+    DeviceUpdate,
+)
 from app.schemas.device_event import DeviceEventRead
-from app.schemas.pagination import PaginatedResponse
-
-from app.schemas.pagination import PaginatedResponse
+from app.schemas.device_metric import DeviceMetricRead
 from app.schemas.device_snmp_system_snapshot import (
     DeviceSNMPSystemSnapshotRead,
 )
-from app.services.audit_log_service import AuditLogService
-from app.schemas.health_score import HealthScoreRead
-from app.services.health_score_service import HealthScoreService
+from app.schemas.device_summary import DeviceSummaryRead
 from app.schemas.failure_risk import FailureRiskRead
-from app.services.failure_risk_service import FailureRiskService
-from typing import List
-
+from app.schemas.health_score import HealthScoreRead
+from app.schemas.pagination import PaginatedResponse
 from app.schemas.top_risk_device import (
     TopRiskDeviceRead,
 )
-
+from app.services.audit_log_service import AuditLogService
+from app.services.device_service import DeviceService
+from app.services.device_summary_service import DeviceSummaryService
+from app.services.failure_risk_service import FailureRiskService
+from app.services.health_score_service import HealthScoreService
 from app.services.risk_service import (
     RiskService,
 )
-
+from app.services.snmp_service import SNMPService
 
 router = APIRouter(prefix="/devices", tags=["Devices"])
 
@@ -112,7 +94,7 @@ def get_device_failure_risk(
 
 @router.get(
     "/risk/top",
-    response_model=List[TopRiskDeviceRead],
+    response_model=list[TopRiskDeviceRead],
 )
 def get_top_risk_devices(
     limit: int = 10,

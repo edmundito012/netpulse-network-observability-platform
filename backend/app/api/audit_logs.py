@@ -7,7 +7,6 @@ from app.models.user import User, UserRole
 from app.repositories.audit_log_repository import AuditLogRepository
 from app.schemas.audit_log import AuditLogRead
 
-
 router = APIRouter(
     prefix="/audit-logs",
     tags=["Audit Logs"],
