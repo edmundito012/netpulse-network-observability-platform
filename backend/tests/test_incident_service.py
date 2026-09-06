@@ -54,15 +54,6 @@ def build_incident():
         resolved_at=None,
     )
 
-    return SimpleNamespace(
-        id=21,
-        public_id="INC-2026-000021",
-        title="WAN degradation",
-        status=IncidentStatus.OPEN,
-        started_at=started_at,
-        resolved_at=None,
-    )
-
 
 @patch("app.services.incident_service.IncidentRepository.get_by_id")
 @patch("app.services.incident_service.IncidentRepository.create")
