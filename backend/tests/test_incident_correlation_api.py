@@ -34,7 +34,6 @@ from app.services.incident_correlation_service import (
     SourceAlertNotFoundError,
 )
 
-
 NOW = datetime(
     2026,
     7,

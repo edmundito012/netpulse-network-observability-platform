@@ -25,7 +25,6 @@ from app.services.metric_series_service import (
     MetricSeriesService,
 )
 
-
 router = APIRouter(
     prefix="/analytics",
     tags=["Network Analytics"],

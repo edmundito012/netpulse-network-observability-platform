@@ -5,7 +5,6 @@ from app.core.device_state_cache import get_all_device_states
 from app.models.user import User, UserRole
 from app.schemas.device_state import DeviceStateRead
 
-
 router = APIRouter(
     prefix="/device-state",
     tags=["Device State"],

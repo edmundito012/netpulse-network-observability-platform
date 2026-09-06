@@ -1,14 +1,10 @@
-from fastapi import APIRouter
-from fastapi import Depends
-
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-
 from app.schemas.notification_log import (
     NotificationLogRead,
 )
-
 from app.services.notification_log_service import (
     NotificationLogService,
 )

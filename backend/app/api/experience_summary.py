@@ -1,10 +1,9 @@
 from fastapi import APIRouter
 
 from app.schemas.experience_summary import (
-    ExperienceSummaryResponse,
     ExperienceProfile,
+    ExperienceSummaryResponse,
 )
-
 from app.services.experience_summary_service import (
     ExperienceSummaryService,
 )

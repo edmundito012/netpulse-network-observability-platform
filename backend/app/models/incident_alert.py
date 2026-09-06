@@ -21,7 +21,6 @@ from sqlalchemy.orm import (
 
 from app.models.base import Base
 
-
 if TYPE_CHECKING:
     from app.models.alert import Alert
     from app.models.incident import Incident

@@ -14,7 +14,6 @@ from app.models.alert import (
     AlertSeverity,
 )
 from app.models.incident import (
-    Incident,
     IncidentPriority,
     IncidentSeverity,
     IncidentSource,

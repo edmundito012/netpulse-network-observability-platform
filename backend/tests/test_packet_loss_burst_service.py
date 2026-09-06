@@ -15,7 +15,6 @@ from app.services.packet_loss_burst_service import (
     PacketLossBurstService,
 )
 
-
 BASE_TIME = datetime(
     2026,
     7,

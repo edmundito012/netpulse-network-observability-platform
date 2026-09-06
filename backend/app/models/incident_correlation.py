@@ -7,17 +7,19 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     DateTime,
-    Enum as SQLEnum,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     Numeric,
     String,
     Text,
     text,
+)
+from sqlalchemy import (
+    Enum as SQLEnum,
 )
 from sqlalchemy.orm import (
     Mapped,
@@ -31,7 +33,6 @@ from app.core.correlation import (
     CorrelationSignalFamily,
 )
 from app.models.base import Base
-
 
 if TYPE_CHECKING:
     from app.models.alert import Alert

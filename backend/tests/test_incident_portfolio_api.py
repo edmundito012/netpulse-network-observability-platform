@@ -17,7 +17,6 @@ from app.schemas.incident_portfolio import (
     IncidentPortfolioSummary,
 )
 
-
 client = TestClient(app)
 
 

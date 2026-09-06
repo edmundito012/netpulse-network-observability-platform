@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from math import floor
-from statistics import mean
-from statistics import median
-from statistics import pstdev
+from statistics import mean, median, pstdev
 
 
 @dataclass

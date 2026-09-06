@@ -1,7 +1,5 @@
-from jose import JWTError, jwt
-
 from fastapi import WebSocket
-
+from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 from app.core.config import settings

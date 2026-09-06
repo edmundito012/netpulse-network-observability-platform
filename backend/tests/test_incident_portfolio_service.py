@@ -14,7 +14,6 @@ from app.services.incident_portfolio_service import (
     IncidentPortfolioService,
 )
 
-
 NOW = datetime(
     2026,
     7,

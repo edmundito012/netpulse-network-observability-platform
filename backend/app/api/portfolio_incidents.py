@@ -15,7 +15,6 @@ from app.services.incident_portfolio_service import (
     IncidentPortfolioService,
 )
 
-
 router = APIRouter(
     prefix="/portfolio/incidents",
     tags=["Portfolio"],

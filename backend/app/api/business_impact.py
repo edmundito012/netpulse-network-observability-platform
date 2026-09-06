@@ -2,17 +2,14 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-
 from app.schemas.business_impact import (
     BusinessImpactResponse,
 )
-
-from app.services.network_impact_service import (
-    NetworkImpactService,
-)
-
 from app.services.business_impact_service import (
     BusinessImpactService,
+)
+from app.services.network_impact_service import (
+    NetworkImpactService,
 )
 
 router = APIRouter(

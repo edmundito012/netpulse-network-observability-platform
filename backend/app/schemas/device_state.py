@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -9,5 +8,5 @@ class DeviceStateRead(BaseModel):
     device_name: str
     ip_address: str
     status: str
-    response_time_ms: Optional[float] = None
+    response_time_ms: float | None = None
     last_checked_at: datetime

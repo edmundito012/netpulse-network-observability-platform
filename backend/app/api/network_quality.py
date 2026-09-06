@@ -3,7 +3,6 @@ from fastapi import APIRouter
 from app.schemas.network_quality import (
     NetworkQualityResponse,
 )
-
 from app.services.network_quality_service import (
     NetworkQualityService,
 )

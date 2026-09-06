@@ -20,7 +20,6 @@ from app.services.packet_loss_burst_application_service import (
     PacketLossBurstApplicationService,
 )
 
-
 router = APIRouter(
     prefix="/analytics",
     tags=["Network Analytics"],

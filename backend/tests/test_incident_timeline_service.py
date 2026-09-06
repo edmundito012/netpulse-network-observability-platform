@@ -24,7 +24,6 @@ from app.services.incident_timeline_service import (
     IncidentTimelineService,
 )
 
-
 NOW = datetime(
     2026,
     7,

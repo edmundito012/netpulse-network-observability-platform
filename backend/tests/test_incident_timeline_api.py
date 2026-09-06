@@ -25,7 +25,6 @@ from app.services.incident_exceptions import (
     IncidentNotFoundError,
 )
 
-
 NOW = datetime(
     2026,
     7,

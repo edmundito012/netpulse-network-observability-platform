@@ -20,9 +20,6 @@ from app.models.incident import (
 from app.services.alert_deduplication_service import (
     AlertDeduplicationResult,
 )
-from app.services.metric_series_service import (
-    MetricSeriesResult,
-)
 from app.services.packet_loss_burst_application_service import (
     PacketLossBurstApplicationResult,
 )
@@ -33,7 +30,6 @@ from app.services.packet_loss_burst_service import (
     PacketLossBurstAnalysisResult,
     PacketLossBurstResult,
 )
-
 
 NOW = datetime(
     2026,

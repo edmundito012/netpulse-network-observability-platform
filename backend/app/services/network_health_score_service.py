@@ -98,12 +98,10 @@ class NetworkHealthScoreService:
     ):
 
         health = round(
-            (
-                latency_score * 0.35
-                + jitter_score * 0.25
-                + packet_loss_score * 0.25
-                + stability_score * 0.15
-            )
+            latency_score * 0.35
+            + jitter_score * 0.25
+            + packet_loss_score * 0.25
+            + stability_score * 0.15
         )
 
         values = {

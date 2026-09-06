@@ -20,7 +20,6 @@ from app.services.network_anomaly_application_service import (
     NetworkAnomalyApplicationService,
 )
 
-
 router = APIRouter(
     prefix="/analytics",
     tags=["Network Analytics"],

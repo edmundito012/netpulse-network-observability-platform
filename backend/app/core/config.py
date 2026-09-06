@@ -5,7 +5,6 @@ from typing import Literal
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-
 INSECURE_SECRET_KEYS = {
     "change-this-secret",
     "change-me",

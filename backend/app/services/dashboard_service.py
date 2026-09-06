@@ -1,12 +1,12 @@
-from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 
+from app.core.dashboard_cache import update_dashboard_state
 from app.models.alert import Alert, AlertSeverity, AlertStatus
 from app.models.device import Device, DeviceStatus
 from app.repositories.device_event_repository import DeviceEventRepository
-from app.core.dashboard_cache import update_dashboard_state
-from app.services.health_score_service import HealthScoreService
 from app.services.failure_risk_service import FailureRiskService
+from app.services.health_score_service import HealthScoreService
 
 
 class DashboardService:
