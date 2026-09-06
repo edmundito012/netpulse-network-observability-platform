@@ -334,7 +334,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-06 13:10 UTC_
+_Last automation run: 2026-09-06 13:30 UTC_
 
 ### ✅ Automated Quality
 
@@ -346,7 +346,8 @@ _Last automation run: 2026-09-06 13:10 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **tests** — remove unreachable incident fixture
+- 🐛 **lint** — move scheduler dependency import
+- 🐛 **tests** — remove unreachable incident fixture (#47)
 - ♻️ **api** — introduce versioned v1 routes (#41)
 - ♻️ **health** — add live ready and startup probes (#34)
 - ♻️ **api** — centralize application router registration
