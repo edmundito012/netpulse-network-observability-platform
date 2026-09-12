@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-12 22:57 UTC_
+_Last automation run: 2026-09-12 23:16 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 362 passed
+- **Tests:** 364 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,13 +346,13 @@ _Last automation run: 2026-09-12 22:57 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **lint** — enforce strict trend pairing
+- ♻️ **types** — modernize paginated response generic
+- 🐛 **lint** — enforce strict trend pairing (#50)
 - 🐛 **lint** — wrap long log messages (#49)
 - 🐛 **lint** — move scheduler dependency import (#48)
 - 🐛 **tests** — remove unreachable incident fixture (#47)
 - ♻️ **api** — introduce versioned v1 routes (#41)
 - ♻️ **health** — add live ready and startup probes (#34)
-- ♻️ **api** — centralize application router registration
 
 ### 📸 Automated Screenshots
 
