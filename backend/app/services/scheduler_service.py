@@ -476,7 +476,8 @@ def start_scheduler():
     scheduler.start()
 
     logger.info(
-        "Monitoring scheduler started with intervals: monitor=%ss snmp=%ss dashboard=%ss",
+        "Monitoring scheduler started with intervals: "
+        "monitor=%ss snmp=%ss dashboard=%ss",
         settings.MONITOR_INTERVAL_SECONDS,
         settings.SNMP_INTERVAL_SECONDS,
         settings.DASHBOARD_BROADCAST_INTERVAL_SECONDS,

@@ -60,7 +60,8 @@ class MonitoringService:
                 jitter_ms = (sum(differences) / len(differences)) * 1000
 
             logger.info(
-                "Ping successful for device IP %s: %.2f ms avg, %.2f%% packet loss, %.2f ms jitter",
+                "Ping successful for device IP %s: %.2f ms avg, "
+                "%.2f%% packet loss, %.2f ms jitter",
                 ip_address,
                 average_response_time_ms,
                 packet_loss_percent,

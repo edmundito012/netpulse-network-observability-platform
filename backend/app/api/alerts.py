@@ -36,7 +36,8 @@ def get_alerts(
     ),
 ):
     logger.info(
-        "Alert list requested by %s with filters device_id=%s severity=%s status=%s page=%s page_size=%s",
+        "Alert list requested by %s with filters "
+        "device_id=%s severity=%s status=%s page=%s page_size=%s",
         current_user.email,
         device_id,
         severity,
