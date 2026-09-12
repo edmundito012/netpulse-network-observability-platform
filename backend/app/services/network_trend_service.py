@@ -47,6 +47,7 @@ class NetworkTrendService:
             for x, y in zip(
                 x_values,
                 values,
+                strict=True,
             )
         )
 
