@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class IncidentStatus(str, Enum):
+class IncidentStatus(StrEnum):
     """Lifecycle states supported by the Incident Engine."""
 
     OPEN = "OPEN"
@@ -41,7 +41,7 @@ class IncidentStatus(str, Enum):
     RESOLVED = "RESOLVED"
 
 
-class IncidentSeverity(str, Enum):
+class IncidentSeverity(StrEnum):
     """Observed technical severity of an incident."""
 
     INFO = "INFO"
@@ -49,7 +49,7 @@ class IncidentSeverity(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class IncidentPriority(str, Enum):
+class IncidentPriority(StrEnum):
     """Operational priority assigned to an incident."""
 
     LOW = "LOW"
@@ -58,7 +58,7 @@ class IncidentPriority(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class IncidentSource(str, Enum):
+class IncidentSource(StrEnum):
     """Component responsible for creating an incident."""
 
     MANUAL = "MANUAL"
