@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from sqlalchemy import DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy import Enum as SqlEnum
@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 from app.models.base import Base
 
 
-class DeviceEventType(str, Enum):
+class DeviceEventType(StrEnum):
     DEVICE_ONLINE = "DEVICE_ONLINE"
     DEVICE_OFFLINE = "DEVICE_OFFLINE"
 
