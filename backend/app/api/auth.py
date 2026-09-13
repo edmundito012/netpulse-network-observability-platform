@@ -47,7 +47,7 @@ def register_user(
         raise HTTPException(
             status_code=400,
             detail=str(e),
-        )
+        ) from e
 
 
 @router.post(
@@ -84,7 +84,7 @@ def login_user(
         raise HTTPException(
             status_code=401,
             detail=str(e),
-        )
+        ) from e
 
 
 @router.get(
