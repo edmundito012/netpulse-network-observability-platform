@@ -1,10 +1,10 @@
 """Core enums and configuration for alert correlation."""
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class CorrelationOutcome(str, Enum):
+class CorrelationOutcome(StrEnum):
     """Decision produced by the Correlation Engine."""
 
     MATCHED_EXISTING = "MATCHED_EXISTING"
@@ -12,7 +12,7 @@ class CorrelationOutcome(str, Enum):
     NO_ACTION = "NO_ACTION"
 
 
-class CorrelationApplicationStatus(str, Enum):
+class CorrelationApplicationStatus(StrEnum):
     """Persistence state of a correlation decision."""
 
     EVALUATED = "EVALUATED"
@@ -20,7 +20,7 @@ class CorrelationApplicationStatus(str, Enum):
     FAILED = "FAILED"
 
 
-class CorrelationSignalFamily(str, Enum):
+class CorrelationSignalFamily(StrEnum):
     """Functional family used to compare related signals."""
 
     CONNECTIVITY = "CONNECTIVITY"
@@ -31,7 +31,7 @@ class CorrelationSignalFamily(str, Enum):
     GENERIC = "GENERIC"
 
 
-class CorrelationReason(str, Enum):
+class CorrelationReason(StrEnum):
     """Explainable reason contributing to a correlation score."""
 
     SAME_DEVICE = "SAME_DEVICE"
