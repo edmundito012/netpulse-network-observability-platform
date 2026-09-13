@@ -133,7 +133,7 @@ def create_device(
         return created_device
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.post("/{device_id}/ping", response_model=DeviceRead)
@@ -146,7 +146,7 @@ def ping_device(
         return DeviceService.ping_device(db=db, device_id=device_id)
 
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.get(
@@ -209,7 +209,7 @@ async def get_device_snmp_system(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"SNMP error: {str(e)}",
-        )
+        ) from e
 
 
 @router.get(
@@ -285,7 +285,7 @@ async def create_device_snmp_system_snapshot(
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=f"SNMP error: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/{device_id}/snmp/sysdescr")
@@ -308,7 +308,7 @@ async def get_device_sysdescr(
         }
 
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 
 @router.get("/{device_id}/summary", response_model=DeviceSummaryRead)
@@ -373,7 +373,7 @@ def get_device(
     try:
         return DeviceService.get_device(db=db, device_id=device_id)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.put("/{device_id}", response_model=DeviceRead)
@@ -405,7 +405,7 @@ def update_device(
         return updated_device
 
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
 
 @router.delete("/{device_id}")
@@ -437,4 +437,4 @@ def delete_device(
         return {"message": "Device deleted successfully"}
 
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
