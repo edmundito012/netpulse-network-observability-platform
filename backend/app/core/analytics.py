@@ -5,10 +5,10 @@ schemas, and repositories. Keeping these values centralized prevents
 inconsistent string literals across the platform.
 """
 
-from enum import Enum
+from enum import StrEnum
 
 
-class MetricName(str, Enum):
+class MetricName(StrEnum):
     """Metrics supported by the historical analytics foundation."""
 
     LATENCY = "latency"
@@ -16,21 +16,21 @@ class MetricName(str, Enum):
     PACKET_LOSS = "packet_loss"
 
 
-class MissingValuePolicy(str, Enum):
+class MissingValuePolicy(StrEnum):
     """Strategy used when a metric sample has no measured value."""
 
     DROP = "drop"
     PRESERVE = "preserve"
 
 
-class SortDirection(str, Enum):
+class SortDirection(StrEnum):
     """Ordering applied when retrieving historical metric samples."""
 
     ASCENDING = "asc"
     DESCENDING = "desc"
 
 
-class AnalyticsSeverity(str, Enum):
+class AnalyticsSeverity(StrEnum):
     """Normalized severity levels shared by analytics engines."""
 
     NORMAL = "NORMAL"
@@ -39,7 +39,7 @@ class AnalyticsSeverity(str, Enum):
     UNKNOWN = "UNKNOWN"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Normalized confidence levels shared by analytics engines."""
 
     LOW = "LOW"
@@ -48,7 +48,7 @@ class ConfidenceLevel(str, Enum):
     VERY_HIGH = "VERY_HIGH"
 
 
-class BurstStatus(str, Enum):
+class BurstStatus(StrEnum):
     """Lifecycle status of a detected metric burst."""
 
     COMPLETED = "COMPLETED"
