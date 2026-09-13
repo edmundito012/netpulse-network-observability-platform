@@ -401,7 +401,7 @@ class IncidentService:
                 alert_id=alert_id,
             )
 
-        except IntegrityError:
+        except IntegrityError as exc:
             db.rollback()
 
             concurrent_link = IncidentRepository.get_alert_link(
@@ -418,7 +418,7 @@ class IncidentService:
             raise IncidentAlertConflictError(
                 alert_id=alert_id,
                 public_id=(concurrent_link.incident.public_id),
-            )
+            ) from exc
 
         (
             IncidentTimelineRecorderService.record_alert_attached(
