@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-13 16:41 UTC_
+_Last automation run: 2026-09-13 20:17 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 399 passed
+- **Tests:** 417 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,7 +346,8 @@ _Last automation run: 2026-09-13 16:41 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ♻️ **types** — modernize alert and device enums
+- ♻️ **types** — modernize incident string enums
+- ♻️ **types** — modernize alert and device enums (#55)
 - ♻️ **types** — modernize correlation string enums (#54)
 - ♻️ **types** — modernize analytics string enums (#53)
 - ♻️ **types** — modernize paginated response generic (#51)
