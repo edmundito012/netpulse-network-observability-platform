@@ -334,7 +334,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-13 20:29 UTC_
+_Last automation run: 2026-09-13 20:44 UTC_
 
 ### ✅ Automated Quality
 
@@ -346,7 +346,8 @@ _Last automation run: 2026-09-13 20:29 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ♻️ **types** — modernize user role enum
+- 🐛 **lint** — chain authentication exceptions
+- ♻️ **types** — modernize user role enum (#57)
 - ♻️ **types** — modernize incident string enums (#56)
 - ♻️ **types** — modernize alert and device enums (#55)
 - ♻️ **types** — modernize correlation string enums (#54)
@@ -355,7 +356,6 @@ _Last automation run: 2026-09-13 20:29 UTC_
 - 🐛 **lint** — enforce strict trend pairing (#50)
 - 🐛 **lint** — wrap long log messages (#49)
 - 🐛 **lint** — move scheduler dependency import (#48)
-- 🐛 **tests** — remove unreachable incident fixture (#47)
 
 ### 📸 Automated Screenshots
 
