@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 
-class DeviceStatus(str, enum.Enum):
+class DeviceStatus(enum.StrEnum):
     ONLINE = "ONLINE"
     OFFLINE = "OFFLINE"
     UNKNOWN = "UNKNOWN"

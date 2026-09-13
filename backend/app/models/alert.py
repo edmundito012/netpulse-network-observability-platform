@@ -1,6 +1,6 @@
 """Alert persistence model and alert domain enums."""
 
-from enum import Enum
+from enum import StrEnum
 from uuid import uuid4
 
 from sqlalchemy import (
@@ -19,7 +19,7 @@ from sqlalchemy.sql import func
 from app.models.base import Base
 
 
-class AlertSeverity(str, Enum):
+class AlertSeverity(StrEnum):
     """Operational severity assigned to an alert."""
 
     CRITICAL = "CRITICAL"
@@ -27,7 +27,7 @@ class AlertSeverity(str, Enum):
     INFO = "INFO"
 
 
-class AlertStatus(str, Enum):
+class AlertStatus(StrEnum):
     """Lifecycle status of an alert."""
 
     OPEN = "OPEN"
@@ -35,7 +35,7 @@ class AlertStatus(str, Enum):
     RESOLVED = "RESOLVED"
 
 
-class AlertType(str, Enum):
+class AlertType(StrEnum):
     """Stable functional identity of an alert."""
 
     GENERIC = "GENERIC"
