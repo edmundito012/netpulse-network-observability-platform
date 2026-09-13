@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from app.models.user import User
 
 
-class IncidentTimelineEventType(str, Enum):
+class IncidentTimelineEventType(StrEnum):
     """Auditable event types supported by the Incident Engine."""
 
     INCIDENT_CREATED = "INCIDENT_CREATED"
@@ -58,7 +58,7 @@ class IncidentTimelineEventType(str, Enum):
     AUTOMATION_ACTION = "AUTOMATION_ACTION"
 
 
-class IncidentTimelineActorType(str, Enum):
+class IncidentTimelineActorType(StrEnum):
     """Origin responsible for producing a timeline event."""
 
     USER = "USER"
