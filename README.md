@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-13 21:17 UTC_
+_Last automation run: 2026-09-27 21:41 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 420 passed
+- **Tests:** 468 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,16 +346,16 @@ _Last automation run: 2026-09-13 21:17 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **lint** — chain incident conflict exception
-- 🐛 **lint** — chain device API exceptions (#59)
-- 🐛 **lint** — chain authentication exceptions (#58)
-- ♻️ **types** — modernize user role enum (#57)
-- ♻️ **types** — modernize incident string enums (#56)
-- ♻️ **types** — modernize alert and device enums (#55)
-- ♻️ **types** — modernize correlation string enums (#54)
-- ♻️ **types** — modernize analytics string enums (#53)
-- ♻️ **types** — modernize paginated response generic (#51)
-- 🐛 **lint** — enforce strict trend pairing (#50)
+- 🐛 **monitoring** — persist scheduler ping metrics
+- 🧪 **alerts** — cover predictive persistence (#73)
+- 🧪 **alerts** — cover flapping detection (#72)
+- 🧪 **alerts** — cover jitter thresholds (#71)
+- 🧪 **alerts** — cover latency trend detection (#70)
+- 🧪 **monitoring** — cover ping behavior (#69)
+- 🧪 **snmp** — cover service behavior (#68)
+- 🧪 **websocket** — cover authenticated endpoints (#67)
+- 🧪 **websocket** — cover connection manager (#66)
+- 🧪 **auth** — cover WebSocket authentication (#65)
 
 ### 📸 Automated Screenshots
 
