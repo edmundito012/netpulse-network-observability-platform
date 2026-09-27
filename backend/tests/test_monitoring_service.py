@@ -68,11 +68,15 @@ def test_ping_device_calculates_partial_packet_loss(monkeypatch):
     assert jitter_ms == pytest.approx(20.0)
 
 
-def test_ping_device_returns_offline_when_all_attempts_fail(monkeypatch):
+@pytest.mark.parametrize("failed_response", [None, False])
+def test_ping_device_returns_offline_when_all_attempts_fail(
+    monkeypatch,
+    failed_response,
+):
     monkeypatch.setattr(
         monitoring_service,
         "ping",
-        Mock(return_value=None),
+        Mock(return_value=failed_response),
     )
 
     result = MonitoringService.ping_device(
