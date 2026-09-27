@@ -22,7 +22,7 @@ class MonitoringService:
                     timeout=settings.PING_TIMEOUT_SECONDS,
                 )
 
-                if response_time is not None:
+                if response_time is not None and response_time is not False:
                     successful_pings.append(response_time)
 
             failed_pings = attempts - len(successful_pings)
