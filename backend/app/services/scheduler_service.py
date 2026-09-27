@@ -24,6 +24,7 @@ from app.models.device import DeviceStatus
 from app.models.device_event import DeviceEventType
 from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_event_repository import DeviceEventRepository
+from app.repositories.device_metric_repository import DeviceMetricRepository
 from app.repositories.device_repository import DeviceRepository
 from app.repositories.device_snmp_system_snapshot_repository import (
     DeviceSNMPSystemSnapshotRepository,
@@ -83,6 +84,7 @@ async def ping_device_task(device):
         status,
         response_time_ms,
         packet_loss_percent,
+        jitter_ms,
     ) = await MonitoringService.ping_device_async(
         device.ip_address,
     )
@@ -92,6 +94,7 @@ async def ping_device_task(device):
         "status": status,
         "response_time_ms": response_time_ms,
         "packet_loss_percent": packet_loss_percent,
+        "jitter_ms": jitter_ms,
     }
 
 
@@ -135,8 +138,18 @@ async def monitor_devices_async():
                     "status": status,
                     "response_time_ms": result["response_time_ms"],
                     "packet_loss_percent": result["packet_loss_percent"],
+                    "jitter_ms": result["jitter_ms"],
                     "last_checked_at": datetime.now(UTC).isoformat(),
                 },
+            )
+
+            DeviceMetricRepository.create(
+                db=db,
+                device_id=device.id,
+                status=status,
+                response_time_ms=result["response_time_ms"],
+                packet_loss_percent=result["packet_loss_percent"],
+                jitter_ms=result["jitter_ms"],
             )
 
             active_alert = AlertRepository.get_active_alert_for_device(
