@@ -19,10 +19,8 @@ from app.db.session import (
     SessionLocal,
     engine,
 )
-from app.models.alert import AlertSeverity
 from app.models.device import DeviceStatus
 from app.models.device_event import DeviceEventType
-from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_event_repository import DeviceEventRepository
 from app.repositories.device_metric_repository import DeviceMetricRepository
 from app.repositories.device_repository import DeviceRepository
@@ -37,6 +35,9 @@ from app.services.correlation_worker_service import (
     CorrelationWorkerService,
 )
 from app.services.dashboard_service import DashboardService
+from app.services.device_availability_alert_service import (
+    DeviceAvailabilityAlertService,
+)
 from app.services.flapping_alert_service import (
     FlappingAlertService,
 )
@@ -152,11 +153,6 @@ async def monitor_devices_async():
                 jitter_ms=result["jitter_ms"],
             )
 
-            active_alert = AlertRepository.get_active_alert_for_device(
-                db=db,
-                device_id=device.id,
-            )
-
             if (
                 status == DeviceStatus.OFFLINE
                 and previous_status != DeviceStatus.OFFLINE
@@ -186,12 +182,13 @@ async def monitor_devices_async():
                     device.id,
                 )
 
-            AlertService.create_packet_loss_alert_if_needed(
-                db=db,
-                device_id=device.id,
-                device_name=device.name,
-                packet_loss_percent=result["packet_loss_percent"],
-            )
+            if status == DeviceStatus.ONLINE:
+                AlertService.create_packet_loss_alert_if_needed(
+                    db=db,
+                    device_id=device.id,
+                    device_name=device.name,
+                    packet_loss_percent=result["packet_loss_percent"],
+                )
 
             LatencyAlertService.create_latency_trend_alert_if_needed(
                 db=db,
@@ -205,43 +202,12 @@ async def monitor_devices_async():
                 device_name=device.name,
             )
 
-            if status == DeviceStatus.OFFLINE and not active_alert:
-                alert = AlertRepository.create(
-                    db=db,
-                    device_id=device.id,
-                    severity=AlertSeverity.CRITICAL,
-                    message=f"Device {device.name} is offline",
-                )
-
-                DeviceEventRepository.create(
-                    db=db,
-                    device_id=device.id,
-                    event_type=DeviceEventType.ALERT_CREATED,
-                    message=f"Critical alert created: {alert.message}",
-                )
-
-                logger.warning(
-                    "Critical alert created for device %s",
-                    device.id,
-                )
-
-            if status == DeviceStatus.ONLINE and active_alert:
-                resolved_alert = AlertRepository.resolve(
-                    db=db,
-                    alert=active_alert,
-                )
-
-                DeviceEventRepository.create(
-                    db=db,
-                    device_id=device.id,
-                    event_type=DeviceEventType.ALERT_RESOLVED,
-                    message=f"Alert resolved: {resolved_alert.message}",
-                )
-
-                logger.info(
-                    "Alert resolved for device %s",
-                    device.id,
-                )
+            DeviceAvailabilityAlertService.reconcile(
+                db=db,
+                device_id=device.id,
+                device_name=device.name,
+                status=status,
+            )
 
         db.commit()
 
