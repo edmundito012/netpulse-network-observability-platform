@@ -187,3 +187,11 @@ def test_has_no_compatible_candidate_family() -> None:
     )
 
     assert result is False
+
+
+def test_device_offline_is_connectivity_signal() -> None:
+    result = CorrelationSignalService.classify(
+        AlertType.DEVICE_OFFLINE,
+    )
+
+    assert result == CorrelationSignalFamily.CONNECTIVITY

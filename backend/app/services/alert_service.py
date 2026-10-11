@@ -7,6 +7,7 @@ from app.models.alert import (
     AlertType,
 )
 from app.models.device_event import DeviceEventType
+from app.repositories.alert_repository import AlertRepository
 from app.repositories.device_event_repository import (
     DeviceEventRepository,
 )
@@ -25,7 +26,7 @@ class AlertService:
         device_name: str,
         packet_loss_percent: float | None,
     ):
-        """Create or deduplicate an instantaneous packet loss alert."""
+        """Reconcile the instantaneous packet loss alert lifecycle."""
 
         if packet_loss_percent is None:
             return None
@@ -38,7 +39,33 @@ class AlertService:
             severity = AlertSeverity.WARNING
 
         if severity is None:
-            return None
+            deduplication_key = AlertDeduplicationService.build_deduplication_key(
+                device_id=device_id,
+                alert_type=AlertType.PACKET_LOSS,
+            )
+
+            active_alert = AlertRepository.get_active_by_deduplication_key(
+                db=db,
+                device_id=device_id,
+                deduplication_key=deduplication_key,
+            )
+
+            if active_alert is None:
+                return None
+
+            resolved_alert = AlertRepository.resolve(
+                db=db,
+                alert=active_alert,
+            )
+
+            DeviceEventRepository.create(
+                db=db,
+                device_id=device_id,
+                event_type=DeviceEventType.ALERT_RESOLVED,
+                message=f"Alert resolved: {resolved_alert.message}",
+            )
+
+            return resolved_alert
 
         message = f"Packet loss detected on {device_name}: {packet_loss_percent:.2f}%"
 

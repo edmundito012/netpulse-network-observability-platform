@@ -39,6 +39,7 @@ class AlertType(StrEnum):
     """Stable functional identity of an alert."""
 
     GENERIC = "GENERIC"
+    DEVICE_OFFLINE = "DEVICE_OFFLINE"
     PACKET_LOSS = "PACKET_LOSS"
     PACKET_LOSS_BURST = "PACKET_LOSS_BURST"
     JITTER = "JITTER"

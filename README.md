@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-09-27 22:14 UTC_
+_Last automation run: 2026-10-11 23:28 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 469 passed
+- **Tests:** 479 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,7 +346,8 @@ _Last automation run: 2026-09-27 22:14 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **monitoring** — reject failed ping responses
+- 🐛 **alerts** — reconcile availability lifecycles
+- 🐛 **monitoring** — reject failed ping responses (#75)
 - 🐛 **monitoring** — persist scheduler ping metrics (#74)
 - 🧪 **alerts** — cover predictive persistence (#73)
 - 🧪 **alerts** — cover flapping detection (#72)
@@ -355,7 +356,6 @@ _Last automation run: 2026-09-27 22:14 UTC_
 - 🧪 **monitoring** — cover ping behavior (#69)
 - 🧪 **snmp** — cover service behavior (#68)
 - 🧪 **websocket** — cover authenticated endpoints (#67)
-- 🧪 **websocket** — cover connection manager (#66)
 
 ### 📸 Automated Screenshots
 

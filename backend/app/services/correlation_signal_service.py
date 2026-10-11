@@ -14,6 +14,7 @@ class CorrelationSignalService:
         CorrelationSignalFamily,
     ] = {
         AlertType.GENERIC: (CorrelationSignalFamily.GENERIC),
+        AlertType.DEVICE_OFFLINE: (CorrelationSignalFamily.CONNECTIVITY),
         AlertType.PACKET_LOSS: (CorrelationSignalFamily.CONNECTIVITY),
         AlertType.PACKET_LOSS_BURST: (CorrelationSignalFamily.CONNECTIVITY),
         AlertType.JITTER: (CorrelationSignalFamily.PERFORMANCE),
