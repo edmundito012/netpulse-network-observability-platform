@@ -13,7 +13,7 @@ $repositoryRoot = Split-Path -Parent $PSScriptRoot
 Push-Location $repositoryRoot
 
 try {
-    docker compose ps
+    docker compose --profile lab ps
 
     $readiness = Invoke-RestMethod `
         -Uri "http://localhost:8000/health/ready" `
@@ -24,7 +24,7 @@ try {
     Write-Host "Database health: $($readiness.database)"
 
     $databaseUser = (
-        docker compose exec -T postgres `
+        docker compose --profile lab exec -T postgres `
             printenv POSTGRES_USER
     ).Trim()
 
@@ -35,7 +35,7 @@ try {
     Write-Host ""
     Write-Host "===== DEVICES ====="
 
-    docker compose exec -T postgres `
+    docker compose --profile lab exec -T postgres `
         psql `
         -U $databaseUser `
         -d $DatabaseName `
@@ -58,7 +58,7 @@ ORDER BY id;
     Write-Host ""
     Write-Host "===== RECENT METRICS PER DEVICE ====="
 
-    docker compose exec -T postgres `
+    docker compose --profile lab exec -T postgres `
         psql `
         -U $databaseUser `
         -d $DatabaseName `
@@ -97,9 +97,52 @@ ORDER BY device_id, checked_at DESC, id DESC;
     }
 
     Write-Host ""
+    Write-Host "===== RECENT SNMP SNAPSHOTS PER DEVICE ====="
+
+    docker compose --profile lab exec -T postgres `
+        psql `
+        -U $databaseUser `
+        -d $DatabaseName `
+        -P pager=off `
+        -c @"
+WITH ranked_snapshots AS (
+    SELECT
+        device_id,
+        id,
+        sysdescr,
+        sysuptime,
+        syscontact,
+        sysname,
+        syslocation,
+        collected_at,
+        ROW_NUMBER() OVER (
+            PARTITION BY device_id
+            ORDER BY collected_at DESC, id DESC
+        ) AS row_number
+    FROM device_snmp_system_snapshots
+)
+SELECT
+    device_id,
+    id,
+    sysdescr,
+    sysuptime,
+    syscontact,
+    sysname,
+    syslocation,
+    collected_at
+FROM ranked_snapshots
+WHERE row_number <= $MetricLimit
+ORDER BY device_id, collected_at DESC, id DESC;
+"@
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "The SNMP snapshot query failed."
+    }
+
+    Write-Host ""
     Write-Host "===== ACTIVE ALERTS ====="
 
-    docker compose exec -T postgres `
+    docker compose --profile lab exec -T postgres `
         psql `
         -U $databaseUser `
         -d $DatabaseName `

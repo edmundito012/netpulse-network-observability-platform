@@ -25,13 +25,13 @@ try {
         throw "Docker is not available."
     }
 
-    docker compose config --quiet
+    docker compose --profile lab config --quiet
 
     if ($LASTEXITCODE -ne 0) {
         throw "Docker Compose configuration is invalid."
     }
 
-    $resolvedCompose = docker compose config | Out-String
+    $resolvedCompose = docker compose --profile lab config | Out-String
 
     if ($resolvedCompose -notmatch "/$([regex]::Escape($DatabaseName))(?:\s|$)") {
         throw (
@@ -41,7 +41,7 @@ try {
     }
 
     Write-Host "Starting PostgreSQL..."
-    docker compose up -d postgres
+    docker compose --profile lab up -d postgres
 
     if ($LASTEXITCODE -ne 0) {
         throw "PostgreSQL could not be started."
@@ -66,7 +66,7 @@ try {
     }
 
     $databaseUser = (
-        docker compose exec -T postgres `
+        docker compose --profile lab exec -T postgres `
             printenv POSTGRES_USER
     ).Trim()
 
@@ -74,7 +74,7 @@ try {
         throw "POSTGRES_USER is not available in the container."
     }
 
-    $databaseExistsOutput = docker compose exec -T postgres `
+    $databaseExistsOutput = docker compose --profile lab exec -T postgres `
         psql `
         -U $databaseUser `
         -d postgres `
@@ -89,7 +89,7 @@ try {
     if ($databaseExists -ne "1") {
         Write-Host "Creating database $DatabaseName..."
 
-        docker compose exec -T postgres `
+        docker compose --profile lab exec -T postgres `
             psql `
             -U $databaseUser `
             -d postgres `
@@ -102,13 +102,46 @@ try {
     }
 
 
+    Write-Host "Starting SNMP simulator..."
+
+    if ($NoBuild) {
+        docker compose --profile lab up -d snmp-simulator
+    }
+    else {
+        docker compose --profile lab up -d --build snmp-simulator
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "The SNMP simulator could not be started."
+    }
+
+    $deadline = (Get-Date).AddSeconds($HealthTimeoutSeconds)
+
+    do {
+        Start-Sleep -Seconds 3
+
+        $snmpHealth = docker inspect `
+            --format="{{.State.Health.Status}}" `
+            netpulse-snmp-simulator `
+            2>$null
+
+        Write-Host "SNMP simulator: $snmpHealth"
+    } until (
+        $snmpHealth -eq "healthy" `
+        -or (Get-Date) -ge $deadline
+    )
+
+    if ($snmpHealth -ne "healthy") {
+        throw "The SNMP simulator did not become healthy before the timeout."
+    }
+
     Write-Host "Starting NetPulse backend..."
 
     if ($NoBuild) {
-        docker compose up -d backend
+        docker compose --profile lab up -d backend
     }
     else {
-        docker compose up -d --build backend
+        docker compose --profile lab up -d --build backend
     }
 
     if ($LASTEXITCODE -ne 0) {

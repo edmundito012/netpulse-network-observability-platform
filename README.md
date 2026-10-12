@@ -234,6 +234,20 @@ Use DHCP reservations so monitored devices retain the same IP address.
 Never publish credentials, MAC addresses, router administration access,
 PostgreSQL, or the development API.
 See [lab-guide.md](docs/lab-guide.md) for the complete procedure.
+### SNMP simulation
+
+The laboratory includes a Net-SNMP agent in the Docker Compose `lab`
+profile. The start script launches it alongside PostgreSQL and the backend.
+
+Register its private Docker address `172.30.250.10` through the device API
+to collect system snapshots and SNMP collection events automatically.
+
+The status script reports recent snapshots per device. The simulator's
+published UDP port is restricted to `127.0.0.1:1161`.
+
+See [the SNMP laboratory guide](docs/lab-guide.md#snmp-simulation-laboratory)
+for registration, OIDs, network configuration, and validation.
+
 ## Local Backend Development
 
 Create and activate a Python virtual environment.
@@ -380,7 +394,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-12 12:56 UTC_
+_Last automation run: 2026-10-12 15:13 UTC_
 
 ### ✅ Automated Quality
 
@@ -392,7 +406,8 @@ _Last automation run: 2026-10-12 12:56 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **lab** — add reproducible real-device workflow
+- ✨ **lab** — add SNMP simulation agent
+- ✨ **lab** — add reproducible real-device workflow (#80)
 - ✨ **monitoring** — confirm device status transitions (#79)
 - 🐛 **auth** — prevent public role escalation (#78)
 - 🐛 **alerts** — reconcile availability lifecycles (#76)
@@ -400,7 +415,6 @@ _Last automation run: 2026-10-12 12:56 UTC_
 - 🐛 **monitoring** — persist scheduler ping metrics (#74)
 - 🧪 **alerts** — cover predictive persistence (#73)
 - 🧪 **alerts** — cover flapping detection (#72)
-- 🧪 **alerts** — cover jitter thresholds (#71)
 
 ### 📸 Automated Screenshots
 
