@@ -7,7 +7,7 @@ from app.core.logging import logger
 from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.schemas.auth import TokenResponse
-from app.schemas.user import UserCreate, UserRead
+from app.schemas.user import UserCreate, UserRead, UserRegistration
 from app.services.user_service import UserService
 
 router = APIRouter(
@@ -21,13 +21,20 @@ router = APIRouter(
     response_model=UserRead,
 )
 def register_user(
-    user_data: UserCreate,
+    user_data: UserRegistration,
     db: Session = Depends(get_db),
 ):
     try:
+        registration_data = UserCreate(
+            email=user_data.email,
+            username=user_data.username,
+            password=user_data.password,
+            role=UserRole.VIEWER,
+        )
+
         user = UserService.create_user(
             db=db,
-            user_data=user_data,
+            user_data=registration_data,
         )
 
         logger.info(
