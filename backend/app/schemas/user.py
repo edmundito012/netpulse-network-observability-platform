@@ -15,6 +15,12 @@ class UserCreate(UserBase):
     role: UserRole = UserRole.VIEWER
 
 
+class UserRegistration(UserBase):
+    password: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     username: str | None = None

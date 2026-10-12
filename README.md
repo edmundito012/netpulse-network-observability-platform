@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-11 23:28 UTC_
+_Last automation run: 2026-10-12 11:21 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 479 passed
+- **Tests:** 482 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,7 +346,8 @@ _Last automation run: 2026-10-11 23:28 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **alerts** — reconcile availability lifecycles
+- 🐛 **auth** — prevent public role escalation
+- 🐛 **alerts** — reconcile availability lifecycles (#76)
 - 🐛 **monitoring** — reject failed ping responses (#75)
 - 🐛 **monitoring** — persist scheduler ping metrics (#74)
 - 🧪 **alerts** — cover predictive persistence (#73)
@@ -354,8 +355,6 @@ _Last automation run: 2026-10-11 23:28 UTC_
 - 🧪 **alerts** — cover jitter thresholds (#71)
 - 🧪 **alerts** — cover latency trend detection (#70)
 - 🧪 **monitoring** — cover ping behavior (#69)
-- 🧪 **snmp** — cover service behavior (#68)
-- 🧪 **websocket** — cover authenticated endpoints (#67)
 
 ### 📸 Automated Screenshots
 
