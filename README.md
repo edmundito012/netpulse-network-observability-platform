@@ -380,7 +380,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-12 12:08 UTC_
+_Last automation run: 2026-10-12 12:56 UTC_
 
 ### ✅ Automated Quality
 
@@ -392,7 +392,8 @@ _Last automation run: 2026-10-12 12:08 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **monitoring** — confirm device status transitions
+- ✨ **lab** — add reproducible real-device workflow
+- ✨ **monitoring** — confirm device status transitions (#79)
 - 🐛 **auth** — prevent public role escalation (#78)
 - 🐛 **alerts** — reconcile availability lifecycles (#76)
 - 🐛 **monitoring** — reject failed ping responses (#75)
@@ -400,7 +401,6 @@ _Last automation run: 2026-10-12 12:08 UTC_
 - 🧪 **alerts** — cover predictive persistence (#73)
 - 🧪 **alerts** — cover flapping detection (#72)
 - 🧪 **alerts** — cover jitter thresholds (#71)
-- 🧪 **alerts** — cover latency trend detection (#70)
 
 ### 📸 Automated Screenshots
 
