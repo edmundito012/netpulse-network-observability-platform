@@ -124,4 +124,4 @@ tests/test_websocket_endpoints.py .....                                  [100%]
     from crypt import crypt as _crypt
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================= 489 passed, 2 warnings in 14.35s =======================
+======================= 489 passed, 2 warnings in 15.27s =======================

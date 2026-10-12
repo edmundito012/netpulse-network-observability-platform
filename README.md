@@ -188,6 +188,52 @@ docker compose down --volumes
 
 > Removing the volume permanently deletes the local NetPulse database.
 
+## Real-Device Laboratory
+
+NetPulse includes a reproducible PowerShell workflow for running a local
+observability laboratory with real devices connected to the same network.
+
+The laboratory uses Docker Compose, PostgreSQL, and the NetPulse backend.
+Its database volume is preserved between sessions.
+
+### Requirements
+
+- Windows PowerShell 5.1 or PowerShell 7
+- Docker Desktop with Docker Compose
+- A configured `.env` file
+- Devices connected to the same local network
+- Stable IP addresses or DHCP reservations
+
+### Start the laboratory
+
+```powershell
+.\scripts\lab-start.ps1
+
+Start without rebuilding the backend image:
+.\scripts\lab-start.ps1 -NoBuild
+
+Available endpoints:
+- API documentation: http://localhost:8000/docs
+- Portfolio dashboard: http://localhost:8000/portfolio
+- Readiness endpoint: http://localhost:8000/health/ready
+Inspect laboratory status
+.\scripts\lab-status.ps1
+
+Display more recent metrics per device:
+.\scripts\lab-status.ps1 -MetricLimit 10
+
+The command reports service health, backend readiness, registered devices,
+recent measurements, and active alerts.
+Stop the laboratory
+.\scripts\lab-stop.ps1
+
+Remove the containers and network while preserving the database volume:
+.\scripts\lab-stop.ps1 -RemoveContainers
+
+Use DHCP reservations so monitored devices retain the same IP address.
+Never publish credentials, MAC addresses, router administration access,
+PostgreSQL, or the development API.
+See [lab-guide.md](docs/lab-guide.md) for the complete procedure.
 ## Local Backend Development
 
 Create and activate a Python virtual environment.
@@ -334,7 +380,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-12 12:08 UTC_
+_Last automation run: 2026-10-12 12:56 UTC_
 
 ### ✅ Automated Quality
 
@@ -346,7 +392,8 @@ _Last automation run: 2026-10-12 12:08 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **monitoring** — confirm device status transitions
+- ✨ **lab** — add reproducible real-device workflow
+- ✨ **monitoring** — confirm device status transitions (#79)
 - 🐛 **auth** — prevent public role escalation (#78)
 - 🐛 **alerts** — reconcile availability lifecycles (#76)
 - 🐛 **monitoring** — reject failed ping responses (#75)
@@ -354,7 +401,6 @@ _Last automation run: 2026-10-12 12:08 UTC_
 - 🧪 **alerts** — cover predictive persistence (#73)
 - 🧪 **alerts** — cover flapping detection (#72)
 - 🧪 **alerts** — cover jitter thresholds (#71)
-- 🧪 **alerts** — cover latency trend detection (#70)
 
 ### 📸 Automated Screenshots
 
