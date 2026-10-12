@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 INSECURE_SECRET_KEYS = {
@@ -49,6 +49,8 @@ class Settings(BaseSettings):
 
     # Monitoring
     PING_TIMEOUT_SECONDS: int = 2
+    OFFLINE_CONFIRMATION_CYCLES: int = Field(default=3, ge=1)
+    ONLINE_CONFIRMATION_CYCLES: int = Field(default=2, ge=1)
 
     # SNMP
     SNMP_PORT: int = 1161
