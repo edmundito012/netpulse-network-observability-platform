@@ -394,7 +394,7 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-12 15:13 UTC_
+_Last automation run: 2026-10-12 15:23 UTC_
 
 ### ✅ Automated Quality
 
@@ -406,7 +406,8 @@ _Last automation run: 2026-10-12 15:13 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- ✨ **lab** — add SNMP simulation agent
+- 🐛 **docker** — forward shutdown signals to backend
+- ✨ **lab** — add SNMP simulation agent (#81)
 - ✨ **lab** — add reproducible real-device workflow (#80)
 - ✨ **monitoring** — confirm device status transitions (#79)
 - 🐛 **auth** — prevent public role escalation (#78)
@@ -414,7 +415,6 @@ _Last automation run: 2026-10-12 15:13 UTC_
 - 🐛 **monitoring** — reject failed ping responses (#75)
 - 🐛 **monitoring** — persist scheduler ping metrics (#74)
 - 🧪 **alerts** — cover predictive persistence (#73)
-- 🧪 **alerts** — cover flapping detection (#72)
 
 ### 📸 Automated Screenshots
 
