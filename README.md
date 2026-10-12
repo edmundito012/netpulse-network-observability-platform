@@ -334,11 +334,11 @@ Technical documentation:
 
 Generated automatically from tests, commits, and screenshots.
 
-_Last automation run: 2026-10-12 11:21 UTC_
+_Last automation run: 2026-10-12 12:08 UTC_
 
 ### ✅ Automated Quality
 
-- **Tests:** 482 passed
+- **Tests:** 489 passed
 - **Warnings:** 2
 - **CI:** GitHub Actions
 - **Security:** CodeQL
@@ -346,7 +346,8 @@ _Last automation run: 2026-10-12 11:21 UTC_
 
 ### 🧠 Recent Engineering Milestones
 
-- 🐛 **auth** — prevent public role escalation
+- ✨ **monitoring** — confirm device status transitions
+- 🐛 **auth** — prevent public role escalation (#78)
 - 🐛 **alerts** — reconcile availability lifecycles (#76)
 - 🐛 **monitoring** — reject failed ping responses (#75)
 - 🐛 **monitoring** — persist scheduler ping metrics (#74)
@@ -354,7 +355,6 @@ _Last automation run: 2026-10-12 11:21 UTC_
 - 🧪 **alerts** — cover flapping detection (#72)
 - 🧪 **alerts** — cover jitter thresholds (#71)
 - 🧪 **alerts** — cover latency trend detection (#70)
-- 🧪 **monitoring** — cover ping behavior (#69)
 
 ### 📸 Automated Screenshots
 

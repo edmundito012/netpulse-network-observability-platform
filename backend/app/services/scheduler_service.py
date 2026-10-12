@@ -38,6 +38,9 @@ from app.services.dashboard_service import DashboardService
 from app.services.device_availability_alert_service import (
     DeviceAvailabilityAlertService,
 )
+from app.services.device_status_confirmation_service import (
+    DeviceStatusConfirmationService,
+)
 from app.services.flapping_alert_service import (
     FlappingAlertService,
 )
@@ -126,7 +129,23 @@ async def monitor_devices_async():
                 continue
 
             previous_status = device.status
-            status = result["status"]
+            observed_status = result["status"]
+
+            DeviceMetricRepository.create(
+                db=db,
+                device_id=device.id,
+                status=observed_status,
+                response_time_ms=result["response_time_ms"],
+                packet_loss_percent=result["packet_loss_percent"],
+                jitter_ms=result["jitter_ms"],
+            )
+
+            status = DeviceStatusConfirmationService.confirm(
+                db=db,
+                device_id=device.id,
+                current_status=previous_status,
+                observed_status=observed_status,
+            )
 
             device.status = status
 
@@ -142,15 +161,6 @@ async def monitor_devices_async():
                     "jitter_ms": result["jitter_ms"],
                     "last_checked_at": datetime.now(UTC).isoformat(),
                 },
-            )
-
-            DeviceMetricRepository.create(
-                db=db,
-                device_id=device.id,
-                status=status,
-                response_time_ms=result["response_time_ms"],
-                packet_loss_percent=result["packet_loss_percent"],
-                jitter_ms=result["jitter_ms"],
             )
 
             if (
@@ -182,7 +192,7 @@ async def monitor_devices_async():
                     device.id,
                 )
 
-            if status == DeviceStatus.ONLINE:
+            if observed_status == DeviceStatus.ONLINE and status == DeviceStatus.ONLINE:
                 AlertService.create_packet_loss_alert_if_needed(
                     db=db,
                     device_id=device.id,
