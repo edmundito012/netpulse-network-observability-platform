@@ -196,3 +196,72 @@ A completed run should demonstrate:
 - independent packet-loss alert resolution;
 - device event history;
 - no active alerts after full recovery.
+
+## SNMP simulation laboratory
+
+The laboratory start script also starts a Net-SNMP agent through the
+Docker Compose `lab` profile.
+
+The simulator uses:
+
+- private Docker subnet: `172.30.250.0/24`;
+- fixed simulator address: `172.30.250.10`;
+- SNMP UDP port: `1161`;
+- read-only laboratory community: `public`;
+- host port binding: `127.0.0.1:1161/udp`.
+
+The backend joins the simulator network and queries the agent directly.
+The published UDP port is accessible only from the host computer.
+
+The subnet must not overlap an existing Docker network, local network,
+or VPN route. If it does, update the subnet, simulator address, and
+community source restriction together before starting the laboratory.
+
+### Register the simulator
+
+Authenticate as an ADMIN or OPERATOR and use `POST /devices/` with:
+
+    {
+      "name": "SNMP laboratory simulator",
+      "ip_address": "172.30.250.10",
+      "hostname": "snmp-simulator",
+      "device_type": "SIMULATOR",
+      "location": "Docker laboratory"
+    }
+
+Register the simulator once. Its device identifier is assigned by the API
+and must not be assumed to be the same across installations.
+
+### Collected system information
+
+The current collector reads these scalar OIDs:
+
+| Field | OID |
+| --- | --- |
+| sysDescr | 1.3.6.1.2.1.1.1.0 |
+| sysUpTime | 1.3.6.1.2.1.1.3.0 |
+| sysContact | 1.3.6.1.2.1.1.4.0 |
+| sysName | 1.3.6.1.2.1.1.5.0 |
+| sysLocation | 1.3.6.1.2.1.1.6.0 |
+
+The scheduler persists system snapshots and records
+`SNMP_SNAPSHOT_COLLECTED` events.
+
+Inspect them with:
+
+    .\scripts\lab-status.ps1 -MetricLimit 3
+
+The simulator uptime increases while its agent is running and resets
+when the agent restarts. Previously collected snapshots remain stored
+in PostgreSQL.
+
+This laboratory validates SNMP system information. Interface traffic,
+bandwidth counters, and interface status collection are future extensions.
+
+### Inspect simulator health
+
+    docker compose --profile lab ps
+    docker compose --profile lab logs snmp-simulator --tail 50
+
+Stopping the laboratory stops all three services. Removing containers
+preserves PostgreSQL data but recreates the SNMP agent on the next start.

@@ -10,10 +10,10 @@ Push-Location $repositoryRoot
 
 try {
     if ($RemoveContainers) {
-        docker compose down
+        docker compose --profile lab down
     }
     else {
-        docker compose stop
+        docker compose --profile lab stop
     }
 
     if ($LASTEXITCODE -ne 0) {

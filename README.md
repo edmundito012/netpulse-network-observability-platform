@@ -234,6 +234,20 @@ Use DHCP reservations so monitored devices retain the same IP address.
 Never publish credentials, MAC addresses, router administration access,
 PostgreSQL, or the development API.
 See [lab-guide.md](docs/lab-guide.md) for the complete procedure.
+### SNMP simulation
+
+The laboratory includes a Net-SNMP agent in the Docker Compose `lab`
+profile. The start script launches it alongside PostgreSQL and the backend.
+
+Register its private Docker address `172.30.250.10` through the device API
+to collect system snapshots and SNMP collection events automatically.
+
+The status script reports recent snapshots per device. The simulator's
+published UDP port is restricted to `127.0.0.1:1161`.
+
+See [the SNMP laboratory guide](docs/lab-guide.md#snmp-simulation-laboratory)
+for registration, OIDs, network configuration, and validation.
+
 ## Local Backend Development
 
 Create and activate a Python virtual environment.
